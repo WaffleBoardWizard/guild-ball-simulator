@@ -21,7 +21,6 @@ var jogMenuButtons = [{
     Icon: FontAwesomeIcons.check,
     click: function(btn,displayObject) {
         finishNodeMovement(displayObject);     
-        finishNodeMovement(displayObject);
         console.log("I was clicked");
         return true;
     }
@@ -40,7 +39,6 @@ var menuButtons = [{
     Icon: FontAwesomeIcons.arrowright,
     click: function(btn,displayObject) {
         displayObject.gamePiece.movement.status = CONSTANTS.MOVEMENT_MOVEABLE;        
-        displayObject.gamePiece.movement.status = CONSTANTS.MOVEMENT_MOVEABLE;
         console.log("I was clicked");
         return true;
     }
@@ -233,8 +231,11 @@ function undoLastMovementNode(displayObject) {
         if(gamePiece.movement.nodes.length == 0) {
             gamePiece.movement.status = CONSTANTS.MOVEMENT_MOVEABLE;
         }
+        else {
+      //      gamePiece.showCurrentMenu();
+        }
 
-        //once the jogMenu is fixed.  Add a call here to re-open the jog Menu on this node.
+        
 
         stage.update();
     }
@@ -289,12 +290,6 @@ function releaseDragNode(evt) {
         getRangeUsed(gamePiece, evt, function(rangeUsed) {
 
             var totalRangeUsed = 0;
-
-            //gamePiece.movement.nodes.push({
-            //    x: evt.currentTarget.x,
-            //    y: evt.currentTarget.y,
-            //    rangeUsed: rangeUsed
-            //})
 
             currentNode.rangeUsed = rangeUsed;
 
@@ -416,14 +411,8 @@ function beginDragNode(evt) {
 
                 });
             }
-<<<<<<< .merge_file_a03820
-
-
             // make sure to redraw the stage to show the change:
         });
-=======
-          });
->>>>>>> .merge_file_a09828
     }
 }
 
