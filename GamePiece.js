@@ -13,6 +13,14 @@ GamePiece.prototype.reach = null;
 GamePiece.prototype.location = Object.create(Location.prototype);
 GamePiece.prototype.movement = Object.create(Movement.prototype);
 GamePiece.prototype.canvasReference = null;
+GamePiece.prototype.currentMenu = null;
+GamePiece.prototype.showCurrentMenu = function() {
+  this.currentMenu.show();
+};
+
+GamePiece.prototype.hideCurrentMenu = function(quick) {
+  this.currentMenu.hide(null, quick);
+};
 
 Location.prototype.x = null;
 Location.prototype.y = null;

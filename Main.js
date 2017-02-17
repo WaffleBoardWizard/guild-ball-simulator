@@ -20,7 +20,7 @@ var jogMenuButtons = [{
     Name: "Confirm",
     Icon: FontAwesomeIcons.check,
     click: function(btn,displayObject) {
-        finishNodeMovement(displayObject);     
+        finishNodeMovement(displayObject);
         console.log("I was clicked");
         return true;
     }
@@ -37,7 +37,7 @@ var menuButtons = [{
     Name: "Jog",
     Icon: FontAwesomeIcons.arrowright,
     click: function(btn,displayObject) {
-        displayObject.gamePiece.movement.status = CONSTANTS.MOVEMENT_MOVEABLE;        
+        displayObject.gamePiece.movement.status = CONSTANTS.MOVEMENT_MOVEABLE;
         console.log("I was clicked");
         return true;
     }
@@ -143,7 +143,8 @@ function init() {
 
         gamePieceGraphic.on("dblclick",
             function(evt) {
-                    toggleMenu(evt.currentTarget, "circle", menuButtons);
+                    gamePiece.currentMenu = Menu(evt.currentTarget, "circle", menuButtons);
+                    gamePiece.showCurrentMenu();
             });
 
         gamePieceGraphic.on("pressup", movementEvent);
@@ -205,7 +206,7 @@ function movementEvent(evt) {
         beginDragNode(evt);
     } else if (evt.type == "pressup") {
         releaseDragNode(evt);
-    } 
+    }
 
     stage.update();
 }
@@ -275,12 +276,16 @@ function releaseDragNode(evt) {
             stage.update();
         });
 
-        toggleMenu(evt.currentTarget, "circle", jogMenuButtons);
+        gamePiece.currentMenu = Menu(evt.currentTarget, "circle", jogMenuButtons);
+        gamePiece.showCurrentMenu();
     }
 }
 
 function beginDragNode(evt) {
     var gamePiece = evt.currentTarget.gamePiece;
+
+    if(gamePiece.currentMenu)
+      gamePiece.hideCurrentMenu(true);
 
     if (gamePiece.movement.status != CONSTANTS.MOVEMENT_UNMOVEABLE) {
         if (gamePiece.movement.status == CONSTANTS.MOVEMENT_MOVEABLE || gamePiece.movement.status == CONSTANTS.MOVEMENT_NODE_MOVEABLE) {
@@ -368,9 +373,7 @@ function beginDragNode(evt) {
 
                 });
             }
-
-            // make sure to redraw the stage to show the change:
-        });
+          });
     }
 }
 
@@ -388,113 +391,4 @@ function detectCollision(evt, gamePieces, success) {
     });
 
     success(result);
-}
-
-function toggleMenu(displayObject, orientation, btns) {
-    let menuButtons = [];
-
-    function hide(clickedIndex) {
-        menuButtons.forEach(function(btn, index) {
-            setTimeout(function() {
-                createjs.Tween.get(btn, {
-                    loop: false
-                }).to({
-                    x: displayObject.x,
-                    y: displayObject.y
-                }, 1000, createjs.Ease.getPowInOut(4));
-            }, clickedIndex == index ? 300 : 0);
-
-            setTimeout(function() {
-                stage.removeChild(btn);
-            }, 1000);
-        });
-    };
-
-    for (let i = 0; i < btns.length; i++) {
-        let btn = btns[i];
-        let menuButton = new FAButton(btn.Icon, "white", "blue");;
-
-        menuButton.x = displayObject.x;
-        menuButton.y = displayObject.y;
-
-        stage.addChild(menuButton);
-
-        menuButton.on("mouseover", function() {
-            //  menuButton.btn.graphics.clear().beginFill("blue");
-            createjs.Tween.get(menuButton, {
-                scaleX: 1,
-                scaleY: 1
-            }).to({
-                scaleX: 1.25,
-                scaleY: 1.25
-            }, 100, createjs.Ease.getPowInOut(4));
-
-        });
-
-        menuButton.on("mouseout", function() {
-            //menuButton.btn.graphics.clear().beginFill("red");
-            createjs.Tween.get(menuButton, {
-                scaleX: 1.25,
-                scaleY: 1.25
-            }).to({
-                scaleX: 1,
-                scaleY: 1
-            }, 100, createjs.Ease.getPowInOut(4));
-        });
-
-        stage.addChild(menuButton);
-
-        let toX = 0;
-        let toY = 0;
-
-        var displayObjectBoundsWidth = displayObject.getBounds().width;
-
-        console.log(displayObjectBoundsWidth);
-        switch (orientation) {
-            case "circle":
-                toX = displayObject.x - ((displayObjectBoundsWidth * 2) * Math.cos(i * (Math.PI / 4)));
-                toY = displayObject.y - ((displayObjectBoundsWidth * 2) * Math.sin(i * (Math.PI / 4)));
-                break;
-            case "up":
-                toX = displayObject.x;
-                toY = displayObject.y - ((displayObjectBoundsWidth * 2) * (i + 1));
-                break;
-            case "down":
-                toX = displayObject.x;
-                toY = displayObject.y + ((displayObjectBoundsWidth * 2) * (i + 1));
-                break;
-            case "left":
-                toX = displayObject.x - ((displayObjectBoundsWidth * 2) * (i + 1));
-                toY = displayObject.y;
-                break;
-            case "right":
-                toX = displayObject.x + ((displayObjectBoundsWidth * 2) * (i + 1));
-                toY = displayObject.y;
-                break;
-            default:
-
-        }
-
-        stage.setChildIndex(menuButton, 0);
-
-        setTimeout(function() {
-            createjs.Tween.get(menuButton, {
-                loop: false
-            }).to({
-                x: toX,
-                y: toY
-            }, 1000, createjs.Ease.getPowInOut(4));
-        }, 50 * i);
-
-
-        menuButtons.push(menuButton);
-
-        if (btn.click) {
-            menuButton.on("click", function() {
-                if (btn.click(menuButton, displayObject)) {
-                    hide(i);
-                }
-            });
-        }
-    }
 }
