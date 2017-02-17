@@ -27,7 +27,8 @@ var jogMenuButtons = [{
 }, {
     Name: "Undo",
     Icon: FontAwesomeIcons.undo,
-    click: function() {
+    click: function(btn,displayObject) {
+        undoLastMovementNode(displayObject);
         console.log("undo");
         return true;
     }
@@ -210,6 +211,32 @@ function movementEvent(evt) {
     stage.update();
 }
 
+function undoLastMovementNode(displayObject) {
+    var gamePiece = displayObject.gamePiece;
+
+    if (gamePiece.movement.status == CONSTANTS.MOVEMENT_NODE_MOVEABLE) {
+
+        var lastNode = gamePiece.movement.nodes[gamePiece.movement.nodes.length - 1];
+
+        displayObject.x = lastNode.x;
+        displayObject.y = lastNode.y;
+
+        $.each(lastNode.displayObjects, function(index, displayObject) {
+            stage.removeChild(displayObject);
+        });
+
+        gamePiece.movement.nodes.pop();
+
+        if(gamePiece.movement.nodes.length == 0) {
+            gamePiece.movement.status = CONSTANTS.MOVEMENT_MOVEABLE;
+        }
+
+        //once the jogMenu is fixed.  Add a call here to re-open the jog Menu on this node.
+
+        stage.update();
+    }
+}
+
 function finishNodeMovement(displayObject) {
     var gamePiece = displayObject.gamePiece;
 
@@ -240,12 +267,15 @@ function releaseDragNode(evt) {
     if (gamePiece.movement.status != CONSTANTS.MOVEMENT_UNMOVEABLE) {
 
         gamePiece.movement.status = CONSTANTS.MOVEMENT_NODE_MOVEABLE;
+        var currentNode = gamePiece.movement.nodes[gamePiece.movement.nodes.length - 1];
 
         var nodeLine = new createjs.Shape();
         nodeLine.graphics.beginStroke("white")
             .setStrokeStyle(2, "round")
             .moveTo(gamePiece.movement.lastNode.x, gamePiece.movement.lastNode.y)
             .lineTo(evt.currentTarget.x, evt.currentTarget.y);
+
+        currentNode.displayObjects.push(nodeLine);
 
         gamePiece.movement.overlays.push({
             type: CONSTANTS.NODE_OVERLAY,
@@ -257,11 +287,13 @@ function releaseDragNode(evt) {
 
             var totalRangeUsed = 0;
 
-            gamePiece.movement.nodes.push({
-                x: evt.currentTarget.x,
-                y: evt.currentTarget.y,
-                rangeUsed: rangeUsed
-            })
+            //gamePiece.movement.nodes.push({
+            //    x: evt.currentTarget.x,
+            //    y: evt.currentTarget.y,
+            //    rangeUsed: rangeUsed
+            //})
+
+            currentNode.rangeUsed = rangeUsed;
 
             $.each(gamePiece.movement.nodes, function(index, node) {
                 totalRangeUsed = totalRangeUsed + node.rangeUsed;
@@ -304,6 +336,7 @@ function beginDragNode(evt) {
                 maxRange.x = x;
                 maxRange.y = y;
                 maxRange.alpha = 0.2;
+                gamePiece.movement.nodes = [];
                 gamePiece.movement.overlays.push({
                     type: CONSTANTS.MAX_RANGE_OVERLAY,
                     value: maxRange
@@ -318,6 +351,13 @@ function beginDragNode(evt) {
             origin.graphics.beginFill("DeepSkyBlue").drawCircle(0, 0, gamePiece.baseSize);
             origin.x = x;
             origin.y = y;
+            
+            gamePiece.movement.nodes.push({
+                x: x,
+                y: y,
+                displayObjects: [origin]
+            });
+
             gamePiece.movement.overlays.push({
                 type: CONSTANTS.NODE_OVERLAY,
                 value: origin
@@ -363,11 +403,13 @@ function beginDragNode(evt) {
                         value: range
                     });
 
+                    gamePiece.movement.nodes[gamePiece.movement.nodes.length - 1].displayObjects.push(range);
 
                     stage.update();
 
                 });
             }
+
 
             // make sure to redraw the stage to show the change:
         });

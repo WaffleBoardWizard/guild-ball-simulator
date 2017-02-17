@@ -3,9 +3,6 @@ function GamePiece() {}
 function Movement() {}
 function Location() {}
 function Node() {}
-//	var gamePiece = new GamePiece();
-//	return gamePiece;
-//}
 
 GamePiece.prototype.maxRange = null;
 GamePiece.prototype.baseSize = null;
@@ -26,3 +23,4 @@ Movement.prototype.range = null;
 Node.prototype.x = null;
 Node.prototype.y = null;
 Node.prototype.rangeUsed = null;
+Node.prototype.displayObjects = null;
