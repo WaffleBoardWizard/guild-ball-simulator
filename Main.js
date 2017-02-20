@@ -5,6 +5,7 @@ var CONSTANTS = {
     RANGE_OVERLAY: 1001,
     MAX_RANGE_OVERLAY: 1002,
     NODE_OVERLAY: 1003,
+    NODELINE_OVERLAY: 1004,
     MOVEMENT_MOVEABLE: 2001,
     MOVEMENT_MOVING: 2002,
     MOVEMENT_UNMOVEABLE: 2003,
@@ -161,37 +162,39 @@ function init() {
 
 function getRangeUsed(gamePiece, evt, success) {
     var rangeUsed = 0;
+    var lastNode = gamePiece.movement.getLastNode();
+
 
     //check for direct x,y axis movement
-    if (gamePiece.movement.lastNode.y == evt.stageY) {
+    if (lastNode.y == evt.stageY) {
         //no movement along the y axis, so we only care how far along the x axis the model has traveled
-        if (evt.stageX > gamePiece.movement.lastNode.x) {
-            rangeUsed = rangeUsed + (evt.stageX - gamePiece.movement.lastNode.x);
+        if (evt.stageX > lastNode.x) {
+            rangeUsed = rangeUsed + (evt.stageX - lastNode.x);
         } else {
-            rangeUsed = rangeUsed + (gamePiece.movement.lastNode.x - evt.stageX);
+            rangeUsed = rangeUsed + (lastNode.x - evt.stageX);
         }
-    } else if (gamePiece.movement.lastNode.x == evt.stageX) {
+    } else if (lastNode.x == evt.stageX) {
         //no movement along the x axis, so we only care how far along the y axis the model has traveled
-        if (evt.stageY > gamePiece.movement.lastNode.y) {
-            rangeUsed = rangeUsed + (evt.stageY - gamePiece.movement.lastNode.y);
+        if (evt.stageY > lastNode.y) {
+            rangeUsed = rangeUsed + (evt.stageY - lastNode.y);
         } else {
-            rangeUsed = rangeUsed + (gamePiece.movement.lastNode.y - evt.stageY);
+            rangeUsed = rangeUsed + (lastNode.y - evt.stageY);
         }
     } else {
         //complex movement detected. Will need to use pythagorean theorem to calculate distance moved
         var xDistance = 0;
         var yDistance = 0;
 
-        if (evt.stageY > gamePiece.movement.lastNode.y) {
-            yDistance = evt.stageY - gamePiece.movement.lastNode.y;
+        if (evt.stageY > lastNode.y) {
+            yDistance = evt.stageY - lastNode.y;
         } else {
-            yDistance = gamePiece.movement.lastNode.y - evt.stageY;
+            yDistance = lastNode.y - evt.stageY;
         }
 
-        if (evt.stageX > gamePiece.movement.lastNode.x) {
-            xDistance = evt.stageX - gamePiece.movement.lastNode.x;
+        if (evt.stageX > lastNode.x) {
+            xDistance = evt.stageX - lastNode.x;
         } else {
-            xDistance = gamePiece.movement.lastNode.x - evt.stageX;
+            xDistance = lastNode.x - evt.stageX;
         }
 
         rangeUsed = pythagorean(xDistance, yDistance);
@@ -217,25 +220,30 @@ function undoLastMovementNode(displayObject) {
 
     if (gamePiece.movement.status == CONSTANTS.MOVEMENT_NODE_MOVEABLE) {
 
-        var lastNode = gamePiece.movement.nodes[gamePiece.movement.nodes.length - 1];
+        var nodeToRemove = gamePiece.movement.nodes[gamePiece.movement.nodes.length - 2];
 
-        displayObject.x = lastNode.x;
-        displayObject.y = lastNode.y;
+        displayObject.x = nodeToRemove.x;
+        displayObject.y = nodeToRemove.y;
 
-        $.each(lastNode.displayObjects, function(index, displayObject) {
-            stage.removeChild(displayObject);
+        nodeToRemove.removeDisplayObjects(stage);
+
+        gamePiece.movement.removeLastNode();
+        gamePiece.movement.removeLastNode();
+
+        var totalRangeUsed = 0;
+
+        $.each(gamePiece.movement.nodes, function(index, node) {
+            totalRangeUsed = totalRangeUsed + node.rangeUsed;
         });
 
-        gamePiece.movement.nodes.pop();
+        gamePiece.movement.range = gamePiece.maxRange - totalRangeUsed;
 
         if(gamePiece.movement.nodes.length == 0) {
             gamePiece.movement.status = CONSTANTS.MOVEMENT_MOVEABLE;
         }
         else {
-      //      gamePiece.showCurrentMenu();
+            gamePiece.showCurrentMenu();
         }
-
-        
 
         stage.update();
     }
@@ -250,13 +258,14 @@ function finishNodeMovement(displayObject) {
         gamePiece.location.y = displayObject.y;
 
         gamePiece.movement.status = CONSTANTS.MOVEMENT_MOVEABLE;
-        gamePiece.movement.lastNode = null;
-        gamePiece.movement.nodes = [];
-
-        $.each(gamePiece.movement.overlays, function(index, overlay) {
-            stage.removeChild(overlay.value);
+     
+        $.each(gamePiece.movement.nodes, function(index, node) {
+            $.each(node.displayObjects, function(index, displayObject) {
+                stage.removeChild(displayObject.value);
+            });
         });
-
+       
+        gamePiece.movement.nodes = [];
         gamePiece.movement.overlays = [];
         gamePiece.movement.status = CONSTANTS.MOVEMENT_UNMOVEABLE;
 
@@ -271,27 +280,24 @@ function releaseDragNode(evt) {
     if (gamePiece.movement.status != CONSTANTS.MOVEMENT_UNMOVEABLE) {
 
         gamePiece.movement.status = CONSTANTS.MOVEMENT_NODE_MOVEABLE;
-        var currentNode = gamePiece.movement.nodes[gamePiece.movement.nodes.length - 1];
+        var lastNode = gamePiece.movement.getLastNode();
 
         var nodeLine = new createjs.Shape();
         nodeLine.graphics.beginStroke("white")
             .setStrokeStyle(2, "round")
-            .moveTo(gamePiece.movement.lastNode.x, gamePiece.movement.lastNode.y)
+            .moveTo(lastNode.x, lastNode.y)
             .lineTo(evt.currentTarget.x, evt.currentTarget.y);
 
-        currentNode.displayObjects.push(nodeLine);
-
-        gamePiece.movement.overlays.push({
-            type: CONSTANTS.NODE_OVERLAY,
+        lastNode.displayObjects.push({
+            type: CONSTANTS.NODELINE_OVERLAY,
             value: nodeLine
         });
-        stage.addChild(nodeLine);
+
+        stage.addChildAt(nodeLine, stage.children.length - 2);
 
         getRangeUsed(gamePiece, evt, function(rangeUsed) {
 
-            var totalRangeUsed = 0;
-
-            currentNode.rangeUsed = rangeUsed;
+            var totalRangeUsed = rangeUsed;
 
             $.each(gamePiece.movement.nodes, function(index, node) {
                 totalRangeUsed = totalRangeUsed + node.rangeUsed;
@@ -299,8 +305,13 @@ function releaseDragNode(evt) {
 
             gamePiece.movement.range = gamePiece.maxRange - totalRangeUsed;
 
-            gamePiece.movement.lastNode.x = evt.currentTarget.x;
-            gamePiece.movement.lastNode.y = evt.currentTarget.y;
+            var currentNode = new Node();
+            currentNode.rangeUsed = rangeUsed;
+            currentNode.x = evt.currentTarget.x;
+            currentNode.y = evt.currentTarget.y;
+            currentNode.displayObjects = [];
+
+            gamePiece.movement.nodes.push(currentNode);
 
             stage.update();
         });
@@ -322,16 +333,12 @@ function beginDragNode(evt) {
             var x = gamePiece.location.x;
             var y = gamePiece.location.y;
 
+
             if (gamePiece.movement.status == CONSTANTS.MOVEMENT_NODE_MOVEABLE) {
-                x = gamePiece.movement.lastNode.x;
-                y = gamePiece.movement.lastNode.y;
+                x = gamePiece.movement.getLastNode().x;
+                y = gamePiece.movement.getLastNode().y;
             } else {
                 gamePiece.movement.range = gamePiece.maxRange;
-                gamePiece.movement.lastNode = {
-                    x: x,
-                    y: y,
-                    rangeUsed: 0
-                };
 
                 var maxRange = new createjs.Shape();
                 maxRange.graphics.beginFill("Green").drawCircle(0, 0, gamePiece.baseSize + gamePiece.maxRange);
@@ -344,38 +351,42 @@ function beginDragNode(evt) {
                     value: maxRange
                 });
 
-                stage.addChild(maxRange);
+                stage.addChildAt(maxRange, gamePiece.canvasReference);
             }
-
-            gamePiece.movement.status = CONSTANTS.MOVEMENT_MOVING;
 
             var origin = new createjs.Shape();
             origin.graphics.beginFill("DeepSkyBlue").drawCircle(0, 0, gamePiece.baseSize);
             origin.x = x;
             origin.y = y;
             
-            gamePiece.movement.nodes.push({
-                x: x,
-                y: y,
-                displayObjects: [origin]
-            });
+            //if (gamePiece.movement.status == CONSTANTS.MOVEMENT_MOVEABLE) {
+                var node = new Node();
+                node.x = x;
+                node.y = y;
+                node.displayObjects = [{
+                    type: CONSTANTS.NODE_OVERLAY,
+                    value: origin
+                }];
 
-            gamePiece.movement.overlays.push({
-                type: CONSTANTS.NODE_OVERLAY,
-                value: origin
-            });
+                gamePiece.movement.nodes.push(node);
+           // }
 
-            stage.addChild(origin);
+            gamePiece.movement.status = CONSTANTS.MOVEMENT_MOVING;
+
+            stage.addChild(origin, gamePiece.canvasReference);
+
         } else {
             //the is not the first movement point of this piece.  Add any logic required for second movement here.
 
         }
 
         if (gamePiece.movement) {
-            $.each(gamePiece.movement.overlays, function(index, overlay) {
-                if (overlay.type == CONSTANTS.RANGE_OVERLAY) {
-                    stage.removeChild(overlay.value);
-                }
+            $.each(gamePiece.movement.nodes, function(index, node) {
+                $.each(node.displayObjects, function(index, displayObject) {
+                    if (displayObject.type == CONSTANTS.RANGE_OVERLAY) {
+                        stage.removeChild(displayObject.value);
+                    }
+                });
             });
         }
 
@@ -399,17 +410,18 @@ function beginDragNode(evt) {
                     }
 
                     range.alpha = 0.2;
-                    stage.addChild(range);
-                    gamePiece.movement.overlays.push({
+                    stage.addChildAt(range, gamePiece.canvasReference);
+
+                    gamePiece.movement.getLastNode().displayObjects.push({
                         type: CONSTANTS.RANGE_OVERLAY,
                         value: range
                     });
 
-                    gamePiece.movement.nodes[gamePiece.movement.nodes.length - 1].displayObjects.push(range);
-
                     stage.update();
 
                 });
+            }else {
+                console.log("No Range Left")
             }
             // make sure to redraw the stage to show the change:
         });

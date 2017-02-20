@@ -11,6 +11,7 @@ GamePiece.prototype.location = Object.create(Location.prototype);
 GamePiece.prototype.movement = Object.create(Movement.prototype);
 GamePiece.prototype.canvasReference = null;
 GamePiece.prototype.currentMenu = null;
+
 GamePiece.prototype.showCurrentMenu = function() {
   this.currentMenu.show();
 };
@@ -28,7 +29,25 @@ Movement.prototype.nodes = null;
 Movement.prototype.lastNode = Object.create(Node.prototype);
 Movement.prototype.range = null;
 
+Movement.prototype.getLastNode = function() {
+	if(this.nodes) {
+		return this.nodes[this.nodes.length -1];
+	}
+}
+
+Movement.prototype.removeLastNode = function() {
+	if(this.nodes) {
+		this.nodes.pop();
+	}
+}
+
 Node.prototype.x = null;
 Node.prototype.y = null;
 Node.prototype.rangeUsed = null;
 Node.prototype.displayObjects = null;
+
+Node.prototype.removeDisplayObjects = function(stage) {
+	 $.each(this.displayObjects, function(index, displayObject) {
+            stage.removeChild(displayObject.value);
+        });
+}

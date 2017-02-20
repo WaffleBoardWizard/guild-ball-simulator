@@ -27,7 +27,7 @@ function Menu(displayObject, orientation, btns) {
             menuButton.x = displayObject.x;
             menuButton.y = displayObject.y;
 
-            stage.addChild(menuButton);
+            stage.addChildAt(menuButton, displayObject);
 
             menuButton.on("mouseover", function() {
                 //  menuButton.btn.graphics.clear().beginFill("blue");
@@ -52,7 +52,7 @@ function Menu(displayObject, orientation, btns) {
                 }, 100, createjs.Ease.getPowInOut(4));
             });
 
-            stage.addChild(menuButton);
+            stage.addChildAt(menuButton, displayObject);
 
             let toX = 0;
             let toY = 0;
