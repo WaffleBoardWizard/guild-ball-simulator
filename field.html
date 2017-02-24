@@ -1,5 +1,6 @@
 <!doctype html>
 <html class="no-js" lang="">
+
 <head>
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
@@ -15,25 +16,43 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"></script>
 
 </head>
+
 <body onload="init();">
-  <p style="display: none;"><i class="fa fa-car"></i> Force Font to load.</p>
-  <canvas id="demoCanvas" width="1200" height="1200"></canvas>
+    <p style="display: none;"><i class="fa fa-car"></i> Force Font to load.</p>
+    <button onclick="setScale(800);">Scale 1 </button>
+    <button onclick="setScale(1200);">Scale 2 </button>
+    <button onclick="setScale(2000);">Scale 3 </button>
 
+    <canvas id="demoCanvas" width="1200" height="1200"></canvas>
     <script src="http://code.jquery.com/jquery-1.12.4.min.js"></script>
-    <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.12.4.min.js"><\/script>')</script>
     <script src="https://code.createjs.com/createjs-2015.11.26.min.js"></script>
-    <script src="fa.js"></script>
-
-    <script src="FAButton.js"></script>
-    <script src="BoardShape.js"></script>
     <script src="FieldControl.js" charset="utf-8"></script>
+    <script type="text/javascript">
 
-    <script src="Main.js"></script>
-    <script src="MathGraphics.js"></script>
-    <script src="GamePiece.js"></script>
-    <script>
-        window.ga=function(){ga.q.push(arguments)};ga.q=[];ga.l=+new Date;
-        ga('create','UA-XXXXX-Y','auto');ga('send','pageview')
-    </script>
+
+
+    var field, stage;
+
+    function init(){
+      stage = new createjs.Stage("demoCanvas");
+      field = new FieldControl();
+      stage.addChild(field);
+      stage.update();
+
+      this.setTimeout(function(){
+        stage.update();
+      },2000);
+    }
+
+    function setScale(scale){
+      $("#demoCanvas").width(scale);
+      $("#demoCanvas").height(scale);
+      field.SetScale(scale);
+      stage.update();
+      
+    }
+
+  </script>
 </body>
+
 </html>
