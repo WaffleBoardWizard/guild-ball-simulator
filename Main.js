@@ -56,7 +56,6 @@ var menuButtons = [{
 var gamePieces = [];
 
 function init() {
-    debugger
     loadAssets(function() {
         stage = new createjs.Stage("demoCanvas");
         field = new FieldControl();
@@ -134,7 +133,6 @@ function loadGame() {
 
         gamePieceGraphic.on("pressup", movementEvent);
         gamePieceGraphic.on("pressmove", movementEvent);
-        drawField();
         field.addChild(gamePieceGraphic);
         stage.update();
     }
@@ -142,64 +140,6 @@ function loadGame() {
     createjs.Ticker.setFPS(60);
     createjs.Ticker.addEventListener("tick", stage);
     stage.update();
-}
-
-function drawField() {
-    let topGoalSide = new createjs.Shape();
-    topGoalSide.graphics.beginFill("pink").drawRect(0, 0, foot * 3, inch * 6);
-    topGoalSide.alpha = .5;
-    field.addChild(topGoalSide);
-
-    let topGoalArea = new createjs.Shape();
-    topGoalArea.graphics.beginFill("red").drawCircle((foot * 3) / 2, 0, inch * 5);
-    topGoalArea.alpha = .5;
-    field.addChild(topGoalArea);
-
-    let topGoal = new createjs.Shape();
-    topGoal.graphics.beginFill("blue").drawCircle((foot * 3) / 2, 5 * inch, inch);
-    topGoal.alpha = .5;
-    field.addChild(topGoal);
-
-    let topDeploy = new createjs.Shape();
-    topDeploy.graphics.beginFill("purple").drawRect(0, inch * 6, foot * 3, inch * 4);
-    topDeploy.alpha = .5;
-    field.addChild(topDeploy);
-
-    let topMidfield = new createjs.Shape();
-    topMidfield.graphics.beginFill("green").drawRect(0, inch * 10, foot * 3, inch * 8);
-    topMidfield.alpha = .5;
-    field.addChild(topMidfield);
-
-    let bottomMidfield = new createjs.Shape();
-    bottomMidfield.graphics.beginFill("green").drawRect(0, inch * 18, foot * 3, inch * 8);
-    bottomMidfield.alpha = .5;
-    field.addChild(bottomMidfield);
-
-    let bottomDeploy = new createjs.Shape();
-    bottomDeploy.graphics.beginFill("purple").drawRect(0, inch * 26, foot * 3, inch * 4);
-    bottomDeploy.alpha = .5;
-    field.addChild(bottomDeploy);
-
-    let bottomGoalSide = new createjs.Shape();
-    bottomGoalSide.graphics.beginFill("pink").drawRect(0, inch * 30, foot * 3, inch * 6);
-    bottomGoalSide.alpha = .5;
-    field.addChild(bottomGoalSide);
-
-    let bottomGoalArea = new createjs.Shape();
-    bottomGoalArea.graphics.beginFill("red").drawCircle((foot * 3) / 2, foot * 3, inch * 5);
-    bottomGoalArea.alpha = .5;
-    field.addChild(bottomGoalArea);
-
-    let bottomGoal = new createjs.Shape();
-    bottomGoal.graphics.beginFill("blue").drawCircle((foot * 3) / 2, (foot * 3) - (5 * inch), inch);
-    bottomGoal.alpha = .5;
-    field.addChild(bottomGoal);
-
-
-    let center = new createjs.Shape();
-    center.graphics.beginFill("brown").drawCircle((foot * 3) / 2, (foot * 3) / 2, inch * 3);
-    center.alpha = .5;
-    field.addChild(center);
 }
 
 function getRangeUsed(gamePiece, evt, success) {
