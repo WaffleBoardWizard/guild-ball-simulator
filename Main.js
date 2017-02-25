@@ -1,8 +1,14 @@
 var stage, field;
 var dragger;
-
 var foot = 400;
 var inch = foot / 12;
+
+var assetsToLoad = [
+    "alc.png",
+    "field.jpg"
+];
+
+var assets = {};
 
 var CONSTANTS = {
     RANGE_OVERLAY: 1001,
@@ -49,10 +55,31 @@ var menuButtons = [{
 
 var gamePieces = [];
 
-function init(){
-  stage = new createjs.Stage("demoCanvas");
-  field = new FieldControl(loadGame);
-  stage.addChild(field);
+function init() {
+    debugger
+    loadAssets(function() {
+        stage = new createjs.Stage("demoCanvas");
+        field = new FieldControl();
+        stage.addChild(field);
+        loadGame();
+    });
+}
+
+function loadAssets(onSuccess) {
+    var assetsLoaded = 0;
+    assetsToLoad.forEach(function(asset) {
+        var image = new Image();
+        image.src = "./assets/" + asset;
+        var me = this;
+        image.onload = function() {
+
+            var imageName = asset.split(".")[0];
+            assets[imageName.toLowerCase()] = event.target;
+            if (++assetsLoaded == assetsToLoad.length) {
+                onSuccess();
+            }
+        }
+    });
 }
 
 function loadGame() {
@@ -90,7 +117,7 @@ function loadGame() {
         image.src = "alc.png";
         var gamePieceGraphic = new BoardShape(gamePiece);
 
-        gamePieceGraphic.graphics.beginFill("red").drawCircle(0, 0, inch / 2);
+        gamePieceGraphic.graphics.beginBitmapFill(assets.alc).drawCircle(0, 0, inch / 2);
         gamePieceGraphic.x = x;
         gamePieceGraphic.y = y;
         gamePieceGraphic.setBounds(x, y, inch, inch);
@@ -117,62 +144,62 @@ function loadGame() {
     stage.update();
 }
 
-function drawField(){
-  let topGoalSide = new createjs.Shape();
-  topGoalSide.graphics.beginFill("pink").drawRect(0, 0, foot * 3, inch * 6);
-  topGoalSide.alpha = .5;
-  field.addChild(topGoalSide);
+function drawField() {
+    let topGoalSide = new createjs.Shape();
+    topGoalSide.graphics.beginFill("pink").drawRect(0, 0, foot * 3, inch * 6);
+    topGoalSide.alpha = .5;
+    field.addChild(topGoalSide);
 
-  let topGoalArea = new createjs.Shape();
-  topGoalArea.graphics.beginFill("red").drawCircle((foot * 3) / 2, 0, inch * 5);
-  topGoalArea.alpha = .5;
-  field.addChild(topGoalArea);
+    let topGoalArea = new createjs.Shape();
+    topGoalArea.graphics.beginFill("red").drawCircle((foot * 3) / 2, 0, inch * 5);
+    topGoalArea.alpha = .5;
+    field.addChild(topGoalArea);
 
-  let topGoal = new createjs.Shape();
-  topGoal.graphics.beginFill("blue").drawCircle((foot * 3) / 2, 5 * inch, inch);
-  topGoal.alpha = .5;
-  field.addChild(topGoal);
+    let topGoal = new createjs.Shape();
+    topGoal.graphics.beginFill("blue").drawCircle((foot * 3) / 2, 5 * inch, inch);
+    topGoal.alpha = .5;
+    field.addChild(topGoal);
 
-  let topDeploy = new createjs.Shape();
-  topDeploy.graphics.beginFill("purple").drawRect(0, inch * 6, foot * 3, inch * 4);
-  topDeploy.alpha = .5;
-  field.addChild(topDeploy);
+    let topDeploy = new createjs.Shape();
+    topDeploy.graphics.beginFill("purple").drawRect(0, inch * 6, foot * 3, inch * 4);
+    topDeploy.alpha = .5;
+    field.addChild(topDeploy);
 
-  let topMidfield = new createjs.Shape();
-  topMidfield.graphics.beginFill("green").drawRect(0, inch * 10, foot * 3, inch * 8);
-  topMidfield.alpha = .5;
-  field.addChild(topMidfield);
+    let topMidfield = new createjs.Shape();
+    topMidfield.graphics.beginFill("green").drawRect(0, inch * 10, foot * 3, inch * 8);
+    topMidfield.alpha = .5;
+    field.addChild(topMidfield);
 
-  let bottomMidfield = new createjs.Shape();
-  bottomMidfield.graphics.beginFill("green").drawRect(0, inch * 18, foot * 3, inch * 8);
-  bottomMidfield.alpha = .5;
-  field.addChild(bottomMidfield);
+    let bottomMidfield = new createjs.Shape();
+    bottomMidfield.graphics.beginFill("green").drawRect(0, inch * 18, foot * 3, inch * 8);
+    bottomMidfield.alpha = .5;
+    field.addChild(bottomMidfield);
 
-  let bottomDeploy = new createjs.Shape();
-  bottomDeploy.graphics.beginFill("purple").drawRect(0, inch * 26, foot * 3, inch * 4);
-  bottomDeploy.alpha = .5;
-  field.addChild(bottomDeploy);
+    let bottomDeploy = new createjs.Shape();
+    bottomDeploy.graphics.beginFill("purple").drawRect(0, inch * 26, foot * 3, inch * 4);
+    bottomDeploy.alpha = .5;
+    field.addChild(bottomDeploy);
 
-  let bottomGoalSide = new createjs.Shape();
-  bottomGoalSide.graphics.beginFill("pink").drawRect(0, inch * 30, foot * 3, inch * 6);
-  bottomGoalSide.alpha = .5;
-  field.addChild(bottomGoalSide);
+    let bottomGoalSide = new createjs.Shape();
+    bottomGoalSide.graphics.beginFill("pink").drawRect(0, inch * 30, foot * 3, inch * 6);
+    bottomGoalSide.alpha = .5;
+    field.addChild(bottomGoalSide);
 
-  let bottomGoalArea = new createjs.Shape();
-  bottomGoalArea.graphics.beginFill("red").drawCircle((foot * 3) / 2, foot * 3, inch * 5);
-  bottomGoalArea.alpha = .5;
-  field.addChild(bottomGoalArea);
+    let bottomGoalArea = new createjs.Shape();
+    bottomGoalArea.graphics.beginFill("red").drawCircle((foot * 3) / 2, foot * 3, inch * 5);
+    bottomGoalArea.alpha = .5;
+    field.addChild(bottomGoalArea);
 
-  let bottomGoal = new createjs.Shape();
-  bottomGoal.graphics.beginFill("blue").drawCircle((foot * 3) / 2, (foot * 3) - (5 * inch), inch);
-  bottomGoal.alpha = .5;
-  field.addChild(bottomGoal);
+    let bottomGoal = new createjs.Shape();
+    bottomGoal.graphics.beginFill("blue").drawCircle((foot * 3) / 2, (foot * 3) - (5 * inch), inch);
+    bottomGoal.alpha = .5;
+    field.addChild(bottomGoal);
 
 
-  let center = new createjs.Shape();
-  center.graphics.beginFill("brown").drawCircle((foot * 3) / 2, (foot * 3) / 2, inch * 3);
-  center.alpha = .5;
-  field.addChild(center);
+    let center = new createjs.Shape();
+    center.graphics.beginFill("brown").drawCircle((foot * 3) / 2, (foot * 3) / 2, inch * 3);
+    center.alpha = .5;
+    field.addChild(center);
 }
 
 function getRangeUsed(gamePiece, evt, success) {
@@ -279,7 +306,7 @@ function finishNodeMovement(displayObject) {
         });
 
         $.each(gamePiece.movement.overlays, function(index, node) {
-                field.removeChild(node.value);
+            field.removeChild(node.value);
         });
 
         gamePiece.movement.nodes = [];

@@ -1,18 +1,10 @@
 (function() {
     var initialSize = 1200;
 
-    function FieldControl(onLoad){
+    function FieldControl(){
         this.Container_constructor();
-        var image = new Image();
-        image.src = "./assets/field.jpg";
-        var me = this;
-        image.onload = function() {
-            var image = event.target;
-            me.bitmap = new createjs.Bitmap(image);
-            me.addChild(me.bitmap);
-            onLoad();
-        };
-
+        this.bitmap = new createjs.Bitmap(assets.field);
+        this.addChild(this.bitmap);
     };
 
     var p = createjs.extend(FieldControl, createjs.Container);
