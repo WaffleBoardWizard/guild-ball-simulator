@@ -1,9 +1,8 @@
 (function() {
     var initialSize = 1200;
 
-    function FieldControl(icon, iconColor, bgColor) {
+    function FieldControl(onLoad){
         this.Container_constructor();
-
         var image = new Image();
         image.src = "./assets/field.jpg";
         var me = this;
@@ -11,6 +10,7 @@
             var image = event.target;
             me.bitmap = new createjs.Bitmap(image);
             me.addChild(me.bitmap);
+            onLoad();
         };
 
     };

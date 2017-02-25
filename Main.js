@@ -1,10 +1,14 @@
-var stage;
+var stage, field;
 var dragger;
+
+var foot = 400;
+var inch = foot / 12;
 
 var CONSTANTS = {
     RANGE_OVERLAY: 1001,
     MAX_RANGE_OVERLAY: 1002,
     NODE_OVERLAY: 1003,
+    NODELINE_OVERLAY: 1004,
     MOVEMENT_MOVEABLE: 2001,
     MOVEMENT_MOVING: 2002,
     MOVEMENT_UNMOVEABLE: 2003,
@@ -19,15 +23,16 @@ var boardState = {
 var jogMenuButtons = [{
     Name: "Confirm",
     Icon: FontAwesomeIcons.check,
-    click: function(btn,displayObject) {
-        finishNodeMovement(displayObject);     
+    click: function(btn, displayObject) {
+        finishNodeMovement(displayObject);
         console.log("I was clicked");
         return true;
     }
 }, {
     Name: "Undo",
     Icon: FontAwesomeIcons.undo,
-    click: function() {
+    click: function(btn, displayObject) {
+        undoLastMovementNode(displayObject);
         console.log("undo");
         return true;
     }
@@ -36,71 +41,24 @@ var jogMenuButtons = [{
 var menuButtons = [{
     Name: "Jog",
     Icon: FontAwesomeIcons.arrowright,
-    click: function(btn,displayObject) {
-        displayObject.gamePiece.movement.status = CONSTANTS.MOVEMENT_MOVEABLE;        
-        console.log("I was clicked");
-        return true;
-    }
-}, {
-    Name: "Undo",
-    Icon: FontAwesomeIcons.undo,
-    click: function() {
-        console.log("undo");
-        return true;
-    }
-},{
-    Name: "Undo",
-    Icon: FontAwesomeIcons.undo,
-    click: function(btn) {
-        console.log("undo");
-        toggleMenu(btn, "up", menuButtons);
-        return false;
-    }
-},
-{
-    Name: "Undo",
-    Icon: FontAwesomeIcons.undo,
-    click: function() {
-        console.log("undo");
-        return true;
-    }
-},{
-    Name: "Undo",
-    Icon: FontAwesomeIcons.undo,
-    click: function() {
-        console.log("undo");
-        return true;
-    }
-},{
-    Name: "Undo",
-    Icon: FontAwesomeIcons.undo,
-    click: function() {
-        console.log("undo");
-        return true;
-    }
-},{
-    Name: "Undo",
-    Icon: FontAwesomeIcons.undo,
-    click: function() {
-        console.log("undo");
-        return true;
-    }
-},{
-    Name: "Undo",
-    Icon: FontAwesomeIcons.undo,
-    click: function() {
-        console.log("undo");
+    click: function(btn, displayObject) {
+        displayObject.gamePiece.movement.status = CONSTANTS.MOVEMENT_MOVEABLE;
         return true;
     }
 }];
 
 var gamePieces = [];
 
-function init() {
-    // code here.
-    stage = new createjs.Stage("demoCanvas");
+function init(){
+  stage = new createjs.Stage("demoCanvas");
+  field = new FieldControl(loadGame);
+  stage.addChild(field);
+}
+
+function loadGame() {
     stage.enableMouseOver();
     stage.mouseMoveOutside = true;
+
     var numberOfPieces = 1;
 
     for (i = 0; i < numberOfPieces; i++) {
@@ -121,21 +79,21 @@ function init() {
         movement.lastNode = new Node();
 
         gamePiece.movement = movement;
-        gamePiece.maxRange = 60;
-        gamePiece.baseSize = 10;
-        gamePiece.reach = 10;
+        gamePiece.maxRange = inch * 8;
+        gamePiece.baseSize = inch;
+        gamePiece.reach = inch * 10;
         gamePiece.location = location;
 
         var hit = new createjs.Shape();
-        hit.graphics.beginFill("#000").drawCircle(0, 0, 10);
+        hit.graphics.beginFill("#000").drawCircle(0, 0, inch / 2);
         var image = new Image();
         image.src = "alc.png";
         var gamePieceGraphic = new BoardShape(gamePiece);
 
-        gamePieceGraphic.graphics.beginFill("red").drawCircle(0, 0, 10);
+        gamePieceGraphic.graphics.beginFill("red").drawCircle(0, 0, inch / 2);
         gamePieceGraphic.x = x;
         gamePieceGraphic.y = y;
-        gamePieceGraphic.setBounds(x, y, 20, 20);
+        gamePieceGraphic.setBounds(x, y, inch, inch);
         gamePieceGraphic.hitArea = hit;
         gamePiece.canvasReference = gamePieceGraphic;
         gamePieces.push(gamePiece);
@@ -143,12 +101,14 @@ function init() {
 
         gamePieceGraphic.on("dblclick",
             function(evt) {
-                    toggleMenu(evt.currentTarget, "circle", menuButtons);
+                gamePiece.currentMenu = new Menu(evt.currentTarget, "circle", menuButtons, inch, field);
+                gamePiece.showCurrentMenu();
             });
 
         gamePieceGraphic.on("pressup", movementEvent);
         gamePieceGraphic.on("pressmove", movementEvent);
-        stage.addChild(gamePieceGraphic);
+        drawField();
+        field.addChild(gamePieceGraphic);
         stage.update();
     }
 
@@ -157,39 +117,99 @@ function init() {
     stage.update();
 }
 
+function drawField(){
+  let topGoalSide = new createjs.Shape();
+  topGoalSide.graphics.beginFill("pink").drawRect(0, 0, foot * 3, inch * 6);
+  topGoalSide.alpha = .5;
+  field.addChild(topGoalSide);
+
+  let topGoalArea = new createjs.Shape();
+  topGoalArea.graphics.beginFill("red").drawCircle((foot * 3) / 2, 0, inch * 5);
+  topGoalArea.alpha = .5;
+  field.addChild(topGoalArea);
+
+  let topGoal = new createjs.Shape();
+  topGoal.graphics.beginFill("blue").drawCircle((foot * 3) / 2, 5 * inch, inch);
+  topGoal.alpha = .5;
+  field.addChild(topGoal);
+
+  let topDeploy = new createjs.Shape();
+  topDeploy.graphics.beginFill("purple").drawRect(0, inch * 6, foot * 3, inch * 4);
+  topDeploy.alpha = .5;
+  field.addChild(topDeploy);
+
+  let topMidfield = new createjs.Shape();
+  topMidfield.graphics.beginFill("green").drawRect(0, inch * 10, foot * 3, inch * 8);
+  topMidfield.alpha = .5;
+  field.addChild(topMidfield);
+
+  let bottomMidfield = new createjs.Shape();
+  bottomMidfield.graphics.beginFill("green").drawRect(0, inch * 18, foot * 3, inch * 8);
+  bottomMidfield.alpha = .5;
+  field.addChild(bottomMidfield);
+
+  let bottomDeploy = new createjs.Shape();
+  bottomDeploy.graphics.beginFill("purple").drawRect(0, inch * 26, foot * 3, inch * 4);
+  bottomDeploy.alpha = .5;
+  field.addChild(bottomDeploy);
+
+  let bottomGoalSide = new createjs.Shape();
+  bottomGoalSide.graphics.beginFill("pink").drawRect(0, inch * 30, foot * 3, inch * 6);
+  bottomGoalSide.alpha = .5;
+  field.addChild(bottomGoalSide);
+
+  let bottomGoalArea = new createjs.Shape();
+  bottomGoalArea.graphics.beginFill("red").drawCircle((foot * 3) / 2, foot * 3, inch * 5);
+  bottomGoalArea.alpha = .5;
+  field.addChild(bottomGoalArea);
+
+  let bottomGoal = new createjs.Shape();
+  bottomGoal.graphics.beginFill("blue").drawCircle((foot * 3) / 2, (foot * 3) - (5 * inch), inch);
+  bottomGoal.alpha = .5;
+  field.addChild(bottomGoal);
+
+
+  let center = new createjs.Shape();
+  center.graphics.beginFill("brown").drawCircle((foot * 3) / 2, (foot * 3) / 2, inch * 3);
+  center.alpha = .5;
+  field.addChild(center);
+}
+
 function getRangeUsed(gamePiece, evt, success) {
     var rangeUsed = 0;
+    var lastNode = gamePiece.movement.getLastNode();
+
 
     //check for direct x,y axis movement
-    if (gamePiece.movement.lastNode.y == evt.stageY) {
+    if (lastNode.y == evt.stageY) {
         //no movement along the y axis, so we only care how far along the x axis the model has traveled
-        if (evt.stageX > gamePiece.movement.lastNode.x) {
-            rangeUsed = rangeUsed + (evt.stageX - gamePiece.movement.lastNode.x);
+        if (evt.stageX > lastNode.x) {
+            rangeUsed = rangeUsed + (evt.stageX - lastNode.x);
         } else {
-            rangeUsed = rangeUsed + (gamePiece.movement.lastNode.x - evt.stageX);
+            rangeUsed = rangeUsed + (lastNode.x - evt.stageX);
         }
-    } else if (gamePiece.movement.lastNode.x == evt.stageX) {
+    } else if (lastNode.x == evt.stageX) {
         //no movement along the x axis, so we only care how far along the y axis the model has traveled
-        if (evt.stageY > gamePiece.movement.lastNode.y) {
-            rangeUsed = rangeUsed + (evt.stageY - gamePiece.movement.lastNode.y);
+        if (evt.stageY > lastNode.y) {
+            rangeUsed = rangeUsed + (evt.stageY - lastNode.y);
         } else {
-            rangeUsed = rangeUsed + (gamePiece.movement.lastNode.y - evt.stageY);
+            rangeUsed = rangeUsed + (lastNode.y - evt.stageY);
         }
     } else {
         //complex movement detected. Will need to use pythagorean theorem to calculate distance moved
         var xDistance = 0;
         var yDistance = 0;
 
-        if (evt.stageY > gamePiece.movement.lastNode.y) {
-            yDistance = evt.stageY - gamePiece.movement.lastNode.y;
+        if (evt.stageY > lastNode.y) {
+            yDistance = evt.stageY - lastNode.y;
         } else {
-            yDistance = gamePiece.movement.lastNode.y - evt.stageY;
+            yDistance = lastNode.y - evt.stageY;
         }
 
-        if (evt.stageX > gamePiece.movement.lastNode.x) {
-            xDistance = evt.stageX - gamePiece.movement.lastNode.x;
+        if (evt.stageX > lastNode.x) {
+            xDistance = evt.stageX - lastNode.x;
         } else {
-            xDistance = gamePiece.movement.lastNode.x - evt.stageX;
+            xDistance = lastNode.x - evt.stageX;
         }
 
         rangeUsed = pythagorean(xDistance, yDistance);
@@ -198,16 +218,48 @@ function getRangeUsed(gamePiece, evt, success) {
     success(rangeUsed);
 }
 
-
 function movementEvent(evt) {
 
     if (evt.type == "pressmove") {
         beginDragNode(evt);
     } else if (evt.type == "pressup") {
         releaseDragNode(evt);
-    } 
+    }
 
     stage.update();
+}
+
+function undoLastMovementNode(displayObject) {
+    var gamePiece = displayObject.gamePiece;
+
+    if (gamePiece.movement.status == CONSTANTS.MOVEMENT_NODE_MOVEABLE) {
+
+        var nodeToRemove = gamePiece.movement.nodes[gamePiece.movement.nodes.length - 2];
+
+        displayObject.x = nodeToRemove.x;
+        displayObject.y = nodeToRemove.y;
+
+        nodeToRemove.removeDisplayObjects(field);
+
+        gamePiece.movement.removeLastNode();
+        gamePiece.movement.removeLastNode();
+
+        var totalRangeUsed = 0;
+
+        $.each(gamePiece.movement.nodes, function(index, node) {
+            totalRangeUsed = totalRangeUsed + node.rangeUsed;
+        });
+
+        gamePiece.movement.range = gamePiece.maxRange - totalRangeUsed;
+
+        if (gamePiece.movement.nodes.length == 0) {
+            gamePiece.movement.status = CONSTANTS.MOVEMENT_MOVEABLE;
+        } else {
+            gamePiece.showCurrentMenu();
+        }
+
+        stage.update();
+    }
 }
 
 function finishNodeMovement(displayObject) {
@@ -219,13 +271,18 @@ function finishNodeMovement(displayObject) {
         gamePiece.location.y = displayObject.y;
 
         gamePiece.movement.status = CONSTANTS.MOVEMENT_MOVEABLE;
-        gamePiece.movement.lastNode = null;
-        gamePiece.movement.nodes = [];
 
-        $.each(gamePiece.movement.overlays, function(index, overlay) {
-            stage.removeChild(overlay.value);
+        $.each(gamePiece.movement.nodes, function(index, node) {
+            $.each(node.displayObjects, function(index, displayObject) {
+                field.removeChild(displayObject.value);
+            });
         });
 
+        $.each(gamePiece.movement.overlays, function(index, node) {
+                field.removeChild(node.value);
+        });
+
+        gamePiece.movement.nodes = [];
         gamePiece.movement.overlays = [];
         gamePiece.movement.status = CONSTANTS.MOVEMENT_UNMOVEABLE;
 
@@ -240,28 +297,25 @@ function releaseDragNode(evt) {
     if (gamePiece.movement.status != CONSTANTS.MOVEMENT_UNMOVEABLE) {
 
         gamePiece.movement.status = CONSTANTS.MOVEMENT_NODE_MOVEABLE;
+        var lastNode = gamePiece.movement.getLastNode();
 
         var nodeLine = new createjs.Shape();
         nodeLine.graphics.beginStroke("white")
             .setStrokeStyle(2, "round")
-            .moveTo(gamePiece.movement.lastNode.x, gamePiece.movement.lastNode.y)
+            .moveTo(lastNode.x, lastNode.y)
             .lineTo(evt.currentTarget.x, evt.currentTarget.y);
 
-        gamePiece.movement.overlays.push({
-            type: CONSTANTS.NODE_OVERLAY,
+        lastNode.displayObjects.push({
+            type: CONSTANTS.NODELINE_OVERLAY,
             value: nodeLine
         });
-        stage.addChild(nodeLine);
+
+        field.addChild(nodeLine);
+        //field.addChild(nodeLine, stage.children.length - 2);
 
         getRangeUsed(gamePiece, evt, function(rangeUsed) {
 
-            var totalRangeUsed = 0;
-
-            gamePiece.movement.nodes.push({
-                x: evt.currentTarget.x,
-                y: evt.currentTarget.y,
-                rangeUsed: rangeUsed
-            })
+            var totalRangeUsed = rangeUsed;
 
             $.each(gamePiece.movement.nodes, function(index, node) {
                 totalRangeUsed = totalRangeUsed + node.rangeUsed;
@@ -269,18 +323,27 @@ function releaseDragNode(evt) {
 
             gamePiece.movement.range = gamePiece.maxRange - totalRangeUsed;
 
-            gamePiece.movement.lastNode.x = evt.currentTarget.x;
-            gamePiece.movement.lastNode.y = evt.currentTarget.y;
+            var currentNode = new Node();
+            currentNode.rangeUsed = rangeUsed;
+            currentNode.x = evt.currentTarget.x;
+            currentNode.y = evt.currentTarget.y;
+            currentNode.displayObjects = [];
+
+            gamePiece.movement.nodes.push(currentNode);
 
             stage.update();
         });
 
-        toggleMenu(evt.currentTarget, "circle", jogMenuButtons);
+        gamePiece.currentMenu = new Menu(evt.currentTarget, "circle", jogMenuButtons, inch, field);
+        gamePiece.showCurrentMenu();
     }
 }
 
 function beginDragNode(evt) {
     var gamePiece = evt.currentTarget.gamePiece;
+
+    if (gamePiece.currentMenu)
+        gamePiece.hideCurrentMenu(true);
 
     if (gamePiece.movement.status != CONSTANTS.MOVEMENT_UNMOVEABLE) {
         if (gamePiece.movement.status == CONSTANTS.MOVEMENT_MOVEABLE || gamePiece.movement.status == CONSTANTS.MOVEMENT_NODE_MOVEABLE) {
@@ -288,52 +351,60 @@ function beginDragNode(evt) {
             var x = gamePiece.location.x;
             var y = gamePiece.location.y;
 
+
             if (gamePiece.movement.status == CONSTANTS.MOVEMENT_NODE_MOVEABLE) {
-                x = gamePiece.movement.lastNode.x;
-                y = gamePiece.movement.lastNode.y;
+                x = gamePiece.movement.getLastNode().x;
+                y = gamePiece.movement.getLastNode().y;
             } else {
                 gamePiece.movement.range = gamePiece.maxRange;
-                gamePiece.movement.lastNode = {
-                    x: x,
-                    y: y,
-                    rangeUsed: 0
-                };
 
                 var maxRange = new createjs.Shape();
                 maxRange.graphics.beginFill("Green").drawCircle(0, 0, gamePiece.baseSize + gamePiece.maxRange);
                 maxRange.x = x;
                 maxRange.y = y;
-                maxRange.alpha = 0.2;
+                maxRange.alpha = 0.5;
+                gamePiece.movement.nodes = [];
                 gamePiece.movement.overlays.push({
                     type: CONSTANTS.MAX_RANGE_OVERLAY,
                     value: maxRange
                 });
 
-                stage.addChild(maxRange);
+                field.addChild(maxRange, gamePiece.canvasReference);
             }
-
-            gamePiece.movement.status = CONSTANTS.MOVEMENT_MOVING;
 
             var origin = new createjs.Shape();
             origin.graphics.beginFill("DeepSkyBlue").drawCircle(0, 0, gamePiece.baseSize);
             origin.x = x;
             origin.y = y;
-            gamePiece.movement.overlays.push({
+
+            //if (gamePiece.movement.status == CONSTANTS.MOVEMENT_MOVEABLE) {
+            var node = new Node();
+            node.x = x;
+            node.y = y;
+            node.displayObjects = [{
                 type: CONSTANTS.NODE_OVERLAY,
                 value: origin
-            });
+            }];
 
-            stage.addChild(origin);
+            gamePiece.movement.nodes.push(node);
+            // }
+
+            gamePiece.movement.status = CONSTANTS.MOVEMENT_MOVING;
+
+            field.addChild(origin, gamePiece.canvasReference);
+
         } else {
             //the is not the first movement point of this piece.  Add any logic required for second movement here.
 
         }
 
         if (gamePiece.movement) {
-            $.each(gamePiece.movement.overlays, function(index, overlay) {
-                if (overlay.type == CONSTANTS.RANGE_OVERLAY) {
-                    stage.removeChild(overlay.value);
-                }
+            $.each(gamePiece.movement.nodes, function(index, node) {
+                $.each(node.displayObjects, function(index, displayObject) {
+                    if (displayObject.type == CONSTANTS.RANGE_OVERLAY) {
+                        field.removeChild(displayObject.value);
+                    }
+                });
             });
         }
 
@@ -356,19 +427,20 @@ function beginDragNode(evt) {
                         range.y = evt.stageY;
                     }
 
-                    range.alpha = 0.2;
-                    stage.addChild(range);
-                    gamePiece.movement.overlays.push({
+                    range.alpha = 0.5;
+                    field.addChild(range, gamePiece.canvasReference);
+
+                    gamePiece.movement.getLastNode().displayObjects.push({
                         type: CONSTANTS.RANGE_OVERLAY,
                         value: range
                     });
 
-
                     stage.update();
 
                 });
+            } else {
+                console.log("No Range Left")
             }
-
             // make sure to redraw the stage to show the change:
         });
     }
@@ -388,113 +460,4 @@ function detectCollision(evt, gamePieces, success) {
     });
 
     success(result);
-}
-
-function toggleMenu(displayObject, orientation, btns) {
-    let menuButtons = [];
-
-    function hide(clickedIndex) {
-        menuButtons.forEach(function(btn, index) {
-            setTimeout(function() {
-                createjs.Tween.get(btn, {
-                    loop: false
-                }).to({
-                    x: displayObject.x,
-                    y: displayObject.y
-                }, 1000, createjs.Ease.getPowInOut(4));
-            }, clickedIndex == index ? 300 : 0);
-
-            setTimeout(function() {
-                stage.removeChild(btn);
-            }, 1000);
-        });
-    };
-
-    for (let i = 0; i < btns.length; i++) {
-        let btn = btns[i];
-        let menuButton = new FAButton(btn.Icon, "white", "blue");;
-
-        menuButton.x = displayObject.x;
-        menuButton.y = displayObject.y;
-
-        stage.addChild(menuButton);
-
-        menuButton.on("mouseover", function() {
-            //  menuButton.btn.graphics.clear().beginFill("blue");
-            createjs.Tween.get(menuButton, {
-                scaleX: 1,
-                scaleY: 1
-            }).to({
-                scaleX: 1.25,
-                scaleY: 1.25
-            }, 100, createjs.Ease.getPowInOut(4));
-
-        });
-
-        menuButton.on("mouseout", function() {
-            //menuButton.btn.graphics.clear().beginFill("red");
-            createjs.Tween.get(menuButton, {
-                scaleX: 1.25,
-                scaleY: 1.25
-            }).to({
-                scaleX: 1,
-                scaleY: 1
-            }, 100, createjs.Ease.getPowInOut(4));
-        });
-
-        stage.addChild(menuButton);
-
-        let toX = 0;
-        let toY = 0;
-
-        var displayObjectBoundsWidth = displayObject.getBounds().width;
-
-        console.log(displayObjectBoundsWidth);
-        switch (orientation) {
-            case "circle":
-                toX = displayObject.x - ((displayObjectBoundsWidth * 2) * Math.cos(i * (Math.PI / 4)));
-                toY = displayObject.y - ((displayObjectBoundsWidth * 2) * Math.sin(i * (Math.PI / 4)));
-                break;
-            case "up":
-                toX = displayObject.x;
-                toY = displayObject.y - ((displayObjectBoundsWidth * 2) * (i + 1));
-                break;
-            case "down":
-                toX = displayObject.x;
-                toY = displayObject.y + ((displayObjectBoundsWidth * 2) * (i + 1));
-                break;
-            case "left":
-                toX = displayObject.x - ((displayObjectBoundsWidth * 2) * (i + 1));
-                toY = displayObject.y;
-                break;
-            case "right":
-                toX = displayObject.x + ((displayObjectBoundsWidth * 2) * (i + 1));
-                toY = displayObject.y;
-                break;
-            default:
-
-        }
-
-        stage.setChildIndex(menuButton, 0);
-
-        setTimeout(function() {
-            createjs.Tween.get(menuButton, {
-                loop: false
-            }).to({
-                x: toX,
-                y: toY
-            }, 1000, createjs.Ease.getPowInOut(4));
-        }, 50 * i);
-
-
-        menuButtons.push(menuButton);
-
-        if (btn.click) {
-            menuButton.on("click", function() {
-                if (btn.click(menuButton, displayObject)) {
-                    hide(i);
-                }
-            });
-        }
-    }
 }

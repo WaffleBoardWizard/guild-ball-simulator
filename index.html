@@ -17,6 +17,9 @@
 </head>
 <body onload="init();">
   <p style="display: none;"><i class="fa fa-car"></i> Force Font to load.</p>
+  <button onclick="setScale(800);">Scale 1 </button>
+  <button onclick="setScale(1200);">Scale 2 </button>
+  <button onclick="setScale(2000);">Scale 3 </button>
   <canvas id="demoCanvas" width="1200" height="1200"></canvas>
 
     <script src="http://code.jquery.com/jquery-1.12.4.min.js"></script>
@@ -27,13 +30,23 @@
     <script src="FAButton.js"></script>
     <script src="BoardShape.js"></script>
     <script src="FieldControl.js" charset="utf-8"></script>
-
+    <script src="Menu.js" charset="utf-8"></script>
     <script src="Main.js"></script>
     <script src="MathGraphics.js"></script>
     <script src="GamePiece.js"></script>
     <script>
-        window.ga=function(){ga.q.push(arguments)};ga.q=[];ga.l=+new Date;
-        ga('create','UA-XXXXX-Y','auto');ga('send','pageview')
+        //window.ga=function(){ga.q.push(arguments)};ga.q=[];ga.l=+new Date;
+      //  ga('create','UA-XXXXX-Y','auto');ga('send','pageview')
+
+
+            function setScale(scale){
+              $("#demoCanvas").width(scale);
+              $("#demoCanvas").height(scale);
+              field.SetScale(scale);
+              stage.update();
+
+            }
+
     </script>
 </body>
 </html>
