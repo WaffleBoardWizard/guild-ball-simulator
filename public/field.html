@@ -28,28 +28,56 @@
     <script src="https://code.createjs.com/createjs-2015.11.26.min.js"></script>
     <script src="FieldControl.js" charset="utf-8"></script>
     <script type="text/javascript">
+    var foot = 400;
+    var inch = foot / 12;
+    var assetsToLoad = [
+      "ballista.png",
+      "colossus.png",
+      "hoist.png",
+      "mainspring.png",
+      "ratchet.png",
+      "salvo.png",
+      "field.jpg"
+    ];
 
+    var assets = {
 
+    }
 
     var field, stage;
 
-    function init(){
-      stage = new createjs.Stage("demoCanvas");
-      field = new FieldControl();
-      stage.addChild(field);
-      stage.update();
-
-      this.setTimeout(function(){
+    function init() {
+      loadAssets(function() {
+        stage = new createjs.Stage("demoCanvas");
+        createjs.Touch.enable(stage, false, true);
+        field = new FieldControl();
+        stage.addChild(field);
         stage.update();
-      },2000);
+      });
     }
 
+    function loadAssets(onSuccess) {
+      var assetsLoaded = 0;
+      assetsToLoad.forEach(function(asset) {
+        var image = new Image();
+        image.src = "./assets/" + asset;
+        var me = this;
+        image.onload = function() {
+
+          var imageName = asset.split(".")[0];
+          assets[imageName.toLowerCase()] = event.target;
+          if (++assetsLoaded == assetsToLoad.length) {
+            onSuccess();
+          }
+        }
+      });
+    }
     function setScale(scale){
       $("#demoCanvas").width(scale);
       $("#demoCanvas").height(scale);
       field.SetScale(scale);
       stage.update();
-      
+
     }
 
   </script>
