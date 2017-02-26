@@ -20,11 +20,8 @@
              shape.graphics.beginFill(bgColor).drawCircle(0, 0, 10);
 
              this.addChild(shape, text);
-
              this.btn = shape;
          };
-
-
 
          var p = createjs.extend(FAButton, createjs.Container);
 

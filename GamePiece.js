@@ -26,7 +26,6 @@ Location.prototype.y = null;
 Movement.prototype.status = null;
 Movement.prototype.overlays = null;
 Movement.prototype.nodes = null;
-Movement.prototype.lastNode = Object.create(Node.prototype);
 Movement.prototype.range = null;
 
 Movement.prototype.getLastNode = function() {
