@@ -146,6 +146,7 @@ function loadGame() {
 
     gamePieceGraphic.on("click",
       function(evt) {
+        evt && evt.nativeEvent && evt.nativeEvent.preventDefault && evt.nativeEvent.preventDefault();
         gamePiece.currentMenu = new Menu(evt.currentTarget, "circle", menuButtons, inch, field);
         gamePiece.showCurrentMenu();
       });
@@ -218,6 +219,7 @@ function getRangeUsed(gamePiece, evt, success) {
 }
 
 function movementEvent(evt) {
+  evt && evt.nativeEvent && evt.nativeEvent.preventDefault && evt.nativeEvent.preventDefault();
 
   if (evt.type == "pressmove") {
     beginDragNode(evt);
