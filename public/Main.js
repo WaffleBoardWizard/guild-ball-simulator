@@ -72,8 +72,8 @@ var gamePieces = [];
 function init() {
   loadAssets(function() {
     stage = new createjs.Stage("demoCanvas");
-    //stage.preventSelection = false;
-    createjs.Touch.enable(stage);
+    stage.preventSelection = false;
+    createjs.Touch.enable(stage, false, true);
     field = new FieldControl();
     stage.addChild(field);
     loadGame();
@@ -146,7 +146,7 @@ function loadGame() {
 
     gamePieceGraphic.on("click",
       function(evt) {
-  //      evt && evt.nativeEvent && evt.nativeEvent.preventDefault && evt.nativeEvent.preventDefault();
+        evt && evt.nativeEvent && evt.nativeEvent.preventDefault && evt.nativeEvent.preventDefault();
         gamePiece.currentMenu = new Menu(evt.currentTarget, "circle", menuButtons, inch, field);
         gamePiece.showCurrentMenu();
       });
@@ -219,7 +219,7 @@ function getRangeUsed(gamePiece, evt, success) {
 }
 
 function movementEvent(evt) {
-//  evt && evt.nativeEvent && evt.nativeEvent.preventDefault && evt.nativeEvent.preventDefault();
+  evt && evt.nativeEvent && evt.nativeEvent.preventDefault && evt.nativeEvent.preventDefault();
 
   if (evt.type == "pressmove") {
     beginDragNode(evt);
