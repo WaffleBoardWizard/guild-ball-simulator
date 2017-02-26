@@ -126,12 +126,12 @@ function loadGame() {
     gamePieces.push(gamePiece);
 
 
-    gamePieceGraphic.on("dblclick",
+    gamePieceGraphic.on("click",
       function(evt) {
         gamePiece.currentMenu = new Menu(evt.currentTarget, "circle", menuButtons, inch, field);
         gamePiece.showCurrentMenu();
       });
-    // 
+    //
     // gamePieceGraphic.on("tap",
     //   function(evt) {
     //     gamePiece.currentMenu = new Menu(evt.currentTarget, "circle", menuButtons, inch, field);
