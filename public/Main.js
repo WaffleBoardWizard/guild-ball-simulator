@@ -58,6 +58,7 @@ var gamePieces = [];
 function init() {
   loadAssets(function() {
     stage = new createjs.Stage("demoCanvas");
+    createjs.Touch.enable(stage);
     field = new FieldControl();
     stage.addChild(field);
     loadGame();
@@ -130,13 +131,13 @@ function loadGame() {
         gamePiece.currentMenu = new Menu(evt.currentTarget, "circle", menuButtons, inch, field);
         gamePiece.showCurrentMenu();
       });
+    // 
+    // gamePieceGraphic.on("tap",
+    //   function(evt) {
+    //     gamePiece.currentMenu = new Menu(evt.currentTarget, "circle", menuButtons, inch, field);
+    //     gamePiece.showCurrentMenu();
+    //   });
 
-    gamePieceGraphic.on("tap",
-      function(evt) {
-        gamePiece.currentMenu = new Menu(evt.currentTarget, "circle", menuButtons, inch, field);
-        gamePiece.showCurrentMenu();
-      });
-      
     gamePieceGraphic.on("pressup", movementEvent);
     gamePieceGraphic.on("pressmove", movementEvent);
     field.addChild(gamePieceGraphic);
