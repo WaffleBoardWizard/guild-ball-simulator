@@ -13,7 +13,9 @@ gulp.task('develop', function () {
   }).on('readable', function () {
     this.stdout.on('data', function (chunk) {
       if(/^Express server listening on port/.test(chunk)){
+        console.log("reloading");
         livereload.changed(__dirname);
+        livereload.reload();
       }
     });
     this.stdout.pipe(process.stdout);

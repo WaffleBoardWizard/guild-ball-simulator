@@ -31,13 +31,18 @@
       bottomGoalArea : null,
       center : null
     };
-    p.drawRect = function(x , y, height, width, color){
+    p.drawRect = function(x , y, width, height, color){
       var rect = new createjs.Shape();
-      rect.graphics.beginFill(color).drawRect(x, y, height, width);
+      rect.graphics.beginFill(color).drawRect(x, y, width, height);
       rect.alpha = .5;
       this.addChild(rect);
 
-      return rect;
+      return {
+        x: x,
+        y: y,
+        height : height,
+        width: width
+      };
     }
 
     p.drawCircle = function(x, y, radius, color){

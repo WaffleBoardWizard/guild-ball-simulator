@@ -4,8 +4,22 @@ var foot = 400;
 var inch = foot / 12;
 
 var assetsToLoad = [
-  "alc.png",
+  "ballista.png",
+  "colossus.png",
+  "hoist.png",
+  "mainspring.png",
+  "ratchet.png",
+  "salvo.png",
   "field.jpg"
+];
+
+var characterImages = [
+  "ballista",
+  "colossus",
+  "hoist",
+  "mainspring",
+  "ratchet",
+  "salvo"
 ];
 
 var assets = {};
@@ -58,7 +72,7 @@ var gamePieces = [];
 function init() {
   loadAssets(function() {
     stage = new createjs.Stage("demoCanvas");
-    createjs.Touch.enable(stage);
+    createjs.Touch.enable(stage, false, true);
     field = new FieldControl();
     stage.addChild(field);
     loadGame();
@@ -86,12 +100,12 @@ function loadGame() {
   stage.enableMouseOver();
   stage.mouseMoveOutside = true;
 
-  var numberOfPieces = 1;
+  var numberOfPieces = 6;
 
   for (i = 0; i < numberOfPieces; i++) {
-
-    var x = 100 + (30 * (i + 1));
-    var y = 100;
+    var center = getRectangleCenter(field.boundaries.topDeploy);
+    var x = center.x - (i * (2 * inch));
+    var y = center.y;
 
     var gamePiece = new GamePiece();
 
@@ -113,11 +127,14 @@ function loadGame() {
 
     var hit = new createjs.Shape();
     hit.graphics.beginFill("#000").drawCircle(0, 0, inch / 2);
-    var image = new Image();
-    image.src = "alc.png";
     var gamePieceGraphic = new BoardShape(gamePiece);
 
-    gamePieceGraphic.graphics.beginBitmapFill(assets.alc).drawCircle(0, 0, inch / 2);
+    var charaterImage = assets[characterImages[i]];
+    var m = new createjs.Matrix2D();
+    m.translate(-inch / 2, -inch / 2);
+    m.scale((inch * 1.5)/charaterImage.height, (inch)/charaterImage.width);
+
+    gamePieceGraphic.graphics.beginBitmapFill(charaterImage, "no-repeat", m).drawCircle(0, 0, inch / 2);
     gamePieceGraphic.x = x;
     gamePieceGraphic.y = y;
     gamePieceGraphic.setBounds(x, y, inch, inch);
@@ -147,6 +164,13 @@ function loadGame() {
   createjs.Ticker.setFPS(60);
   createjs.Ticker.addEventListener("tick", stage);
   stage.update();
+}
+
+function getRectangleCenter(rect){
+  return {
+    x: (rect.x + (rect.width / 2)),
+    y: (rect.y + ( rect.height /  2))
+  }
 }
 
 function getRangeUsed(gamePiece, evt, success) {
