@@ -72,6 +72,7 @@ var gamePieces = [];
 function init() {
   loadAssets(function() {
     stage = new createjs.Stage("demoCanvas");
+    stage.preventSelection = false;
     createjs.Touch.enable(stage, false, true);
     field = new FieldControl();
     stage.addChild(field);
