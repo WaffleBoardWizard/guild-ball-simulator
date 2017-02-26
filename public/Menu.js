@@ -94,6 +94,12 @@
                         me.hide(i);
                     }
                 });
+
+                menuButton.on("tap", function() {
+                    if (btn.click(menuButton, me.refObject)) {
+                        me.hide(i);
+                    }
+                });
             }
         }
     };
