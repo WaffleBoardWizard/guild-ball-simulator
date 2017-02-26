@@ -15,7 +15,7 @@
   p.show = function() {
     for (let i = 0; i < this.btns.length; i++) {
       let btn = this.btns[i];
-      let menuButton = new FAButton(btn.Icon, "white", "blue", this.size);
+      let menuButton = new FAButton(btn.Icon, "white", "blue", this.size * .75);
 
       menuButton.x = this.refObject.x;
       menuButton.y = this.refObject.y;

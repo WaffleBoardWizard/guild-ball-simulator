@@ -2,7 +2,6 @@ var stage, field;
 var dragger;
 var foot = 400;
 var inch = foot / 12;
-var topObj = null;
 var assetsToLoad = [
   "ballista.png",
   "colossus.png",
@@ -10,7 +9,8 @@ var assetsToLoad = [
   "mainspring.png",
   "ratchet.png",
   "salvo.png",
-  "field.jpg"
+  "field.jpg",
+  "die.png"
 ];
 
 var characterImages = [
@@ -69,7 +69,8 @@ var menuButtons = [{
     displayObject.gamePiece.currentMenu = null;
     displayObject.gamePiece.movement.status = CONSTANTS.MOVEMENT_MOVEABLE;
     return true;
-  }}];
+  }
+}];
 
 var gamePieces = [];
 
@@ -137,9 +138,9 @@ function loadGame() {
     var charaterImage = assets[characterImages[i]];
     var m = new createjs.Matrix2D();
     m.translate(-inch / 2, -inch / 2);
-    m.scale((inch * 1.5) / charaterImage.height, (inch) / charaterImage.width);
+    m.scale((inch) / charaterImage.height, (inch) / charaterImage.width);
 
-    gamePieceGraphic.graphics.beginBitmapFill(charaterImage, "no-repeat", m).drawCircle(0, 0, inch / 2);
+    gamePieceGraphic.graphics.setStrokeStyle(2).beginStroke("maroon").beginBitmapFill(charaterImage, "no-repeat", m).drawCircle(0, 0, (inch / 2) - 1);
     gamePieceGraphic.x = x;
     gamePieceGraphic.y = y;
     gamePieceGraphic.setBounds(x, y, inch, inch);
@@ -153,23 +154,8 @@ function loadGame() {
         console.log(gamePiece.currentMenu)
         if (gamePiece.currentMenu == null) {
           evt && evt.nativeEvent && evt.nativeEvent.preventDefault && evt.nativeEvent.preventDefault();
-          // var sortFunction = function(obj1, obj2, options) {
-          //     if (obj1 == evt.currentTarget) { return 1; }
-          //     return 0;
-          // }
-          // field.sortChildren(sortFunction);
-
-          if(topObj == null)
-            field.swapChildren(evt.currentTarget, field.getChildAt(field.numChildren -1));
-          else
-            field.swapChildren(evt.currentTarget, topObj);
-
-          topObj = evt.currentTarget;
-
-          field.setChildIndex(gamePiece.canvasReference,1000);
-
+          field.swapChildren(evt.currentTarget, field.getChildAt(field.numChildren - 1));
           gamePiece.currentMenu = new Menu(evt.currentTarget, "circle", menuButtons, inch, field);
-
           gamePiece.showCurrentMenu();
         }
       });
@@ -360,11 +346,10 @@ function releaseDragNode(evt) {
 function beginDragNode(evt) {
   var gamePiece = evt.currentTarget.gamePiece;
 
-  if (gamePiece.currentMenu)
-    {
-      gamePiece.hideCurrentMenu(true);
-      gamePiece.currentMenu = null;
-    }
+  if (gamePiece.currentMenu) {
+    gamePiece.hideCurrentMenu(true);
+    gamePiece.currentMenu = null;
+  }
   if (gamePiece.movement.status != CONSTANTS.MOVEMENT_UNMOVEABLE) {
     if (gamePiece.movement.status == CONSTANTS.MOVEMENT_MOVEABLE || gamePiece.movement.status == CONSTANTS.MOVEMENT_NODE_MOVEABLE) {
       //First movement!  Add maxRange node and origin node
@@ -393,7 +378,7 @@ function beginDragNode(evt) {
       }
 
       var origin = new createjs.Shape();
-      origin.graphics.beginFill("DeepSkyBlue").drawCircle(0, 0, gamePiece.baseSize /2);
+      origin.graphics.beginFill("DeepSkyBlue").drawCircle(0, 0, gamePiece.baseSize / 2);
       origin.x = x;
       origin.y = y;
 
@@ -480,4 +465,17 @@ function detectCollision(evt, gamePieces, success) {
   });
 
   success(result);
+}
+
+function rollDice() {
+  let results = [];
+  for (var i = 0; i < 5; i++) {
+    var die = new DieControl();
+    die.x = i * 125;
+    die.y = 0;
+    field.addChild(die);
+    var result = die.roll(1000);
+    results.push(result);
+  }
+  return results;
 }
