@@ -2,7 +2,7 @@ var stage, field;
 var dragger;
 var foot = 400;
 var inch = foot / 12;
-
+var topObj = null;
 var assetsToLoad = [
   "ballista.png",
   "colossus.png",
@@ -44,6 +44,8 @@ var jogMenuButtons = [{
   Name: "Confirm",
   Icon: FontAwesomeIcons.check,
   click: function(btn, displayObject) {
+    console.log(displayObject);
+    displayObject.gamePiece.currentMenu = null;
     finishNodeMovement(displayObject);
     console.log("I was clicked");
     return true;
@@ -52,6 +54,8 @@ var jogMenuButtons = [{
   Name: "Undo",
   Icon: FontAwesomeIcons.undo,
   click: function(btn, displayObject) {
+    displayObject.gamePiece.currentMenu = null;
+
     undoLastMovementNode(displayObject);
     console.log("undo");
     return true;
@@ -62,10 +66,10 @@ var menuButtons = [{
   Name: "Jog",
   Icon: FontAwesomeIcons.arrowright,
   click: function(btn, displayObject) {
+    displayObject.gamePiece.currentMenu = null;
     displayObject.gamePiece.movement.status = CONSTANTS.MOVEMENT_MOVEABLE;
     return true;
-  }
-}];
+  }}];
 
 var gamePieces = [];
 
@@ -108,7 +112,7 @@ function loadGame() {
     var x = center.x - (i * (2 * inch));
     var y = center.y;
 
-    var gamePiece = new GamePiece();
+    let gamePiece = new GamePiece();
 
     var location = new Location();
     location.x = x;
@@ -133,7 +137,7 @@ function loadGame() {
     var charaterImage = assets[characterImages[i]];
     var m = new createjs.Matrix2D();
     m.translate(-inch / 2, -inch / 2);
-    m.scale((inch * 1.5)/charaterImage.height, (inch)/charaterImage.width);
+    m.scale((inch * 1.5) / charaterImage.height, (inch) / charaterImage.width);
 
     gamePieceGraphic.graphics.beginBitmapFill(charaterImage, "no-repeat", m).drawCircle(0, 0, inch / 2);
     gamePieceGraphic.x = x;
@@ -144,18 +148,31 @@ function loadGame() {
     gamePieces.push(gamePiece);
 
 
-    gamePieceGraphic.on("click",
+    gamePieceGraphic.on("dblclick",
       function(evt) {
-        evt && evt.nativeEvent && evt.nativeEvent.preventDefault && evt.nativeEvent.preventDefault();
-        gamePiece.currentMenu = new Menu(evt.currentTarget, "circle", menuButtons, inch, field);
-        gamePiece.showCurrentMenu();
+        console.log(gamePiece.currentMenu)
+        if (gamePiece.currentMenu == null) {
+          evt && evt.nativeEvent && evt.nativeEvent.preventDefault && evt.nativeEvent.preventDefault();
+          // var sortFunction = function(obj1, obj2, options) {
+          //     if (obj1 == evt.currentTarget) { return 1; }
+          //     return 0;
+          // }
+          // field.sortChildren(sortFunction);
+
+          if(topObj == null)
+            field.swapChildren(evt.currentTarget, field.getChildAt(field.numChildren -1));
+          else
+            field.swapChildren(evt.currentTarget, topObj);
+
+          topObj = evt.currentTarget;
+
+          field.setChildIndex(gamePiece.canvasReference,1000);
+
+          gamePiece.currentMenu = new Menu(evt.currentTarget, "circle", menuButtons, inch, field);
+
+          gamePiece.showCurrentMenu();
+        }
       });
-    //
-    // gamePieceGraphic.on("tap",
-    //   function(evt) {
-    //     gamePiece.currentMenu = new Menu(evt.currentTarget, "circle", menuButtons, inch, field);
-    //     gamePiece.showCurrentMenu();
-    //   });
 
     gamePieceGraphic.on("pressup", movementEvent);
     gamePieceGraphic.on("pressmove", movementEvent);
@@ -168,10 +185,10 @@ function loadGame() {
   stage.update();
 }
 
-function getRectangleCenter(rect){
+function getRectangleCenter(rect) {
   return {
     x: (rect.x + (rect.width / 2)),
-    y: (rect.y + ( rect.height /  2))
+    y: (rect.y + (rect.height / 2))
   }
 }
 
@@ -344,8 +361,10 @@ function beginDragNode(evt) {
   var gamePiece = evt.currentTarget.gamePiece;
 
   if (gamePiece.currentMenu)
-    gamePiece.hideCurrentMenu(true);
-
+    {
+      gamePiece.hideCurrentMenu(true);
+      gamePiece.currentMenu = null;
+    }
   if (gamePiece.movement.status != CONSTANTS.MOVEMENT_UNMOVEABLE) {
     if (gamePiece.movement.status == CONSTANTS.MOVEMENT_MOVEABLE || gamePiece.movement.status == CONSTANTS.MOVEMENT_NODE_MOVEABLE) {
       //First movement!  Add maxRange node and origin node
@@ -360,7 +379,7 @@ function beginDragNode(evt) {
         gamePiece.movement.range = gamePiece.maxRange;
 
         var maxRange = new createjs.Shape();
-        maxRange.graphics.beginFill("Green").drawCircle(0, 0, gamePiece.baseSize + gamePiece.maxRange);
+        maxRange.graphics.beginFill("Green").drawCircle(0, 0, (gamePiece.baseSize / 2) + gamePiece.maxRange);
         maxRange.x = x;
         maxRange.y = y;
         maxRange.alpha = 0.5;
@@ -374,7 +393,7 @@ function beginDragNode(evt) {
       }
 
       var origin = new createjs.Shape();
-      origin.graphics.beginFill("DeepSkyBlue").drawCircle(0, 0, gamePiece.baseSize);
+      origin.graphics.beginFill("DeepSkyBlue").drawCircle(0, 0, gamePiece.baseSize /2);
       origin.x = x;
       origin.y = y;
 
