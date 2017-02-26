@@ -1,0 +1,28 @@
+var gulp = require('gulp'),
+  nodemon = require('gulp-nodemon'),
+  plumber = require('gulp-plumber'),
+  livereload = require('gulp-livereload');
+
+
+gulp.task('develop', function () {
+  livereload.listen();
+  nodemon({
+    script: 'bin/www',
+    ext: 'js',
+    stdout: false
+  }).on('readable', function () {
+    this.stdout.on('data', function (chunk) {
+      if(/^Express server listening on port/.test(chunk)){
+        console.log("reloading");
+        livereload.changed(__dirname);
+        livereload.reload();
+      }
+    });
+    this.stdout.pipe(process.stdout);
+    this.stderr.pipe(process.stderr);
+  });
+});
+
+gulp.task('default', [
+  'develop'
+]);

@@ -1,0 +1,87 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>SVG Graphics Demo</title>
+    <meta name="description" content="${2}">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link href="http://netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"></script>
+
+</head>
+
+<body onload="init();">
+    <p style="display: none;"><i class="fa fa-car"></i> Force Font to load.</p>
+    <button onclick="setScale(800);">Scale 1 </button>
+    <button onclick="setScale(1200);">Scale 2 </button>
+    <button onclick="setScale(2000);">Scale 3 </button>
+
+    <canvas id="demoCanvas" width="1200" height="1200"></canvas>
+    <script src="http://code.jquery.com/jquery-1.12.4.min.js"></script>
+    <script src="https://code.createjs.com/createjs-2015.11.26.min.js"></script>
+    <script src="FieldControl.js" charset="utf-8"></script>
+    <script type="text/javascript">
+    var foot = 400;
+    var inch = foot / 12;
+    var assetsToLoad = [
+      "ballista.png",
+      "colossus.png",
+      "hoist.png",
+      "mainspring.png",
+      "ratchet.png",
+      "salvo.png",
+      "field.jpg"
+    ];
+
+    var assets = {
+
+    }
+
+    var field, stage;
+
+    function init() {
+      loadAssets(function() {
+        stage = new createjs.Stage("demoCanvas");
+        stage.preventSelection = false;
+        createjs.Touch.enable(stage, false, true);
+        field = new FieldControl();
+        stage.addChild(field);
+        stage.update();
+      });
+    }
+
+    function loadAssets(onSuccess) {
+      var assetsLoaded = 0;
+      assetsToLoad.forEach(function(asset) {
+        var image = new Image();
+        image.src = "./assets/" + asset;
+        var me = this;
+        image.onload = function() {
+
+          var imageName = asset.split(".")[0];
+          assets[imageName.toLowerCase()] = event.target;
+          if (++assetsLoaded == assetsToLoad.length) {
+            onSuccess();
+          }
+        }
+      });
+    }
+    function setScale(scale){
+      $("#demoCanvas").width(scale);
+      $("#demoCanvas").height(scale);
+      field.SetScale(scale);
+      stage.update();
+
+    }
+
+  </script>
+</body>
+
+</html>
