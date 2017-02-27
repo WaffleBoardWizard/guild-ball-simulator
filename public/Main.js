@@ -1,4 +1,4 @@
-var stage, field;
+var stage, field, ball;
 var dragger;
 var foot = 400;
 var inch = foot / 12;
@@ -10,7 +10,9 @@ var assetsToLoad = [
   "ratchet.png",
   "salvo.png",
   "field.jpg",
-  "die.png"
+  "die.png",
+  "ball.png",
+  "house.png"
 ];
 
 var characterImages = [
@@ -68,6 +70,20 @@ var menuButtons = [{
   click: function(btn, displayObject) {
     displayObject.gamePiece.currentMenu = null;
     displayObject.gamePiece.movement.status = CONSTANTS.MOVEMENT_MOVEABLE;
+    return true;
+  }
+},{
+  Name: "Kick",
+  Icon: FontAwesomeIcons.arrowright,
+  click: function(btn, displayObject) {
+    displayObject.gamePiece.currentMenu = null;
+
+    var diceResults = rollDice(4, function(diceResults){
+      if(checkDiceResult(diceResults, 4)){
+        console.log("success!");
+        snapBallToCharacter(gamePieces[4].canvasReference, ball);
+      }
+    });
     return true;
   }
 }];
@@ -136,6 +152,7 @@ function loadGame() {
     var gamePieceGraphic = new BoardShape(gamePiece);
 
     var charaterImage = assets[characterImages[i]];
+
     var m = new createjs.Matrix2D();
     m.translate(-inch / 2, -inch / 2);
     m.scale((inch) / charaterImage.height, (inch) / charaterImage.width);
@@ -166,9 +183,49 @@ function loadGame() {
     stage.update();
   }
 
+  ball = createBall();
+  snapBallToCharacter(gamePieces[0].canvasReference, ball);
+
+  createTerrain();
   createjs.Ticker.setFPS(60);
   createjs.Ticker.addEventListener("tick", stage);
   stage.update();
+}
+
+function createBall(){
+    var ball = new BoardShape();
+
+    var m = new createjs.Matrix2D();
+    m.translate(-inch / 2, -inch / 2);
+    m.scale((inch) / assets.ball.height, (inch) / assets.ball.width);
+
+    ball.graphics.setStrokeStyle(2).beginStroke("black").beginBitmapFill(assets.ball, "no-repeat", m).drawCircle(0, 0, (inch / 2) - 1);
+    ball.x = ball.y = inch
+    field.addChild(ball);
+    return ball;
+}
+
+function createTerrain(){
+    var terrian = new BoardShape();
+
+    var m = new createjs.Matrix2D();
+    //m.translate(-inch / 2, -inch / 2);
+    //m.scale((inch) / assets.house.height, (inch) / assets.house.width);
+
+    terrian.graphics.setStrokeStyle(2).beginBitmapFill(assets.house, "no-repeat").drawRect(0, 0, assets.house.height, assets.house.width);
+    terrian.x = terrian.y = foot * .75;
+    field.addChild(terrian);
+    return terrian;
+}
+
+function snapBallToCharacter(character, ball){
+  createjs.Tween.get(ball, {
+    loop: false
+  }).to({
+    x: character.x - inch,
+    y: character.y
+  }, 1000, createjs.Ease.getPowInOut(4));
+  character.hasBall = true;
 }
 
 function getRectangleCenter(rect) {
@@ -467,9 +524,9 @@ function detectCollision(evt, gamePieces, success) {
   success(result);
 }
 
-function rollDice() {
+function rollDice(numberOfDice, onFinish) {
   let results = [];
-  for (var i = 0; i < 5; i++) {
+  for (var i = 0; i < numberOfDice; i++) {
     var die = new DieControl();
     die.x = i * 125;
     die.y = 0;
@@ -477,5 +534,18 @@ function rollDice() {
     var result = die.roll(1000);
     results.push(result);
   }
-  return results;
+
+  setTimeout(function(){
+      onFinish(results);
+  }, 1000);;
+}
+
+function checkDiceResult(diceResults, goal){
+  let result = false;
+  diceResults.forEach(function(d){
+    if(d >= goal)
+      result = true;
+  });
+
+  return result;
 }
