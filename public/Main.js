@@ -168,7 +168,7 @@ function loadGame() {
     gamePieces.push(gamePiece);
 
 
-    gamePieceGraphic.on("dblclick",
+    gamePieceGraphic.on("click",
       function(evt) {
         console.log(gamePiece.currentMenu)
         if (gamePiece.currentMenu == null) {
@@ -195,7 +195,8 @@ function loadGame() {
 
 function createBall() {
   var ball = new BallControl();
-  ball.x = ball.y = inch
+  ball.x = foot * 1.5;
+  ball.y = inch;
   field.addChild(ball);
   return ball;
 }
@@ -203,7 +204,7 @@ function createBall() {
 function createTerrain() {
   var terrian = new BoardShape();
   terrian.graphics.setStrokeStyle(2).beginBitmapFill(assets.house, "no-repeat").drawRect(0, 0, assets.house.height, assets.house.width);
-  terrian.x = terrian.y = foot * .75;
+  terrian.x = terrian.y = foot * 2;
   field.addChild(terrian);
   return terrian;
 }
@@ -562,8 +563,8 @@ function createProton() {
   emitter.addBehaviour(new Proton.Scale(new Proton.Span(.02, .07)));
   emitter.addBehaviour(new Proton.RandomDrift(5, 0, .15));
   //emitter.addBehaviour(new Proton.Gravity(0.9));
-  emitter.p.x = 410;
-  emitter.p.y = 475;
+  emitter.p.x = (foot * 2) + 110;
+  emitter.p.y = (foot * 2) + 30;
   emitter.emit();
   proton.addEmitter(emitter);
 
