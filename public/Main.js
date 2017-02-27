@@ -1,4 +1,4 @@
-var stage, field, ball;
+var stage, field, ball, proton;
 var dragger;
 var foot = 400;
 var inch = foot / 12;
@@ -72,14 +72,14 @@ var menuButtons = [{
     displayObject.gamePiece.movement.status = CONSTANTS.MOVEMENT_MOVEABLE;
     return true;
   }
-},{
+}, {
   Name: "Kick",
   Icon: FontAwesomeIcons.arrowright,
   click: function(btn, displayObject) {
     displayObject.gamePiece.currentMenu = null;
 
-    var diceResults = rollDice(4, function(diceResults){
-      if(checkDiceResult(diceResults, 4)){
+    var diceResults = rollDice(4, function(diceResults) {
+      if (checkDiceResult(diceResults, 4)) {
         console.log("success!");
         snapBallToCharacter(gamePieces[4].canvasReference, ball);
       }
@@ -97,6 +97,7 @@ function init() {
     createjs.Touch.enable(stage, false, true);
     field = new FieldControl();
     stage.addChild(field);
+    createProton();
     loadGame();
   });
 }
@@ -188,37 +189,36 @@ function loadGame() {
 
   createTerrain();
   createjs.Ticker.setFPS(60);
-  createjs.Ticker.addEventListener("tick", stage);
-  stage.update();
+  createjs.Ticker.addEventListener("tick", tick);
 }
 
-function createBall(){
-    var ball = new BoardShape();
+function createBall() {
+  var ball = new BoardShape();
 
-    var m = new createjs.Matrix2D();
-    m.translate(-inch / 2, -inch / 2);
-    m.scale((inch) / assets.ball.height, (inch) / assets.ball.width);
+  var m = new createjs.Matrix2D();
+  m.translate(-inch / 2, -inch / 2);
+  m.scale((inch) / assets.ball.height, (inch) / assets.ball.width);
 
-    ball.graphics.setStrokeStyle(2).beginStroke("black").beginBitmapFill(assets.ball, "no-repeat", m).drawCircle(0, 0, (inch / 2) - 1);
-    ball.x = ball.y = inch
-    field.addChild(ball);
-    return ball;
+  ball.graphics.setStrokeStyle(2).beginStroke("black").beginBitmapFill(assets.ball, "no-repeat", m).drawCircle(0, 0, (inch / 2) - 1);
+  ball.x = ball.y = inch
+  field.addChild(ball);
+  return ball;
 }
 
-function createTerrain(){
-    var terrian = new BoardShape();
+function createTerrain() {
+  var terrian = new BoardShape();
 
-    var m = new createjs.Matrix2D();
-    //m.translate(-inch / 2, -inch / 2);
-    //m.scale((inch) / assets.house.height, (inch) / assets.house.width);
+  var m = new createjs.Matrix2D();
+  //m.translate(-inch / 2, -inch / 2);
+  //m.scale((inch) / assets.house.height, (inch) / assets.house.width);
 
-    terrian.graphics.setStrokeStyle(2).beginBitmapFill(assets.house, "no-repeat").drawRect(0, 0, assets.house.height, assets.house.width);
-    terrian.x = terrian.y = foot * .75;
-    field.addChild(terrian);
-    return terrian;
+  terrian.graphics.setStrokeStyle(2).beginBitmapFill(assets.house, "no-repeat").drawRect(0, 0, assets.house.height, assets.house.width);
+  terrian.x = terrian.y = foot * .75;
+  field.addChild(terrian);
+  return terrian;
 }
 
-function snapBallToCharacter(character, ball){
+function snapBallToCharacter(character, ball) {
   createjs.Tween.get(ball, {
     loop: false
   }).to({
@@ -535,17 +535,52 @@ function rollDice(numberOfDice, onFinish) {
     results.push(result);
   }
 
-  setTimeout(function(){
-      onFinish(results);
+  setTimeout(function() {
+    onFinish(results);
   }, 1000);;
 }
 
-function checkDiceResult(diceResults, goal){
+function checkDiceResult(diceResults, goal) {
   let result = false;
-  diceResults.forEach(function(d){
-    if(d >= goal)
+  diceResults.forEach(function(d) {
+    if (d >= goal)
       result = true;
   });
 
   return result;
+}
+
+function createProton() {
+  var canvas = $("#demoCanvas");
+  var bitmap = new createjs.Bitmap("assets/smoke.png");
+  bitmap.scaleX = bitmap.scaleY = .0002;
+  proton = new Proton();
+  emitter = new Proton.Emitter();
+  emitter.rate = new Proton.Rate(new Proton.Span(0, 3), new Proton.Span(0, 0));
+  emitter.addInitialize(new Proton.ImageTarget(bitmap));
+
+  emitter.addInitialize(new Proton.Mass(1, 5));
+  emitter.addInitialize(new Proton.Radius(20));
+  //emitter.addInitialize(new Proton.Position(new Proton.LineZone(0, -40, canvas.width(), -40)));
+  emitter.addInitialize(new Proton.Life(2, 4));
+  emitter.addInitialize(new Proton.V(0, new Proton.Span(.1, .5)));
+
+  emitter.addBehaviour(new Proton.CrossZone(new Proton.LineZone(0, canvas.height(), canvas.width(), canvas.height() + 20, 'down'), 'dead'));
+  emitter.addBehaviour(new Proton.Rotate(new Proton.Span(0, 360), new Proton.Span(-.5, .5), 'add'));
+  emitter.addBehaviour(new Proton.Scale(new Proton.Span(.02,.07)));
+  emitter.addBehaviour(new Proton.RandomDrift(5, 0, .15));
+  //emitter.addBehaviour(new Proton.Gravity(0.9));
+  emitter.p.x = 410;
+  emitter.p.y = 475;
+  emitter.emit();
+  proton.addEmitter(emitter);
+
+  renderer = new Proton.Renderer('easel', proton, field);
+  renderer.start();
+}
+
+function tick() {
+  console.log("tick");
+  proton.update();
+  stage.update();
 }
