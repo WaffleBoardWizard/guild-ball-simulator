@@ -12,7 +12,8 @@ var assetsToLoad = [
   "field.jpg",
   "die.png",
   "ball.png",
-  "house.png"
+  "house.png",
+  "kickscatter30.png"
 ];
 
 var characterImages = [
@@ -185,7 +186,7 @@ function loadGame() {
   }
 
   ball = createBall();
-  snapBallToCharacter(gamePieces[0].canvasReference, ball);
+  //snapBallToCharacter(gamePieces[0].canvasReference, ball);
 
   createTerrain();
   createjs.Ticker.setFPS(60);
@@ -193,13 +194,7 @@ function loadGame() {
 }
 
 function createBall() {
-  var ball = new BoardShape();
-
-  var m = new createjs.Matrix2D();
-  m.translate(-inch / 2, -inch / 2);
-  m.scale((inch) / assets.ball.height, (inch) / assets.ball.width);
-
-  ball.graphics.setStrokeStyle(2).beginStroke("black").beginBitmapFill(assets.ball, "no-repeat", m).drawCircle(0, 0, (inch / 2) - 1);
+  var ball = new BallControl();
   ball.x = ball.y = inch
   field.addChild(ball);
   return ball;
@@ -207,11 +202,6 @@ function createBall() {
 
 function createTerrain() {
   var terrian = new BoardShape();
-
-  var m = new createjs.Matrix2D();
-  //m.translate(-inch / 2, -inch / 2);
-  //m.scale((inch) / assets.house.height, (inch) / assets.house.width);
-
   terrian.graphics.setStrokeStyle(2).beginBitmapFill(assets.house, "no-repeat").drawRect(0, 0, assets.house.height, assets.house.width);
   terrian.x = terrian.y = foot * .75;
   field.addChild(terrian);
@@ -536,6 +526,8 @@ function rollDice(numberOfDice, onFinish) {
   }
 
   setTimeout(function() {
+    if (results.length == 1)
+      results = results[0];
     onFinish(results);
   }, 1000);;
 }
@@ -567,7 +559,7 @@ function createProton() {
 
   emitter.addBehaviour(new Proton.CrossZone(new Proton.LineZone(0, canvas.height(), canvas.width(), canvas.height() + 20, 'down'), 'dead'));
   emitter.addBehaviour(new Proton.Rotate(new Proton.Span(0, 360), new Proton.Span(-.5, .5), 'add'));
-  emitter.addBehaviour(new Proton.Scale(new Proton.Span(.02,.07)));
+  emitter.addBehaviour(new Proton.Scale(new Proton.Span(.02, .07)));
   emitter.addBehaviour(new Proton.RandomDrift(5, 0, .15));
   //emitter.addBehaviour(new Proton.Gravity(0.9));
   emitter.p.x = 410;
@@ -584,3 +576,33 @@ function tick() {
   proton.update();
   stage.update();
 }
+
+function kickScatter() {
+  rollDice(2, function(r) {
+      var distance = r[1];
+      var direction = r[0];
+
+      if(direction > 3)
+        direction++;
+
+      var coord = calculateXY(distance * inch, 22.5 * direction);
+
+      createjs.Tween.get(ball, {
+        loop: false
+      }).to({
+        x: ball.x + coord.x,
+        y: ball.y + coord.y
+      }, 1000, createjs.Ease.getPowInOut(4));
+  });
+
+  }
+
+  function calculateXY(distance, angle) {
+    var x = distance * (Math.cos((angle * Math.PI) / 180));
+    var y = distance * (Math.sin((angle * Math.PI) / 180));
+
+    return {
+      x: x,
+      y: y,
+    }
+  }
