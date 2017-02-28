@@ -12,6 +12,12 @@
     <link href="http://netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css">
+    <style>
+      button{
+        font-size: 42px;
+        margin: 20px;
+      }
+    </style>
 </head>
 <body onload="init();">
   <p style="display: none;"><i class="fa fa-car"></i> Force Font to load.</p>
@@ -19,6 +25,7 @@
   <button onclick="setScale(1200);">Scale 2 </button>
   <button onclick="setScale(2000);">Scale 3 </button>
   <button onclick="rollDice(5);">Roll Dice</button>
+  <button onclick="kickScatter(5)">Kick Scatter</button>
 
   <canvas id="demoCanvas" width="1200" height="1200"></canvas>
 
@@ -30,6 +37,7 @@
     <script src="fa.js"></script>
 
     <script src="FAButton.js"></script>
+    <script src="BallControl.js"></script>
     <script src="BoardShape.js"></script>
     <script src="FieldControl.js" charset="utf-8"></script>
     <script src="Menu.js" charset="utf-8"></script>
