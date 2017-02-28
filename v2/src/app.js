@@ -1,7 +1,7 @@
-import $ from 'jquery';
-import proton from './lib/proton.min.js';
-import FieldControl from './controls/FieldControl';
-import Measurement from './common/Measurements';
+const $ = require('jquery');
+const proton = require('./lib/proton.min.js');
+const FieldControl = require('./controls/FieldControl');
+const Measurement = require ('./common/Measurements');
 const AssetsDirectory = require.context('./assets', false);
 
 var stage, field, ball, proton;
@@ -39,7 +39,6 @@ function init(){
     createjs.Touch.enable(stage, false, true);
     field = new FieldControl(assets.field);
     stage.addChild(field);
-    console.log("hi");
     stage.update();
     //createProton();
     //loadGame();
