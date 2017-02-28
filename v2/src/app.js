@@ -39,7 +39,7 @@ function init(){
     createjs.Touch.enable(stage, false, true);
     field = new FieldControl(assets.field);
     stage.addChild(field);
-
+    console.log("hi");
     stage.update();
     //createProton();
     //loadGame();
