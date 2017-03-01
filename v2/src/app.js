@@ -1,10 +1,11 @@
-const $ = require('jquery');
-const proton = require('./lib/proton.min.js');
-const FieldControl = require('./controls/FieldControl');
-const Measurement = require ('./common/Measurements');
+import $ from 'jquery';
+import proton from'./lib/proton.min.js';
+import CharacterControl from './controls/CharacterControl';
+import FieldControl from './controls/FieldControl';
+import Measurements from './common/Measurements';
 const AssetsDirectory = require.context('./assets', false);
 
-var stage, field, ball, proton;
+var stage, field, ball;
 var dragger;
 var foot = 400;
 var inch = foot / 12;
@@ -39,6 +40,7 @@ function init(){
     createjs.Touch.enable(stage, false, true);
     field = new FieldControl(assets.field);
     stage.addChild(field);
+    addCharacters(field);
     stage.update();
     //createProton();
     //loadGame();
@@ -63,4 +65,15 @@ function loadAssets(onSuccess) {
   });
 }
 
+function addCharacters(field){
+   var ballista = {
+     image : assets.ballista,
+     baseSize : Measurements.Inch
+   }
+   var characterControl = new CharacterControl(ballista);
+   characterControl.x = inch;
+   characterControl.y = inch;
+
+   field.addChild(characterControl);
+}
 $(document).ready(init);

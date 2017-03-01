@@ -15,7 +15,7 @@ var p = createjs.extend(FieldControl, createjs.Container);
 p.SetScale = function(scale) {
   var scaleTimes = 0;
   scaleTimes = 1200 / scale;
-}
+};
 
 p.boundaries = {
   topGoalSide: null,
