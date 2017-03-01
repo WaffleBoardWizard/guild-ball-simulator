@@ -2,6 +2,7 @@ import $ from 'jquery';
 import proton from'./lib/proton.min.js';
 import CharacterControl from './controls/CharacterControl';
 import FieldControl from './controls/FieldControl';
+import TerrianControl from './controls/TerrianControl';
 import Measurements from './common/Measurements';
 const AssetsDirectory = require.context('./assets', false);
 
@@ -41,6 +42,7 @@ function init(){
     field = new FieldControl(assets.field);
     stage.addChild(field);
     addCharacters(field);
+    addTerrian(field);
     stage.update();
     //createProton();
     //loadGame();
@@ -76,4 +78,18 @@ function addCharacters(field){
 
    field.addChild(characterControl);
 }
+
+function addTerrian(field){
+  var house = {
+    image : assets.house,
+    height: Measurements.Inch * 4,
+    width: Measurements.Inch * 4
+  }
+  var terrianControl = new TerrianControl(house);
+  terrianControl.x = foot;
+  terrianControl.y = foot;
+
+  field.addChild(terrianControl);
+}
+
 $(document).ready(init);
