@@ -20,6 +20,7 @@
   "dependencies": {
     "createjs": "0.0.1",
     "jquery": "^3.1.1",
+    "q": "^1.4.1",
     "url-loader": "^0.5.8"
   }
 }

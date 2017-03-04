@@ -1,14 +1,36 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
   <title>
   </title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.9/semantic.min.css" />
   <link href="http://netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+  <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
   <script src="https://code.createjs.com/createjs-2015.11.26.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.9/semantic.min.js"></script>
 </head>
+
 <body>
+  <div class="ui basic modal">
+    <div class="ui icon header">
+      <i class="archive icon"></i> Archive Old Messages
+    </div>
+    <div class="content">
+      <p>Your inbox is getting full, would you like us to enable automatic archiving of old messages?</p>
+    </div>
+    <div class="actions">
+      <div class="ui red basic cancel inverted button">
+        <i class="remove icon"></i> No
+      </div>
+      <div class="ui green ok inverted button">
+        <i class="checkmark icon"></i> Yes
+      </div>
+    </div>
+  </div>
   <p style="display: none;"><i class="fa fa-car"></i> Force Font to load.</p>
   <canvas id="demoCanvas" width="1200" height="1200"></canvas>
 </body>
+
 </html>

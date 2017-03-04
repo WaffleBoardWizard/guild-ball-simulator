@@ -1,28 +1,13 @@
-import $ from 'jquery';
 import proton from'./lib/proton.min.js';
 import CharacterControl from './controls/CharacterControl';
 import FieldControl from './controls/FieldControl';
 import TerrianControl from './controls/TerrianControl';
 import BallControl from './controls/BallControl';
 import Measurements from './common/Measurements';
-const AssetsDirectory = require.context('./assets', false);
+import AssetsLoader from './helpers/AssetsLoader';
 
-var stage, field, ball;
+var stage, field, ball, assets;
 var dragger;
-var foot = 400;
-var inch = foot / 12;
-var assetsToLoad = [
-  'ballista.PNG',
-  "hoist.PNG",
-  "colossus.PNG",
-  "mainspring.PNG",
-  "ratchet.PNG",
-  "salvo.PNG",
-  "field.jpg",
-  "die.png",
-  "ball.png",
-  "house.png"
-];
 
 var characterImages = [
   "ballista",
@@ -36,56 +21,60 @@ var characterImages = [
 var assets = {};
 
 function init(){
-  loadAssets(function() {
+  AssetsLoader.LoadAssets()
+  .then(function(q){
+    assets = q;
     stage = new createjs.Stage("demoCanvas");
     stage.preventSelection = false;
     createjs.Touch.enable(stage, false, true);
-    field = new FieldControl(assets.field);
+    field = new FieldControl(assets.getResult("field"));
     stage.addChild(field);
     addCharacters(field);
     addTerrian(field);
-    addBall(field, assets.ball);
+    addBall(field, assets.getResult("ball"));
     stage.update();
     createjs.Ticker.setFPS(60);
     createjs.Ticker.addEventListener("tick", tick);
     //createProton();
     //loadGame();
-  });
-}
-
-
-function loadAssets(onSuccess) {
-  var assetsLoaded = 0;
-  assetsToLoad.forEach(function(asset) {
-    var image = new Image();
-    var path = './' + asset;
-    image.src =  AssetsDirectory(path, false);
-    var me = this;
-    image.onload = function() {
-      var imageName = asset.split(".")[0];
-      assets[imageName.toLowerCase()] = event.target;
-      if (++assetsLoaded == assetsToLoad.length) {
-        onSuccess();
-      }
-    }
+  })
+  .catch(function(ex){
+    console.log(ex);
   });
 }
 
 function addCharacters(field){
    var ballista = {
-     image : assets.ballista,
-     baseSize : Measurements.Inch
+     image : assets.getResult("ballista"),
+     baseSize : 30 * Measurements.MM
    }
-   var characterControl = new CharacterControl(ballista, field);
-   characterControl.x = inch * 4;
-   characterControl.y = inch * 4;
+   var colossus = {
+     image: assets.getResult("colossus"),
+     baseSize : 40 * Measurements.MM
+   }
 
-   field.addChild(characterControl);
+   addCharacter(ballista, Measurements.Inch * 2, Measurements.Inch * 2, field);
+   addCharacter(colossus, Measurements.Foot, Measurements.Foot/2, field);
+}
+
+function addCharacter(characterProps, x, y, field){
+  let characterControl = new CharacterControl(characterProps, field);
+  characterControl.x = x;
+  characterControl.y =y;
+
+  characterControl.on("click",
+  function(evt) {
+    $('.ui.basic.modal')
+      .modal('show');
+      characterControl.selectCharacter();
+    });
+
+  field.addChild(characterControl);
 }
 
 function addTerrian(field){
   var house = {
-    image : assets.house,
+    image : assets.getResult("house"),
     height: Measurements.Inch * 4,
     width: Measurements.Inch * 4
   }
