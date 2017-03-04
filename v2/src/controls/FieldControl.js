@@ -30,6 +30,7 @@ p.boundaries = {
   bottomGoalArea: null,
   center: null
 };
+
 p.drawRect = function(x, y, width, height, color) {
   var rect = new createjs.Shape();
   rect.graphics.beginFill(color).drawRect(x, y, width, height);

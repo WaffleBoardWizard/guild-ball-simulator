@@ -16,8 +16,8 @@
         scatter.rotation = 180;
         scatter.x = 250;
         scatter.y = 165;
-        this.addChild(scatter);
-
+        this.addChildAt(scatter, ball);
+        
     };
 
     var p = createjs.extend(BallControl, createjs.Container);

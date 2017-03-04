@@ -1,15 +1,14 @@
-var DIE_IMAGE = require("../assets/die.png");
 
-function DieControl() {
+function DieControl(DIE_IMAGE) {
     this.Container_constructor();
     let spriteSheet = new createjs.SpriteSheet({
       framerate: 30,
       "images": [DIE_IMAGE],
       "frames": {
         "regX":0,
-        "height": assets.die.height,
+        "height": DIE_IMAGE.height,
         "regY": 0,
-        "width": assets.die.width / 6
+        "width": DIE_IMAGE.width / 6
       },
       // define two animations, run (loops, 1.5x speed) and jump (returns to run):
       "animations": {
@@ -58,4 +57,4 @@ function DieControl() {
   };
 
 
-exports default createjs.promote(DieControl, "Container");
+export default createjs.promote(DieControl, "Container");

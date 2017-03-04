@@ -11,7 +11,8 @@ var _AssetsToLoad = [
     "field.jpg",
     "die.png",
     "ball.png",
-    "house.png"
+    "house.png",
+    "kickscatter30.png"
   ];
 export default {
 
