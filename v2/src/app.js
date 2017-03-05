@@ -10,6 +10,8 @@ import MenuControl from './controls/MenuControl';
 import DieControl from './controls/DieControl';
 import GameState from './helpers/GameState';
 import GAME_STATES from './helpers/GameStates';
+import GamePieceActions from './actions/GamePieceActions';
+
 import Q from 'q';
 
 var stage, field, ball, assets;
@@ -100,15 +102,12 @@ function addCharacters(field) {
 
 function addCharacter(characterProps, x, y, field) {
   let characterControl = new CharacterControl(characterProps, field);
-  characterControl.x = x;
-  characterControl.y = y;
-
   characterControl.on("click",
     function(evt) {
       selectCharacter(characterControl);
     });
 
-  field.addChild(characterControl);
+  GameState.performCommand(GamePieceActions.addPiece(characterControl, field, x, y));
 
   characters.push(characterControl);
 };
@@ -149,14 +148,8 @@ function characterSelected(character) {
   GameState.toState(GAME_STATES.CHARACTER_SELECTED);
 }
 
-function snapBallToCharacter(c) {
-  let character = c;
-  createjs.Tween.get(ball, {
-    loop: false
-  }).to({
-    x: character.x,
-    y: character.y
-  }, 1000, createjs.Ease.getPowInOut(4));
+function snapBallToCharacter(character) {
+  GameState.performCommand(GamePieceActions.movePiece(ball, character.x, character.y));
 }
 
 function addTerrian(field) {
@@ -225,42 +218,51 @@ function checkDiceResult(diceResults, goal) {
 
 function menuFactory(character) {
   return [{
-    Name: "Confirm",
-    Icon: FontAwesomeIcons.check,
-    click: function(btn, displayObject) {
-      // finishNodeMovement(displayObject);
-      console.log("confirm");
-      return true;
-    }
-  }, {
-    Name: "Kick",
-    Icon: FontAwesomeIcons.undo,
-    click: function(btn, displayObject) {
-      let otherCharacters = characters.filter(x => x != character);
+      Name: "Confirm",
+      Icon: FontAwesomeIcons.check,
+      click: function(btn, displayObject) {
+        // finishNodeMovement(displayObject);
+        console.log("confirm");
+        return true;
+      }
+    }, {
+      Name: "Kick",
+      Icon: FontAwesomeIcons.undo,
+      click: function(btn, displayObject) {
+        let otherCharacters = characters.filter(x => x != character);
+        selectOtherCharacter(otherCharacters)
+          .then(function(otherCharacter) {
+            rollDice(1).then(function(results) {
+                GameState.toState(GAME_STATES.BALL_KICKED);
+                if (checkDiceResult(results, 6)) {
+                  snapBallToCharacter(otherCharacter);
+                } else {
+                  snapBallToCharacter(otherCharacter);
+                  kickScatter(character.x, character.y, otherCharacter.x, otherCharacter.y);
+                }
+                GameState.toState(GAME_STATES.SELECT_CHARACTER);
+              })
+              .catch(function(ex) {
+                console.log(ex);
+              });
+          })
+          .catch(function(ex) {
+            console.log(ex);
+          });
 
-      selectOtherCharacter(otherCharacters)
-        .then(function(otherCharacter) {
-          rollDice(1).then(function(results) {
-              GameState.toState(GAME_STATES.BALL_KICKED);
-              if (checkDiceResult(results, 6)) {
-                snapBallToCharacter(otherCharacter);
-              } else {
-                snapBallToCharacter(otherCharacter);
-                kickScatter(character.x, character.y, otherCharacter.x, otherCharacter.y);
-              }
-              GameState.toState(GAME_STATES.SELECT_CHARACTER);
-            })
-            .catch(function(ex) {
-              console.log(ex);
-            });
-        })
-        .catch(function(ex) {
-          console.log(ex);
-        });
-
-      return true;
+        return true;
+      }
+    },
+    {
+      Name: "Undo",
+      Icon: FontAwesomeIcons.check,
+      click: function(btn, displayObject) {
+        // finishNodeMovement(displayObject);
+        GameState.undoLastCommand();
+        return true;
+      }
     }
-  }];
+  ];
 };
 
 function kickScatter(fromX, fromY, toX, toY) {
@@ -274,14 +276,9 @@ function kickScatter(fromX, fromY, toX, toY) {
       if (direction > 3)
         direction++;
 
-      var coord = calculateXY(distance * Measurements.Inch, (22.5 * direction) + angle - 90);
+      let coord = calculateXY(distance * Measurements.Inch, (22.5 * direction) + angle - 90);
       setTimeout(function() {
-        createjs.Tween.get(ball, {
-          loop: false
-        }).to({
-          x: ball.x + coord.x,
-          y: ball.y + coord.y
-        }, 1000, createjs.Ease.getPowInOut(4));
+        GameState.performCommand(GamePieceActions.movePiece(ball, coord.x + ball.x, coord.y + ball.y));
       }, 2000);
 
     })
@@ -299,5 +296,28 @@ function calculateXY(distance, angle) {
     y: y,
   }
 }
+
+function movePiece(piece, toX, toY) {
+  let prevPieceX = piece.x;
+  let prevPieceY = piece.y;
+  return {
+    execute: function() {
+      createjs.Tween.get(piece, {
+        loop: false
+      }).to({
+        x: toX,
+        y: toY
+      }, 1000, createjs.Ease.getPowInOut(4));
+    },
+    undo: function() {
+      createjs.Tween.get(piece, {
+        loop: false
+      }).to({
+        x: prevPieceX,
+        y: prevPieceY
+      }, 1000, createjs.Ease.getPowInOut(4));
+    }
+  }
+};
 
 $(document).ready(init);

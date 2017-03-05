@@ -5,6 +5,8 @@ export default {
 
   StateHandlers : {},
 
+  Commands : [],
+
   callStateHandlers : function(state, subState, params, clearHandlers){
     if(!this.StateHandlers[state]) return;
 
@@ -68,5 +70,15 @@ export default {
       this.addStateHanderStart(state, startHandler, true);
     if(endHandler)
       this.addStateHandlerEnd(state, endHandler, true);
+  },
+
+  performCommand: function(command){
+    this.Commands.push(command);
+    command.execute();
+  },
+
+  undoLastCommand: function(){
+    var command = this.Commands.pop();
+    command.undo();
   }
 };
