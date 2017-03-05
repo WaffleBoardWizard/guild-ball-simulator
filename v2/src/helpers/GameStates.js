@@ -1,0 +1,8 @@
+import Enum from "es6-enum"
+
+export default Enum(
+  "SELECT_OTHER_CHARACTER",
+  "SELECT_CHARACTER",
+  "OTHER_CHARACTER_SELECTED",
+  "CHARACTER_SELECTED",
+  "BALL_KICKED");

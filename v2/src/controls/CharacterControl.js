@@ -2,24 +2,6 @@ import GamePieceControl from './GamePieceControl';
 import MenuControl from './MenuControl';
 import FontAwesomeIcons from '../common/FontAwesomeIcons';
 
-var jogMenuButtons = [{
-  Name: "Confirm",
-  Icon: FontAwesomeIcons.check,
-  click: function(btn, displayObject) {
-    // finishNodeMovement(displayObject);
-    console.log("confirm");
-    return true;
-  }
-}, {
-  Name: "Undo",
-  Icon: FontAwesomeIcons.undo,
-  click: function(btn, displayObject) {
-    console.log("undo");
-  //  undoLastMovementNode(displayObject);
-    return true;
-  }
-}];
-
 function CharacterControl(properties, container) {
   this.GamePieceControl_constructor();
   this.addImage(properties);
@@ -47,6 +29,29 @@ p.addImage = function(properties){
   this.shape.graphics.setStrokeStyle(2).beginStroke(properties.border).beginBitmapFill(charaterImage, "no-repeat", m).drawCircle(0, 0, (properties.baseSize / 2) - 1);
   this.addChild(this.shape);
 }
+
+p.illuminate = function(){
+  var bounds = this.DisplayObject_getBounds();
+
+  this.illuminateCircle = new createjs.Shape();
+  this.illuminateCircle.graphics.beginFill("blue").drawCircle(0, 0, (100* .5))
+  this.illuminateCircle.alpha = .5;
+  this.addChildAt(this.illuminateCircle);
+  var me = this;
+  createjs.Tween.get(this.illuminateCircle,{
+    loop: true
+  }).to({
+    scaleX : 1.5,
+    scaleY : 1.5
+  },1000, createjs.Ease.getPowInOut(4)).to({
+    scaleX : 1,
+    scaleY : 1
+  }, 1000, createjs.Ease.getPowInOut(4));
+};
+
+p.stopIlluminate = function(){
+  this.removeChild(this.illuminateCircle);
+};
 
 
 export default createjs.promote(CharacterControl, "GamePieceControl");

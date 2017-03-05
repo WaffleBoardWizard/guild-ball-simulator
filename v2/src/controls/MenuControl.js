@@ -76,7 +76,7 @@ p.show = function() {
       default:
 
     }
-
+    
     setTimeout(function() {
       createjs.Tween.get(menuButton, {
         loop: false

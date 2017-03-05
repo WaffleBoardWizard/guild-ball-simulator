@@ -8,19 +8,13 @@ import AssetsLoader from './helpers/AssetsLoader';
 import FontAwesomeIcons from './common/FontAwesomeIcons';
 import MenuControl from './controls/MenuControl';
 import DieControl from './controls/DieControl';
-
+import GameState from './helpers/GameState';
+import GAME_STATES from './helpers/GameStates';
 import Q from 'q';
 
 var stage, field, ball, assets;
-var dragger;
 
-const STATES = {
-  SELECT_OTHER_CHARACTER: "SELECT_OTHER_CHARACTER",
-  SELECT_CHARACTER: "SELECT_CHARACTER"
-};
-
-let CURRENT_STATE = STATES.SELECT_CHARACTER;
-
+let characters = [];
 var characterImages = [
   "ballista",
   "colossus",
@@ -47,6 +41,10 @@ function init() {
       addCharacters(field);
       addTerrian(field);
       stage.update();
+
+      addPermStateHandlers();
+      GameState.toState(GAME_STATES.SELECT_CHARACTER);
+
       createjs.Ticker.setFPS(60);
       createjs.Ticker.addEventListener("tick", tick);
       //createProton();
@@ -56,6 +54,24 @@ function init() {
       console.log(ex);
     });
 }
+
+function addPermStateHandlers(){
+
+  GameState.addPermStateHandler(GAME_STATES.SELECT_CHARACTER, illumateCharacters, stopIllumatingCharacters);
+  GameState.addPermStateHandler(GAME_STATES.SELECT_OTHER_CHARACTER, illumateCharacters, stopIllumatingCharacters);
+}
+
+function illumateCharacters(){
+  characters.forEach(function(character){
+    character.illuminate();
+  });
+};
+
+function stopIllumatingCharacters(){
+  characters.forEach(function(character){
+    character.stopIlluminate();
+  });
+};
 
 function addCharacters(field) {
   var ballista = {
@@ -82,38 +98,38 @@ function addCharacter(characterProps, x, y, field) {
     });
 
   field.addChild(characterControl);
+
+  characters.push(characterControl);
 };
 
 function selectCharacter(character) {
-  switch (CURRENT_STATE) {
-    case STATES.SELECT_CHARACTER:
+  switch (GameState.CURRENT_STATE) {
+    case GAME_STATES.SELECT_CHARACTER:
       characterSelected(character);
       break;
-    case STATES.SELECT_OTHER_CHARACTER:
+    case GAME_STATES.SELECT_OTHER_CHARACTER:
       otherCharacterSelected(character);
       break;
-    default:
-
   }
 };
 
 function otherCharacterSelected(character) {
-  onClickHandler(character);
+  GameState.toState(GAME_STATES.OTHER_CHARACTER_SELECTED, character);
 };
 
 function selectOtherCharacter() {
   return Q.Promise(function(resolve, reject, notify) {
-    CURRENT_STATE = STATES.SELECT_OTHER_CHARACTER;
-    onClickHandler = function(character) {
-      resolve(character);
-      onClickHandler = null;
-    }
-  })
+    GameState.toStateExpect(GAME_STATES.SELECT_OTHER_CHARACTER,
+                      GAME_STATES.OTHER_CHARACTER_SELECTED)
+                      .then(resolve);
+  });
 }
 
 function characterSelected(character) {
   var menu = menuFactory(character);
   new MenuControl(character, "circle", menu, character.properties.baseSize, field).show();
+
+  GameState.toState(GAME_STATES.CHARACTER_SELECTED);
 }
 
 function snapBallToCharacter(c) {
@@ -205,7 +221,7 @@ function menuFactory(character) {
     click: function(btn, displayObject) {
       selectOtherCharacter()
         .then(function(otherCharacter) {
-          console.log(otherCharacter);
+          GameState.toState(GAME_STATES.BALL_KICKED);
           rollDice(1).then(function(results){
             if(checkDiceResult(results, 6)){
               snapBallToCharacter(otherCharacter);
@@ -213,11 +229,11 @@ function menuFactory(character) {
               snapBallToCharacter(otherCharacter);
               kickScatter(character.x, character.y, otherCharacter.x, otherCharacter.y);
             }
+            GameState.toState(GAME_STATES.SELECT_CHARACTER);
           })
           .catch(function(ex){
             console.log(ex);
           });
-          CURRENT_STATE = STATES.SELECT_CHARACTER;
         })
         .catch(function(ex) {
           console.log(ex);
