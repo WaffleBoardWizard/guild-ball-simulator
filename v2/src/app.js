@@ -49,26 +49,37 @@ function init() {
       createjs.Ticker.addEventListener("tick", tick);
       //createProton();
       //loadGame();
+      field.on("click",
+        function(evt) {
+          console.log("click");
+        });
+
     })
     .catch(function(ex) {
       console.log(ex);
     });
 }
 
-function addPermStateHandlers(){
-
-  GameState.addPermStateHandler(GAME_STATES.SELECT_CHARACTER, illumateCharacters, stopIllumatingCharacters);
-  GameState.addPermStateHandler(GAME_STATES.SELECT_OTHER_CHARACTER, illumateCharacters, stopIllumatingCharacters);
+function addPermStateHandlers() {
+  GameState.addPermStateHandler(GAME_STATES.SELECT_CHARACTER, illuminateAllCharacters, stopIllumatingAllCharacters);
 }
 
-function illumateCharacters(){
-  characters.forEach(function(character){
+function illuminateAllCharacters() {
+  illuminateCharacters(characters);
+}
+
+function stopIllumatingAllCharacters() {
+  stopIlluminatingCharacters(characters);
+}
+
+function illuminateCharacters(characters) {
+  characters.forEach(function(character) {
     character.illuminate();
   });
 };
 
-function stopIllumatingCharacters(){
-  characters.forEach(function(character){
+function stopIlluminatingCharacters(characters) {
+  characters.forEach(function(character) {
     character.stopIlluminate();
   });
 };
@@ -117,11 +128,17 @@ function otherCharacterSelected(character) {
   GameState.toState(GAME_STATES.OTHER_CHARACTER_SELECTED, character);
 };
 
-function selectOtherCharacter() {
+function selectOtherCharacter(characters) {
+  GameState.addTempStateHandler(GAME_STATES.SELECT_OTHER_CHARACTER,
+    () => illuminateCharacters(characters),
+    () => stopIlluminatingCharacters(characters));
+
   return Q.Promise(function(resolve, reject, notify) {
     GameState.toStateExpect(GAME_STATES.SELECT_OTHER_CHARACTER,
-                      GAME_STATES.OTHER_CHARACTER_SELECTED)
-                      .then(resolve);
+        GAME_STATES.OTHER_CHARACTER_SELECTED)
+      .then(function(otherCharacter) {
+        resolve(otherCharacter);
+      });
   });
 }
 
@@ -189,8 +206,8 @@ function rollDice(numberOfDice) {
       resolve(results);
     }, 1000);
 
-    setTimeout(function(){
-      dice.forEach(function(die){
+    setTimeout(function() {
+      dice.forEach(function(die) {
         field.removeChild(die);
       });
     }, 4000)
@@ -219,21 +236,23 @@ function menuFactory(character) {
     Name: "Kick",
     Icon: FontAwesomeIcons.undo,
     click: function(btn, displayObject) {
-      selectOtherCharacter()
+      let otherCharacters = characters.filter(x => x != character);
+
+      selectOtherCharacter(otherCharacters)
         .then(function(otherCharacter) {
-          GameState.toState(GAME_STATES.BALL_KICKED);
-          rollDice(1).then(function(results){
-            if(checkDiceResult(results, 6)){
-              snapBallToCharacter(otherCharacter);
-            } else {
-              snapBallToCharacter(otherCharacter);
-              kickScatter(character.x, character.y, otherCharacter.x, otherCharacter.y);
-            }
-            GameState.toState(GAME_STATES.SELECT_CHARACTER);
-          })
-          .catch(function(ex){
-            console.log(ex);
-          });
+          rollDice(1).then(function(results) {
+              GameState.toState(GAME_STATES.BALL_KICKED);
+              if (checkDiceResult(results, 6)) {
+                snapBallToCharacter(otherCharacter);
+              } else {
+                snapBallToCharacter(otherCharacter);
+                kickScatter(character.x, character.y, otherCharacter.x, otherCharacter.y);
+              }
+              GameState.toState(GAME_STATES.SELECT_CHARACTER);
+            })
+            .catch(function(ex) {
+              console.log(ex);
+            });
         })
         .catch(function(ex) {
           console.log(ex);
@@ -246,37 +265,39 @@ function menuFactory(character) {
 
 function kickScatter(fromX, fromY, toX, toY) {
   rollDice(2)
-  .then(function(r){
+    .then(function(r) {
       var angle = Math.atan2(toY - fromY, toX - fromX) * 180 / Math.PI;
       var distance = r[1];
       var direction = r[0];
-      angle;
-      ball.rotateScatter(angle+ 90);
-      stage.update();
-      if(direction > 3)
+      ball.rotateScatter(angle + 90);
+
+      if (direction > 3)
         direction++;
 
       var coord = calculateXY(distance * Measurements.Inch, (22.5 * direction) + angle - 90);
+      setTimeout(function() {
+        createjs.Tween.get(ball, {
+          loop: false
+        }).to({
+          x: ball.x + coord.x,
+          y: ball.y + coord.y
+        }, 1000, createjs.Ease.getPowInOut(4));
+      }, 2000);
 
-      createjs.Tween.get(ball, {
-        loop: false
-      }).to({
-        x: ball.x + coord.x,
-        y: ball.y + coord.y
-      }, 1000, createjs.Ease.getPowInOut(4));
-  })
-  .catch(function(ex){
-    console.log(ex);
-  });
+    })
+    .catch(function(ex) {
+      console.log(ex);
+    });
 }
 
-  function calculateXY(distance, angle) {
-    var x = distance * (Math.cos((angle * Math.PI) / 180));
-    var y = distance * (Math.sin((angle * Math.PI) / 180));
+function calculateXY(distance, angle) {
+  var x = distance * (Math.cos((angle * Math.PI) / 180));
+  var y = distance * (Math.sin((angle * Math.PI) / 180));
 
-    return {
-      x: x,
-      y: y,
-    }
+  return {
+    x: x,
+    y: y,
   }
+}
+
 $(document).ready(init);

@@ -56,8 +56,17 @@ export default {
     this.addStateHandler(state, handler, permanent, "end");
   },
 
+  addTempStateHandler: function(state, startHandler, endHandler){
+    if(startHandler)
+      this.addStateHanderStart(state, startHandler, false);
+    if(endHandler)
+      this.addStateHandlerEnd(state, endHandler, false);
+  },
+
   addPermStateHandler: function(state, startHandler, endHandler){
-    this.addStateHanderStart(state, startHandler, true);
-    this.addStateHandlerEnd(state, endHandler, true);
+    if(startHandler)
+      this.addStateHanderStart(state, startHandler, true);
+    if(endHandler)
+      this.addStateHandlerEnd(state, endHandler, true);
   }
 };
