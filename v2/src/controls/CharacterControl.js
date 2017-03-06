@@ -7,10 +7,6 @@ function CharacterControl(properties, container) {
   this.addImage(properties);
   var me = this;
   this.properties = properties;
-  // this.on("click",
-  // function(evt) {
-  //     new MenuControl(me, "circle", jogMenuButtons, properties.baseSize, container).show();
-  //   });
 };
 
 var p = createjs.extend(CharacterControl, GamePieceControl);
@@ -31,12 +27,10 @@ p.addImage = function(properties){
 }
 
 p.illuminate = function(){
-  var bounds = this.DisplayObject_getBounds();
-
   this.illuminateCircle = new createjs.Shape();
-  this.illuminateCircle.graphics.beginFill("blue").drawCircle(0, 0, (100* .5))
+  this.illuminateCircle.graphics.beginFill("blue").drawCircle(0, 0, (this.properties.baseSize * .6) - 1)
   this.illuminateCircle.alpha = .5;
-  this.addChildAt(this.illuminateCircle);
+  this.addChildAt(this.illuminateCircle, this.shape);
   var me = this;
   createjs.Tween.get(this.illuminateCircle,{
     loop: true
@@ -51,7 +45,6 @@ p.illuminate = function(){
 
 p.stopIlluminate = function(){
   this.removeChild(this.illuminateCircle);
-};
-
+}
 
 export default createjs.promote(CharacterControl, "GamePieceControl");

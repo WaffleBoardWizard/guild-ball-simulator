@@ -1,6 +1,6 @@
 import FAButton from "./FAButton";
 
-function MenuContol(refObject, orientation, btns, size, parent) {
+function MenuControl(refObject, orientation, btns, size, parent) {
   this.Container_constructor();
   this.refObject = refObject;
   this.orientation = orientation;
@@ -11,7 +11,7 @@ function MenuContol(refObject, orientation, btns, size, parent) {
   parent.addChildAt(this, parent.getChildIndex(refObject));
 };
 
-var p = createjs.extend(MenuContol, createjs.Container);
+var p = createjs.extend(MenuControl, createjs.Container);
 
 p.show = function() {
   for (let i = 0; i < this.btns.length; i++) {
@@ -76,7 +76,7 @@ p.show = function() {
       default:
 
     }
-    
+
     setTimeout(function() {
       createjs.Tween.get(menuButton, {
         loop: false
@@ -124,4 +124,4 @@ p.show = function() {
     }, quick ? 0 : 1000);
   });
 };
-export default createjs.promote(MenuContol, "Container");
+export default createjs.promote(MenuControl, "Container");
