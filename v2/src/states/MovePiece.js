@@ -3,7 +3,7 @@ import Inputs from "../Inputs"
 
 export default class MovePiece extends State{
   constructor(piece, callback, game) {
-    super(game);
+    super("MovePiece", game);
     this.piece = piece;
     this.callback = callback.bind(game);
   }

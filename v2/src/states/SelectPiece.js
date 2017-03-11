@@ -3,9 +3,9 @@ import Inputs from "../Inputs";
 import MenuControl from "../controls/MenuControl";
 import FontAwesomeIcons from '../common/FontAwesomeIcons';
 
-export default class SelectCharacter extends State {
+export default class SelectPiece extends State {
   constructor(characters, callback, game) {
-    super(game);
+    super("SelectPiece", game);
     this.characters = characters;
     this.game.illuminateCharacters(characters);
     this.callback = callback;

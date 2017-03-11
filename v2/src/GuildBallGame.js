@@ -11,7 +11,11 @@ import MathHelper from './helpers/MathHelper';
 export default class GuildBallGame extends Game {
   constructor(canvasId) {
     super();
+
+    this.actions = [];
+
     let me = this;
+
     AssetsLoader.LoadAssets()
       .then(function(assets) {
         me.initialize(canvasId, assets);
@@ -142,7 +146,7 @@ export default class GuildBallGame extends Game {
     let otherCharacters = this.characters.filter(x => x != character);
     let me = this;
 
-    this.switchState(new States.SelectCharacter(otherCharacters,
+    this.switchState(new States.SelectPiece(otherCharacters,
       function(otherCharacter) {
         this.rollDice(1).then(function(result) {
           me.snapBallToCharacter(otherCharacter);
@@ -158,7 +162,7 @@ export default class GuildBallGame extends Game {
 
   activateCharacterInGroup(characters) {
     var me = this;
-    this.switchState(new States.SelectCharacter(characters, this.showCharacterMenu, this));
+    this.switchState(new States.SelectPiece(characters, this.showCharacterMenu, this));
   }
 
   kickScatter(fromX, fromY, toX, toY) {

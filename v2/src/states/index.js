@@ -1,2 +1,2 @@
-export {default as SelectCharacter}  from './SelectCharacter';
+export {default as SelectPiece}  from './SelectPiece';
 export {default as MovePiece}  from './MovePiece';
