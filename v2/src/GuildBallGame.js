@@ -7,6 +7,7 @@ import * as States from './states';
 import Q from 'q';
 import FontAwesomeIcons from './common/FontAwesomeIcons';
 import MathHelper from './helpers/MathHelper';
+import _ from 'lodash';
 
 export default class GuildBallGame extends Game {
   constructor(canvasId) {
@@ -24,6 +25,7 @@ export default class GuildBallGame extends Game {
         console.log(ex);
       });
   }
+
   initialize(canvasId, assets) {
     this.assets = assets;
     this.createStage(canvasId);
@@ -31,7 +33,7 @@ export default class GuildBallGame extends Game {
     this.createBall();
     this.addCharacters();
     this.addTerrian();
-    this.activateCharacterInGroup(this.characters);
+    this.activateCharacterInGroup(this.reducePiecesToId(this.getPieceByType("character")));
   }
 
   createStage(canvasId) {
@@ -112,14 +114,13 @@ export default class GuildBallGame extends Game {
     return result;
   }
 
-
   menuFactory(character, scope) {
     return [{
         Name: "Confirm",
         Icon: FontAwesomeIcons.check,
         click: function(btn, displayObject) {
-          let showmenu = scope.showCharacterMenu.bind(scope, character);
-          scope.switchState(new States.MovePiece(character,
+          let showmenu = scope.showCharacterMenu.bind(scope, character.id);
+          scope.switchState(new States.MovePiece(character.id,
             showmenu,
             scope));
           return true;
@@ -160,9 +161,9 @@ export default class GuildBallGame extends Game {
       }, this));
   }
 
-  activateCharacterInGroup(characters) {
+  activateCharacterInGroup(charactersIds) {
     var me = this;
-    this.switchState(new States.SelectPiece(characters, this.showCharacterMenu, this));
+    this.switchState(new States.SelectPiece(charactersIds, this.showCharacterMenu, this));
   }
 
   kickScatter(fromX, fromY, toX, toY) {
@@ -255,7 +256,8 @@ export default class GuildBallGame extends Game {
     });
   }
 
-  showCharacterMenu(character) {
+  showCharacterMenu(characterId) {
+    let character = this.getPiece(characterId)
     var menu = this.menuFactory(character, this);
     new Controls.MenuControl(character,
         "circle",
@@ -273,11 +275,11 @@ export default class GuildBallGame extends Game {
 
   //INPUT HANDLERS
   clickPiece(piece, evt) {
-    this._currentState.handleInput(Inputs.PIECE_CLICK, piece, evt);
+    this._currentState.handleInput(Inputs.PIECE_CLICK, piece.id);
   }
 
   pressMovePiece(piece, evt) {
-    this._currentState.handleInput(Inputs.PIECE_DRAG, piece, evt);
+    this._currentState.handleInput(Inputs.PIECE_DRAG, piece.id, { mouseX : evt.rawX, mouseY : evt.rawY});
   }
   //END INPUT HANDLERS
 

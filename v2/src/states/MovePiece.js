@@ -2,19 +2,21 @@ import State from "./State";
 import Inputs from "../Inputs"
 
 export default class MovePiece extends State{
-  constructor(piece, callback, game) {
+  constructor(pieceId, callback, game) {
     super("MovePiece", game);
-    this.piece = piece;
+    this.pieceId = pieceId;
+    this.piece = this.game.getPiece(pieceId);
     this.callback = callback.bind(game);
   }
 
-  handleInput(input, piece, evt){
-    if(piece != this.piece) return;
-
+  handleInput(input, pieceId, evt){
+    console.log(pieceId);
+    console.log(this.pieceId);
+    if(pieceId != this.pieceId) return;
     switch (input) {
       case Inputs.PIECE_DRAG:
-        this.piece.x = evt.rawX;
-        this.piece.y = evt.rawY;
+        this.piece.x = evt.mouseX;
+        this.piece.y = evt.mouseY;
         break;
       case Inputs.PIECE_CLICK:
         if(this.callback)

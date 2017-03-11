@@ -2,7 +2,7 @@ import GamePieceControl from "./GamePieceControl";
 import Measurements from '../common/Measurements';
 var BALL_IMAGE = require("../assets/ball.png");
 function BallControl(ballmage, kickScatterImage) {
-  this.GamePieceControl_constructor();
+  this.GamePieceControl_constructor("ball");
   this.addImage(Measurements.Inch, ballmage);
   this.scatter = new createjs.Shape();
   this.scatter.graphics.setStrokeStyle(2).beginStroke("red").beginBitmapFill(kickScatterImage, "no-repeat").drawRect(0, 0, kickScatterImage.width, kickScatterImage.height);

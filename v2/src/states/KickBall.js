@@ -1,45 +1,19 @@
 import State from "./State";
-import Inputs from "../Inputs";
-import MenuControl from "../controls/MenuControl";
-import FontAwesomeIcons from '../common/FontAwesomeIcons';
+import Inputs from "../Inputs"
 
 export default class KickBall extends State{
-  constructor(characters, game) {
-    super("KickBall", game);
-    this.game.illuminateCharacters(characters);
+  constructor(piece, game) {
+    super(game);
+    this.piece = piece;
   }
 
-  menuFactory(character) {
-    return [{
-        Name: "Confirm",
-        Icon: FontAwesomeIcons.check,
-        click: function(btn, displayObject) {
-          return true;
-        }
-      }, {
-        Name: "Kick",
-        Icon: FontAwesomeIcons.undo,
-        click: function(btn, displayObject) {
-          return true;
-        }
-      },
-      {
-        Name: "Undo",
-        Icon: FontAwesomeIcons.check,
-        click: function(btn, displayObject) {
-          return true;
-        }
-      }
-    ];
-  };
-
-  handleInput(input, character){
-    var menu = this.menuFactory(character);
+  handleInput(input, piece, evt){
+    if(piece != this.piece) return;
 
     switch (input) {
-      case Inputs.CHARACTER_SELECTED:
-        this.game.stopIllumatingAllCharacters();
-        new MenuControl(character, "circle", menu, character.properties.baseSize, this.game.field).show();
+      case Inputs.PIECE_DRAG:
+        this.piece.x = evt.rawX;
+        this.piece.y = evt.rawY;
         break;
       default:
     }

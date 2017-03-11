@@ -3,7 +3,7 @@ import MenuControl from './MenuControl';
 import FontAwesomeIcons from '../common/FontAwesomeIcons';
 
 function CharacterControl(properties, container) {
-  this.GamePieceControl_constructor();
+  this.GamePieceControl_constructor("character");
   this.addImage(properties);
   var me = this;
   this.properties = properties;

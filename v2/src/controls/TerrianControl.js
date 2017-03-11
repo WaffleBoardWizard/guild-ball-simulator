@@ -1,7 +1,7 @@
 import GamePieceControl from "./GamePieceControl";
 
 function TerrianControl(properties) {
-  this.GamePieceControl_constructor();
+  this.GamePieceControl_constructor("terrian");
   this.addImage(properties);
 };
 

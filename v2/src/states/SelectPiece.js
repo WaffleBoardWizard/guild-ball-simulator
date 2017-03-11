@@ -4,22 +4,22 @@ import MenuControl from "../controls/MenuControl";
 import FontAwesomeIcons from '../common/FontAwesomeIcons';
 
 export default class SelectPiece extends State {
-  constructor(characters, callback, game) {
+  constructor(piecesId, callback, game) {
     super("SelectPiece", game);
-    this.characters = characters;
-    this.game.illuminateCharacters(characters);
+    this.piecesId = piecesId;
+    this.pieces = this.game.getPieces(piecesId);
+    this.game.illuminateCharacters(this.pieces);
     this.callback = callback;
   }
 
 
-  handleInput(input, character) {
-
+  handleInput(input, pieceId) {
     switch (input) {
       case Inputs.PIECE_CLICK:
-        if (this.characters.indexOf(character) > -1) {
+        if (_.includes(this.piecesId, pieceId)) {
           this.game.stopIllumatingAllCharacters(this.characters);
           if(this.callback)
-            this.callback.bind(this.game, character)();
+            this.callback.bind(this.game, pieceId)();
         }
     break;
     default:
