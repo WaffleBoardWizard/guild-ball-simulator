@@ -144,17 +144,20 @@ export default class GuildBallGame extends Game {
   }
 
   kickBall(character){
-    let otherCharacters = this.characters.filter(x => x != character);
+    let otherCharacterIds = this.reducePiecesToId(this.characters.filter(x => x != character));
     let me = this;
 
-    this.switchState(new States.SelectPiece(otherCharacters,
-      function(otherCharacter) {
-        this.rollDice(1).then(function(result) {
-          me.snapBallToCharacter(otherCharacter);
-          if (!me.checkDiceResult(result, 4)) {
-            me.kickScatter(character.x, character.y, otherCharacter.x, otherCharacter.y);
-          }
-          me.showCharacterMenu(character);
+    this.switchState(new States.SelectPiece(otherCharacterIds,
+      function(otherCharacterId) {
+        let otherCharacter = this.getPiece(otherCharacterId);
+        this.rollDice(1).then(function(results) {
+          me.switchState(new States.RollDice(results, 4, function(success){
+            me.snapBallToCharacter(otherCharacter);
+            if(success){
+                me.kickScatter(character.x, character.y, otherCharacter.x, otherCharacter.y);
+              }
+              me.showCharacterMenu(character.id);
+          }, me));
         }).catch(function(ex) {
           console.log(ex);
         });
@@ -167,12 +170,13 @@ export default class GuildBallGame extends Game {
   }
 
   kickScatter(fromX, fromY, toX, toY) {
-    var me = this;
+    let me = this;
     this.rollDice(2)
-      .then(function(r) {
-        var angle = Math.atan2(toY - fromY, toX - fromX) * 180 / Math.PI;
-        var distance = r[1];
-        var direction = r[0];
+      .then(function(results) {
+        me.switchState(new States.RollDice(results, 20, function(success){}, me));
+        let angle = Math.atan2(toY - fromY, toX - fromX) * 180 / Math.PI;
+        let direction = results[0];
+        let distance = results[1];
         me.ball.rotateScatter(angle + 90);
 
         if (direction > 3)
@@ -231,28 +235,12 @@ export default class GuildBallGame extends Game {
   rollDice(numberOfDice) {
     var me = this;
     return Q.Promise(function(resolve, reject, notify) {
-
-      let dice = [];
       let results = [];
       for (var i = 0; i < numberOfDice; i++) {
-        var die = new Controls.DieControl(me.assets.getResult("die"));
-        die.x = i * 125;
-        die.y = 0;
-        me.field.addChild(die);
-        dice.push(die);
-        var result = die.roll(1000);
-        results.push(result);
+        results.push(MathHelper.RandomNumber(1, 6));
       }
-
-      setTimeout(function() {
-        resolve(results);
-      }, 1000);
-
-      setTimeout(function() {
-        dice.forEach(function(die) {
-          me.field.removeChild(die);
-        });
-      }, 4000)
+      console.log(results);
+      resolve(results);
     });
   }
 

@@ -8,4 +8,8 @@ export default  class  MathHelper{
       y: y,
     }
   }
+
+  static RandomNumber(from, to){
+    return Math.floor(Math.random() * ((to - from) + from) + from);
+  }
 }

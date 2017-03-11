@@ -10,9 +10,8 @@ export default class MovePiece extends State{
   }
 
   handleInput(input, pieceId, evt){
-    console.log(pieceId);
-    console.log(this.pieceId);
     if(pieceId != this.pieceId) return;
+    
     switch (input) {
       case Inputs.PIECE_DRAG:
         this.piece.x = evt.mouseX;

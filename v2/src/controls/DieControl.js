@@ -27,12 +27,10 @@ function DieControl(DIE_IMAGE) {
   p.sprite = null;
 
 
-  p.roll = function(transitionTime) {
-    var result = Math.floor(Math.random() * ((6 - 1) + 1) + 1);
+  p.roll = function(result, transitionTime) {
     let me = this;
     let iterations = transitionTime / 100;
     this.results.push(result);
-
 
       for(let i = 0; i < iterations; i++){
         setTimeout(function(){
@@ -44,8 +42,6 @@ function DieControl(DIE_IMAGE) {
           }
         }, 100 * i)
       }
-
-    return result;
   };
 
   p.getLatestResult = function() {
