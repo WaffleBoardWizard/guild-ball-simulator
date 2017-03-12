@@ -81,6 +81,9 @@ export default class Game {
       case Inputs.PIECE_CLICK:
         input = this.clickPiece;
         break;
+      case Inputs.CLICK_MENU_BUTTON:
+        input = this.menuButtonClick;
+        break;
       default:
     }
 
@@ -104,16 +107,7 @@ export default class Game {
         },
         replayTime);
 
-      switch (a.type) {
-        case "State":
-          replayTime += a.replaySpeed;
-          break;
-        case "Input":
-          replayTime += 10;
-          break;
-        default:
-      }
-
+      replayTime += a.replaySpeed;
     });
   }
 }

@@ -12,8 +12,11 @@ function MenuControl(refObject, orientation, btns, size, parent) {
 };
 
 var p = createjs.extend(MenuControl, createjs.Container);
+p.isOpen = false;
 
 p.show = function() {
+  this.isOpen = true;
+
   for (let i = 0; i < this.btns.length; i++) {
     let btn = this.btns[i];
     let menuButton = new FAButton(btn.Icon, "white", "blue", this.size * .75);
@@ -91,15 +94,15 @@ p.show = function() {
     if (btn.click) {
       var me = this;
       menuButton.on("click", function() {
-        if (btn.click(menuButton, me.refObject)) {
-          me.hide(i);
-        }
+         btn.click(menuButton, me.refObject);
       });
     }
   }
 };
- p.hide = function(clickedIndex, quick) {
-  console.log("hide!");
+
+p.hide = function(clickedIndex, quick) {
+  this.isOpen = false;
+
   let me = this;
 
   me.menuButtons.forEach(function(btn, index) {

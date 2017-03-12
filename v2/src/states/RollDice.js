@@ -21,7 +21,7 @@ export default class MovePiece extends State{
     }, this);
 
     if(this.callback)
-      setTimeout(() => callback(results) ,1000);
+      setTimeout(() => callback(results) ,1500);
 
     setTimeout(() =>
       dice.forEach(function(die) {

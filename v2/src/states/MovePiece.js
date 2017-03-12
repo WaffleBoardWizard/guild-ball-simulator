@@ -1,28 +1,34 @@
 import State from "./State";
 import Inputs from "../Inputs"
 
-export default class MovePiece extends State{
+export default class MovePiece extends State {
   constructor(params, callback, game) {
-    super("MovePiece", params, game, 1);
+    super("MovePiece", params, game, params.speed);
     this.pieceId = params.pieceId;
     this.piece = this.game.getPiece(this.pieceId);
-    this.piece.x = params.x;
-    this.piece.y = params.y;
 
-    if(callback)
+    createjs.Tween.get(this.piece, {
+      loop: false
+    }).to({
+      x: params.x,
+      y: params.y
+    },  params.speed, createjs.Ease.getPowInOut(4));
+
+    if (callback)
       this.callback = callback.bind(game);
   }
 
-  handleInput(input, pieceId, evt){
-    if(pieceId != this.pieceId) return;
 
+  handleInput(input, pieceId, evt) {
+    if (pieceId != this.pieceId) return;
+    console.log("move");
     switch (input) {
       case Inputs.PIECE_DRAG:
         this.piece.x = evt.mouseX;
         this.piece.y = evt.mouseY;
         break;
       case Inputs.PIECE_CLICK:
-        if(this.callback)
+        if (this.callback)
           this.callback();
         break;
       default:

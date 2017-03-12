@@ -11,11 +11,11 @@ export default class CharacterMenu extends State {
     this.characterId = characterId;
     this.character = this.game.getPiece(characterId);
 
-    let menu = this.menuFactory(this.character, this.game);
+    this.menuButtons = this.menuFactory(this.character, this.game);
 
     this.menu = new Controls.MenuControl(this.character,
         "circle",
-        menu,
+        this.menuButtons,
         this.character.properties.baseSize,
         this.game.field);
   }
@@ -25,36 +25,53 @@ export default class CharacterMenu extends State {
   }
 
   onExit() {
-    this.menu.hide();
+    if(this.menu.isOpen)
+      this.menu.hide(null, true);
   }
 
-  handleInput(input, pieceId) {
+  handleInput(input, buttonId) {
+    switch (input) {
+      case Inputs.CLICK_MENU_BUTTON:
+      debugger
+        let btn = _.find(this.menuButtons, {id : buttonId});
+        if(btn){
+          this.menu.hide(buttonId - 1);
+          btn.action();
+        }
+        break;
+      default:
+    }
   }
 
   menuFactory(character, scope) {
     return [{
+        id: 1,
         Name: "Confirm",
         Icon: FontAwesomeIcons.check,
-        click: function(btn, displayObject) {
+        click: function() {
+          scope.menuButtonClick(1);
+        },
+        action: function(){
           let showmenu = scope.showCharacterMenu.bind(scope, character.id);
-          scope.switchState(new States.MovePiece({ pieceId : character.id,  x : character.x, y : character.y},
-            showmenu,
-            scope));
-          return true;
+          scope.switchState(new States.MovePiece({ pieceId : character.id,  x : character.x, y : character.y, speed: 1}, showmenu, scope));
         }
       }, {
+        id: 2,
         Name: "Kick",
         Icon: FontAwesomeIcons.undo,
-        click: function(btn, displayObject) {
+        click: function() {
+          scope.menuButtonClick(2);
+        },
+        action : function(){
           scope.kickBall(character);
-          return true;
         }
       },
       {
+        id: 3,
         Name: "Undo",
         Icon: FontAwesomeIcons.check,
-        click: function(btn, displayObject) {
-          return true;
+        click: function() {
+          scope.menuButtonClick(3);
         }
       }
     ];

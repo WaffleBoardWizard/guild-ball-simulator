@@ -112,8 +112,9 @@ export default class GuildBallGame extends Game {
 
   kickBall(character){
     let otherCharacterIds = this.reducePiecesToId(this.characters.filter(x => x != character));
-    let me = this;
 
+    let me = this;
+    console.log("test");
     this.switchState(new States.SelectPiece(otherCharacterIds,
       function(otherCharacterId) {
         let otherCharacter = this.getPiece(otherCharacterId);
@@ -142,7 +143,6 @@ export default class GuildBallGame extends Game {
     let me = this;
     this.rollDice(2)
       .then(function(results) {
-        me.switchState(new States.RollDice(results, function(success){}, me));
         let angle = Math.atan2(toY - fromY, toX - fromX) * 180 / Math.PI;
         let direction = results[0];
         let distance = results[1];
@@ -191,18 +191,23 @@ export default class GuildBallGame extends Game {
     this.bindInputsToPiece(piece);
     this.field.addChild(piece);
 
-    this.switchState(new States.MovePiece({ pieceId : piece.id,  x : x, y : y},
+    this.switchState(new States.MovePiece({
+      pieceId : piece.id,
+      x : x,
+      y : y,
+      speed: 1},
       null,
       this));
   }
 
-  movePiece(piece, toX, toY) {
-    createjs.Tween.get(piece, {
-      loop: false
-    }).to({
-      x: toX,
-      y: toY
-    }, 1000, createjs.Ease.getPowInOut(4));
+  movePiece(piece, x, y) {
+    this.switchState(new States.MovePiece({
+      pieceId : piece.id,
+      x : x,
+      y : y,
+      speed: 1000},
+      null,
+      this));
   }
 
   rollDice(numberOfDice) {
@@ -231,7 +236,8 @@ export default class GuildBallGame extends Game {
         id: this.actions.length + 1,
         type: "Input",
         params: params,
-        input:  Inputs.PIECE_CLICK
+        input:  Inputs.PIECE_CLICK,
+        replaySpeed : 1
       });
     }
 
@@ -244,11 +250,26 @@ export default class GuildBallGame extends Game {
         id: this.actions.length + 1,
         type: "Input",
         params: params,
-        input:  Inputs.PIECE_DRAG
+        input:  Inputs.PIECE_DRAG,
+        replaySpeed : 1
       });
     }
 
     this._currentState.handleInput(Inputs.PIECE_DRAG, params.pieceId, { mouseX : params.mouseX, mouseY : params.mouseY});
+  }
+
+  menuButtonClick(buttonId, skipAction) {
+    if (!skipAction) {
+      this.actions.push({
+        id: this.actions.length + 1,
+        type: "Input",
+        params: buttonId,
+        input:  Inputs.CLICK_MENU_BUTTON,
+        replaySpeed : 1000
+      });
+    }
+
+    this._currentState.handleInput(Inputs.CLICK_MENU_BUTTON, buttonId);
   }
   //END INPUT HANDLERS
 
