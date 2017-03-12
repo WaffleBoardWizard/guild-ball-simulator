@@ -3,9 +3,11 @@ import Inputs from "../Inputs"
 import * as Controls from '../controls';
 
 export default class MovePiece extends State{
-  constructor(results, goal, callback, game) {
-    super("MovePiece", game);
-    this.callback = callback.bind(game);
+  constructor(results, callback, game) {
+    super("RollDice", results, game, 1500);
+
+    if(callback)
+      this.callback = callback.bind(game);
 
     let dice = [];
 
@@ -18,7 +20,8 @@ export default class MovePiece extends State{
       die.roll(result, 1000);
     }, this);
 
-    setTimeout(() => callback(this.game.checkDiceResult(results, goal)) ,1000);
+    if(this.callback)
+      setTimeout(() => callback(results) ,1000);
 
     setTimeout(() =>
       dice.forEach(function(die) {

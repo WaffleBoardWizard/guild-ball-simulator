@@ -232,7 +232,8 @@ function menuFactory(character) {
         let otherCharacters = characters.filter(x => x != character);
         selectOtherCharacter(otherCharacters)
           .then(function(otherCharacter) {
-            rollDice(1).then(function(results) {
+            rollDice(1)
+            .then(function(results) {
                 GameState.toState(GAME_STATES.BALL_KICKED);
                 if (checkDiceResult(results, 6)) {
                   snapBallToCharacter(otherCharacter);
@@ -257,7 +258,6 @@ function menuFactory(character) {
       Name: "Undo",
       Icon: FontAwesomeIcons.check,
       click: function(btn, displayObject) {
-        // finishNodeMovement(displayObject);
         GameState.undoLastCommand();
         return true;
       }

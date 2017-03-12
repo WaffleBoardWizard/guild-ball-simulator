@@ -13,8 +13,6 @@ export default class GuildBallGame extends Game {
   constructor(canvasId) {
     super();
 
-    this.actions = [];
-
     let me = this;
 
     AssetsLoader.LoadAssets()
@@ -87,17 +85,15 @@ export default class GuildBallGame extends Game {
     this.addPieceToField(terrianControl, Measurements.Foot, Measurements.Foot);
   }
 
-  switchState(state) {
-    this._currentState = state;
-  }
+
 
   bindInputsToPiece(piece) {
     piece.on("pressmove", function(evt) {
-      this.pressMovePiece(piece, evt);
+      this.pressMovePiece({ pieceId : piece.id, mouseX : evt.rawX, mouseY : evt.rawY});
     }, this);
 
     piece.on("click", function(evt) {
-      this.clickPiece(piece, evt);
+      this.clickPiece({ pieceId : piece.id });
     }, this);
 
     piece.on("mouseup", function(evt) {}, this);
@@ -114,35 +110,6 @@ export default class GuildBallGame extends Game {
     return result;
   }
 
-  menuFactory(character, scope) {
-    return [{
-        Name: "Confirm",
-        Icon: FontAwesomeIcons.check,
-        click: function(btn, displayObject) {
-          let showmenu = scope.showCharacterMenu.bind(scope, character.id);
-          scope.switchState(new States.MovePiece(character.id,
-            showmenu,
-            scope));
-          return true;
-        }
-      }, {
-        Name: "Kick",
-        Icon: FontAwesomeIcons.undo,
-        click: function(btn, displayObject) {
-          scope.kickBall(character);
-          return true;
-        }
-      },
-      {
-        Name: "Undo",
-        Icon: FontAwesomeIcons.check,
-        click: function(btn, displayObject) {
-          return true;
-        }
-      }
-    ];
-  }
-
   kickBall(character){
     let otherCharacterIds = this.reducePiecesToId(this.characters.filter(x => x != character));
     let me = this;
@@ -151,13 +118,12 @@ export default class GuildBallGame extends Game {
       function(otherCharacterId) {
         let otherCharacter = this.getPiece(otherCharacterId);
         this.rollDice(1).then(function(results) {
-          me.switchState(new States.RollDice(results, 4, function(success){
             me.snapBallToCharacter(otherCharacter);
-            if(success){
+
+            if(!me.checkDiceResult(results, 4))
                 me.kickScatter(character.x, character.y, otherCharacter.x, otherCharacter.y);
-              }
-              me.showCharacterMenu(character.id);
-          }, me));
+
+            me.showCharacterMenu(character.id);
         }).catch(function(ex) {
           console.log(ex);
         });
@@ -165,15 +131,18 @@ export default class GuildBallGame extends Game {
   }
 
   activateCharacterInGroup(charactersIds) {
-    var me = this;
     this.switchState(new States.SelectPiece(charactersIds, this.showCharacterMenu, this));
+  }
+
+  showCharacterMenu(characterid){
+    this.switchState(new States.CharacterMenu(characterid, null, this));
   }
 
   kickScatter(fromX, fromY, toX, toY) {
     let me = this;
     this.rollDice(2)
       .then(function(results) {
-        me.switchState(new States.RollDice(results, 20, function(success){}, me));
+        me.switchState(new States.RollDice(results, function(success){}, me));
         let angle = Math.atan2(toY - fromY, toX - fromX) * 180 / Math.PI;
         let direction = results[0];
         let distance = results[1];
@@ -218,9 +187,13 @@ export default class GuildBallGame extends Game {
     piece.x = x;
     piece.y = y;
 
+    this.pieces.push(piece)
     this.bindInputsToPiece(piece);
     this.field.addChild(piece);
-    this.pieces.push(piece)
+
+    this.switchState(new States.MovePiece({ pieceId : piece.id,  x : x, y : y},
+      null,
+      this));
   }
 
   movePiece(piece, toX, toY) {
@@ -239,20 +212,10 @@ export default class GuildBallGame extends Game {
       for (var i = 0; i < numberOfDice; i++) {
         results.push(MathHelper.RandomNumber(1, 6));
       }
-      console.log(results);
-      resolve(results);
+      me.switchState(new States.RollDice(results, function(success){
+        resolve(results);
+      }, me));
     });
-  }
-
-  showCharacterMenu(characterId) {
-    let character = this.getPiece(characterId)
-    var menu = this.menuFactory(character, this);
-    new Controls.MenuControl(character,
-        "circle",
-        menu,
-        character.properties.baseSize,
-        this.field)
-      .show();
   }
 
   snapBallToCharacter(character) {
@@ -262,12 +225,30 @@ export default class GuildBallGame extends Game {
   //END UI Functions
 
   //INPUT HANDLERS
-  clickPiece(piece, evt) {
-    this._currentState.handleInput(Inputs.PIECE_CLICK, piece.id);
+  clickPiece(params, skipAction) {
+    if (!skipAction) {
+      this.actions.push({
+        id: this.actions.length + 1,
+        type: "Input",
+        params: params,
+        input:  Inputs.PIECE_CLICK
+      });
+    }
+
+    this._currentState.handleInput(Inputs.PIECE_CLICK, params.pieceId);
   }
 
-  pressMovePiece(piece, evt) {
-    this._currentState.handleInput(Inputs.PIECE_DRAG, piece.id, { mouseX : evt.rawX, mouseY : evt.rawY});
+  pressMovePiece(params, skipAction) {
+    if (!skipAction) {
+      this.actions.push({
+        id: this.actions.length + 1,
+        type: "Input",
+        params: params,
+        input:  Inputs.PIECE_DRAG
+      });
+    }
+
+    this._currentState.handleInput(Inputs.PIECE_DRAG, params.pieceId, { mouseX : params.mouseX, mouseY : params.mouseY});
   }
   //END INPUT HANDLERS
 

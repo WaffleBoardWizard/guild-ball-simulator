@@ -1,12 +1,19 @@
 export default class State{
-  constructor(state, game){
+  constructor(state, params, game, replaySpeed){
     this.game = game;
     this.state = state;
-  }
-  handleInput(input, params){
+    this.params = params
+    this.replaySpeed =  replaySpeed;
   }
 
-  save(input, params){
-    this.game.SaveAction(input,params);
+  onStart(){
+
+  }
+
+  onExit(){
+
+  }
+
+  handleInput(input, params){
   }
 }
