@@ -36,4 +36,14 @@ export default class CharacterModel{
     this.currentHP = hp;
   }
 
+  nimble(){
+    apply(){
+      this.defense += 1;
+    }
+
+    remove(){
+      this.defense -= 1;
+    }
+  }
+
 }
