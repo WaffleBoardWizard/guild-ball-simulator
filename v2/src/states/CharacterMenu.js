@@ -16,7 +16,7 @@ export default class CharacterMenu extends State {
     this.menu = new Controls.MenuControl(this.character,
         "circle",
         this.menuButtons,
-        this.character.properties.baseSize,
+        this.character.character.Size,
         this.game.field);
   }
 
@@ -32,7 +32,6 @@ export default class CharacterMenu extends State {
   handleInput(input, buttonId) {
     switch (input) {
       case Inputs.CLICK_MENU_BUTTON:
-      debugger
         let btn = _.find(this.menuButtons, {id : buttonId});
         if(btn){
           this.menu.hide(buttonId - 1);

@@ -3,7 +3,7 @@ const AssetsDirectory = require.context('../assets', false);
 
 var _AssetsToLoad = [
     'ballista.PNG',
-    "hoist.PNG",
+    "Flask.PNG",
     "colossus.PNG",
     "mainspring.PNG",
     "ratchet.PNG",

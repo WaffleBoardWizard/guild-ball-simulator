@@ -8,6 +8,8 @@ import Q from 'q';
 import FontAwesomeIcons from './common/FontAwesomeIcons';
 import MathHelper from './helpers/MathHelper';
 import _ from 'lodash';
+import data from './mockdata/characters';
+import CharacterModel from './models/CharacterModel';
 
 export default class GuildBallGame extends Game {
   constructor(canvasId) {
@@ -53,21 +55,13 @@ export default class GuildBallGame extends Game {
   }
 
   addCharacters() {
-    var ballista = {
-      image: this.assets.getResult("ballista"),
-      baseSize: 30 * Measurements.MM
-    }
-    var colossus = {
-      image: this.assets.getResult("colossus"),
-      baseSize: 40 * Measurements.MM
-    }
-
-    this.addCharacter(ballista, Measurements.Inch * 8, Measurements.Inch * 16);
-    this.addCharacter(colossus, Measurements.Foot, Measurements.Foot / 2);
+    var flaskData = this.getCharacter("Flask");
+    var flaskModel = new CharacterModel(flaskData);
+    this.addCharacter(flaskModel, Measurements.Inch * 8, Measurements.Inch * 16);
   }
 
-  addCharacter(characterProps, x, y, field) {
-    let characterControl = new Controls.CharacterControl(characterProps, field);
+  addCharacter(character, x, y, field) {
+    let characterControl = new Controls.CharacterControl(character, this.assets.getResult(character.Name));
 
     this.addPieceToField(characterControl, x, y);
     this.characters.push(characterControl);
@@ -112,9 +106,8 @@ export default class GuildBallGame extends Game {
 
   kickBall(character){
     let otherCharacterIds = this.reducePiecesToId(this.characters.filter(x => x != character));
-
     let me = this;
-    console.log("test");
+
     this.switchState(new States.SelectPiece(otherCharacterIds,
       function(otherCharacterId) {
         let otherCharacter = this.getPiece(otherCharacterId);
@@ -125,6 +118,7 @@ export default class GuildBallGame extends Game {
                 me.kickScatter(character.x, character.y, otherCharacter.x, otherCharacter.y);
 
             me.showCharacterMenu(character.id);
+
         }).catch(function(ex) {
           console.log(ex);
         });
@@ -227,6 +221,10 @@ export default class GuildBallGame extends Game {
     this.movePiece(this.ball, character.x, character.y);
   }
 
+  getCharacter(characterName){
+    return _.find(data, { Name : characterName });
+  }
+
   //END UI Functions
 
   //INPUT HANDLERS
@@ -245,13 +243,15 @@ export default class GuildBallGame extends Game {
   }
 
   pressMovePiece(params, skipAction) {
+    console.log("Test");
+
     if (!skipAction) {
       this.actions.push({
         id: this.actions.length + 1,
         type: "Input",
         params: params,
         input:  Inputs.PIECE_DRAG,
-        replaySpeed : 1
+        replaySpeed : 10
       });
     }
 

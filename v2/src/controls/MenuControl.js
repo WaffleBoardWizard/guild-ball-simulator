@@ -53,7 +53,7 @@ p.show = function() {
     let toX = 0;
     let toY = 0;
 
-    var displayObjectBoundsWidth = this.refObject.properties.baseSize;
+    var displayObjectBoundsWidth = this.refObject.character.Size  ;
 
     switch (this.orientation) {
       case "circle":

@@ -1,4 +1,4 @@
-export default characters[{
+export default [{
   "Name": "Midas",
   "MeleeZone": 1,
   "Jog": 5,
