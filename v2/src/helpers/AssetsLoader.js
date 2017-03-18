@@ -3,7 +3,7 @@ const AssetsDirectory = require.context('../assets', false);
 
 var _AssetsToLoad = [
     'ballista.PNG',
-    "Flask.PNG",
+    "Hoist.PNG",
     "colossus.PNG",
     "mainspring.PNG",
     "ratchet.PNG",
@@ -12,7 +12,19 @@ var _AssetsToLoad = [
     "die.png",
     "ball.png",
     "house.png",
-    "kickscatter30.png"
+    "kickscatter30.png",
+    "Flask.PNG",
+    "Katalyst.png",
+    "Compound.png",
+    "Mercury.png",
+    "Midas.png",
+    "Naja.png",
+    "Tapper.png",
+    "Venin.png",
+    "VETKatalyst.png",
+    "Vitriol.png",
+    "Smoke.png",
+    "Calculus.png"
   ];
 export default {
 

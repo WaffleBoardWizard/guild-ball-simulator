@@ -1306,7 +1306,7 @@ export default [{
   "MeleeZone": 1,
   "Jog": 6,
   "TAC": 6,
-  "KickDice": 26,
+  "KickDice": 2,
   "KickLength": 6,
   "Defense": 3,
   "Armor": 1,

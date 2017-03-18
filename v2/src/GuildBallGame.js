@@ -33,6 +33,7 @@ export default class GuildBallGame extends Game {
     this.createBall();
     this.addCharacters();
     this.addTerrian();
+    this.saveCharacterData();
     this.activateCharacterInGroup(this.reducePiecesToId(this.getPieceByType("character")));
   }
 
@@ -55,9 +56,10 @@ export default class GuildBallGame extends Game {
   }
 
   addCharacters() {
-    var flaskData = this.getCharacter("Flask");
-    var flaskModel = new CharacterModel(flaskData);
-    this.addCharacter(flaskModel, Measurements.Inch * 8, Measurements.Inch * 16);
+    data.forEach(function(c, i) {
+      var model = new CharacterModel(c);
+      this.addCharacter(model, Measurements.Inch * (i + 1) * 3, Measurements.Inch * 12);
+    }, this);
   }
 
   addCharacter(character, x, y, field) {
@@ -76,18 +78,24 @@ export default class GuildBallGame extends Game {
 
     var terrianControl = new Controls.TerrianControl(house);
 
-    this.addPieceToField(terrianControl, Measurements.Foot, Measurements.Foot);
+    this.addPieceToField(terrianControl, Measurements.Foot * 2, Measurements.Foot * 2);
   }
 
 
 
   bindInputsToPiece(piece) {
     piece.on("pressmove", function(evt) {
-      this.pressMovePiece({ pieceId : piece.id, mouseX : evt.rawX, mouseY : evt.rawY});
+      this.pressMovePiece({
+        pieceId: piece.id,
+        mouseX: evt.rawX,
+        mouseY: evt.rawY
+      });
     }, this);
 
     piece.on("click", function(evt) {
-      this.clickPiece({ pieceId : piece.id });
+      this.clickPiece({
+        pieceId: piece.id
+      });
     }, this);
 
     piece.on("mouseup", function(evt) {}, this);
@@ -96,29 +104,50 @@ export default class GuildBallGame extends Game {
   }
 
   checkDiceResult(diceResults, goal) {
-    let result = false;
+    let result = 0;
     diceResults.forEach(function(d) {
       if (d >= goal)
-        result = true;
+        result++;
     });
     return result;
   }
 
-  kickBall(character){
+  kickBall(character) {
     let otherCharacterIds = this.reducePiecesToId(this.characters.filter(x => x != character));
     let me = this;
 
     this.switchState(new States.SelectPiece(otherCharacterIds,
       function(otherCharacterId) {
         let otherCharacter = this.getPiece(otherCharacterId);
-        this.rollDice(1).then(function(results) {
-            me.snapBallToCharacter(otherCharacter);
+        this.rollDice(character.character.KickDice, 4).then(function(results) {
+          me.snapBallToCharacter(otherCharacter);
 
-            if(!me.checkDiceResult(results, 4))
-                me.kickScatter(character.x, character.y, otherCharacter.x, otherCharacter.y);
+          if (!me.checkDiceResult(results, 4))
+            me.kickScatter(character.x, character.y, otherCharacter.x, otherCharacter.y);
 
-            me.showCharacterMenu(character.id);
+          me.activateCharacterInGroup(me.reducePiecesToId(me.getPieceByType("character")));
+        }).catch(function(ex) {
+          console.log(ex);
+        });
+      }, this));
+  }
 
+  attackPlayer(character) {
+    let otherCharacterIds = this.reducePiecesToId(this.characters.filter(x => x != character));
+    let me = this;
+
+    this.switchState(new States.SelectPiece(otherCharacterIds,
+      function(otherCharacterId) {
+        let otherCharacter = this.getPiece(otherCharacterId);
+
+        this.rollDice(character.character.TAC, otherCharacter.character.Defense).then(function(results) {
+          var hits = me.checkDiceResult(results, otherCharacter.character.Defense)
+          hits -= otherCharacter.character.Armor;
+
+          if (hits > 0)
+            me.switchState(new States.ModifyCharacterHealth({characterId : otherCharacter.id, hits: hits}, null, me));
+
+          me.activateCharacterInGroup(me.reducePiecesToId(me.getPieceByType("character")));
         }).catch(function(ex) {
           console.log(ex);
         });
@@ -129,34 +158,34 @@ export default class GuildBallGame extends Game {
     this.switchState(new States.SelectPiece(charactersIds, this.showCharacterMenu, this));
   }
 
-  showCharacterMenu(characterid){
+  showCharacterMenu(characterid) {
     this.switchState(new States.CharacterMenu(characterid, null, this));
   }
 
   kickScatter(fromX, fromY, toX, toY) {
-    let me = this;
-    this.rollDice(2)
-      .then(function(results) {
-        let angle = Math.atan2(toY - fromY, toX - fromX) * 180 / Math.PI;
-        let direction = results[0];
-        let distance = results[1];
-        me.ball.rotateScatter(angle + 90);
+      let me = this;
+      this.rollDice(2, 7)
+        .then(function(results) {
+          let angle = Math.atan2(toY - fromY, toX - fromX) * 180 / Math.PI;
+          let direction = results[0];
+          let distance = results[1];
+          me.ball.rotateScatter(angle + 90);
 
-        if (direction > 3)
-          direction++;
+          if (direction > 3)
+            direction++;
 
-        let coord = MathHelper.CalculateXYWithDistanceAndAngle(distance * Measurements.Inch, (22.5 * direction) + angle - 90);
+          let coord = MathHelper.CalculateXYWithDistanceAndAngle(distance * Measurements.Inch, (22.5 * direction) + angle - 90);
 
-        setTimeout(function() {
-          me.movePiece(me.ball, coord.x + me.ball.x, coord.y + me.ball.y);
-        }, 2000, this);
+          setTimeout(function() {
+            me.movePiece(me.ball, coord.x + me.ball.x, coord.y + me.ball.y);
+          }, 2000, this);
 
-      })
-      .catch(function(ex) {
-        console.log(ex);
-      });
-  }
-  //UI Functions
+        })
+        .catch(function(ex) {
+          console.log(ex);
+        });
+    }
+    //UI Functions
   illuminateAllCharacters() {
     this.illuminateCharacters(this.characters);
   }
@@ -186,32 +215,39 @@ export default class GuildBallGame extends Game {
     this.field.addChild(piece);
 
     this.switchState(new States.MovePiece({
-      pieceId : piece.id,
-      x : x,
-      y : y,
-      speed: 1},
+        pieceId: piece.id,
+        x: x,
+        y: y,
+        speed: 1
+      },
       null,
       this));
   }
 
   movePiece(piece, x, y) {
     this.switchState(new States.MovePiece({
-      pieceId : piece.id,
-      x : x,
-      y : y,
-      speed: 1000},
+        pieceId: piece.id,
+        x: x,
+        y: y,
+        speed: 1000
+      },
       null,
       this));
   }
 
-  rollDice(numberOfDice) {
+  rollDice(numberOfDice, goal) {
     var me = this;
     return Q.Promise(function(resolve, reject, notify) {
       let results = [];
+
       for (var i = 0; i < numberOfDice; i++) {
         results.push(MathHelper.RandomNumber(1, 6));
       }
-      me.switchState(new States.RollDice(results, function(success){
+
+      me.switchState(new States.RollDice({
+        results,
+        goal
+      }, function() {
         resolve(results);
       }, me));
     });
@@ -221,8 +257,10 @@ export default class GuildBallGame extends Game {
     this.movePiece(this.ball, character.x, character.y);
   }
 
-  getCharacter(characterName){
-    return _.find(data, { Name : characterName });
+  getCharacter(characterName) {
+    return _.find(data, {
+      Name: characterName
+    });
   }
 
   //END UI Functions
@@ -234,8 +272,8 @@ export default class GuildBallGame extends Game {
         id: this.actions.length + 1,
         type: "Input",
         params: params,
-        input:  Inputs.PIECE_CLICK,
-        replaySpeed : 1
+        input: Inputs.PIECE_CLICK,
+        replaySpeed: 1
       });
     }
 
@@ -243,35 +281,63 @@ export default class GuildBallGame extends Game {
   }
 
   pressMovePiece(params, skipAction) {
-    console.log("Test");
-
     if (!skipAction) {
       this.actions.push({
         id: this.actions.length + 1,
         type: "Input",
         params: params,
-        input:  Inputs.PIECE_DRAG,
-        replaySpeed : 10
+        input: Inputs.PIECE_DRAG,
+        replaySpeed: 10
       });
     }
 
-    this._currentState.handleInput(Inputs.PIECE_DRAG, params.pieceId, { mouseX : params.mouseX, mouseY : params.mouseY});
+    this._currentState.handleInput(Inputs.PIECE_DRAG, params.pieceId, {
+      mouseX: params.mouseX,
+      mouseY: params.mouseY
+    });
   }
 
   menuButtonClick(buttonId, skipAction) {
-    if (!skipAction) {
-      this.actions.push({
-        id: this.actions.length + 1,
-        type: "Input",
-        params: buttonId,
-        input:  Inputs.CLICK_MENU_BUTTON,
-        replaySpeed : 1000
-      });
+      if (!skipAction) {
+        this.actions.push({
+          id: this.actions.length + 1,
+          type: "Input",
+          params: buttonId,
+          input: Inputs.CLICK_MENU_BUTTON,
+          replaySpeed: 1000
+        });
+      }
+
+      this._currentState.handleInput(Inputs.CLICK_MENU_BUTTON, buttonId);
     }
+    //END INPUT HANDLERS
 
-    this._currentState.handleInput(Inputs.CLICK_MENU_BUTTON, buttonId);
+  saveCharacterData() {
+    var characters = this.getPieceByType("character").map(c => c.data());
+    this.actions.push({
+      id: this.actions.length + 1,
+      type: "SetCharacterData",
+      params: characters,
+      replaySpeed: 1
+    });
   }
-  //END INPUT HANDLERS
 
+  loadCharacters(characters) {
+    this.removeCharacterPieces();
 
+    characters.forEach(c => {
+      var model = new CharacterModel(JSON.parse(c.characterData));
+      this.addCharacter(model, c.x, c.y)
+    }, this);
+  }
+
+  removeCharacterPieces() {
+    this.getPieceByType("character")
+      .forEach(c => {
+        _.remove(this.pieces, {
+          id: c.id
+        });
+        this.field.removeChild(c)
+      }, this);
+  }
 }

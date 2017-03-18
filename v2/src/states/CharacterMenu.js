@@ -51,8 +51,8 @@ export default class CharacterMenu extends State {
           scope.menuButtonClick(1);
         },
         action: function(){
-          let showmenu = scope.showCharacterMenu.bind(scope, character.id);
-          scope.switchState(new States.MovePiece({ pieceId : character.id,  x : character.x, y : character.y, speed: 1}, showmenu, scope));
+          let activateCharacters = scope.activateCharacterInGroup.bind(scope, scope.reducePiecesToId(scope.getPieceByType("character")));
+          scope.switchState(new States.MovePiece({ pieceId : character.id,  x : character.x, y : character.y, speed: 1}, activateCharacters, scope));
         }
       }, {
         id: 2,
@@ -71,6 +71,17 @@ export default class CharacterMenu extends State {
         Icon: FontAwesomeIcons.check,
         click: function() {
           scope.menuButtonClick(3);
+        }
+      },
+      {
+        id: 4,
+        Name: "Attack",
+        Icon: FontAwesomeIcons.fighterjet,
+        click: function() {
+          scope.menuButtonClick(4);
+        },
+        action : function(){
+          scope.attackPlayer(character);
         }
       }
     ];

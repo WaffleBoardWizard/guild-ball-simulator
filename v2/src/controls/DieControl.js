@@ -17,6 +17,7 @@ function DieControl(DIE_IMAGE) {
     });
 
     this.sprite = new createjs.Sprite(spriteSheet);
+    //this.regY = this.regX = (DIE_IMAGE.width / 2);
 
     this.addChild(this.sprite);
   };
@@ -25,9 +26,9 @@ function DieControl(DIE_IMAGE) {
 
   p.results = [];
   p.sprite = null;
+  p.illuminateCircle = null;
 
-
-  p.roll = function(result, transitionTime) {
+  p.roll = function(result, transitionTime, highlight) {
     let me = this;
     let iterations = transitionTime / 100;
     this.results.push(result);
@@ -39,10 +40,29 @@ function DieControl(DIE_IMAGE) {
           if(i == iterations - 1){
             me.sprite.stop();
             me.sprite.gotoAndStop(result - 1);
+            if(highlight)
+              me.highlight();
           }
         }, 100 * i)
       }
   };
+
+  p.highlight = function() {
+    // this.illuminateCircle = new createjs.Shape();
+    // this.illuminateCircle.graphics.beginFill("blue").drawRect(0, 0, 100, 100)
+    // this.illuminateCircle.alpha = .5;
+    // this.addChildAt(this.illuminateCircle, this.sprite);
+    // var me = this;
+    createjs.Tween.get(this, {
+      loop: true
+    }).to({
+      scaleX: 1.5,
+      scaleY: 1.5
+    }, 1000, createjs.Ease.getPowInOut(4)).to({
+      scaleX: 1,
+      scaleY: 1
+    }, 1000, createjs.Ease.getPowInOut(4));
+  }
 
   p.getLatestResult = function() {
     return this.results[this.results.length - 1];

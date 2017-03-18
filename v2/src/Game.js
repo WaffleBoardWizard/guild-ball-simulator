@@ -52,24 +52,7 @@ export default class Game {
   }
 
   replayState(actions) {
-    let state = null;
-    switch (actions.state) {
-      case "RollDice":
-        state = States.RollDice;
-        break;
-      case "MovePiece":
-        state = States.MovePiece;
-        break;
-      case "SelectPiece":
-        state = States.SelectPiece;
-        break;
-      case "CharacterMenu":
-        state = States.CharacterMenu;
-        break;
-      default:
-    }
-
-    this.switchState(new state(actions.params, null, this), true);
+    this.switchState(new States[actions.state](actions.params, null, this), true);
   }
 
   replayInput(actions) {
@@ -102,6 +85,8 @@ export default class Game {
             case "Input":
               this.replayInput(a)
               break;
+            case "SetCharacterData":
+              this.loadCharacters(a.params);
             default:
           }
         },
