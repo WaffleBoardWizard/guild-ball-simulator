@@ -22,7 +22,8 @@ export default class CharacterModel{
     this.Image = params.Name + "png";
 
     this.tempModifiers = [];
-
+    
+    this.PlayBookColumns = params.PlayBookColumns;
     this.onHealthChangeEvents = [];
   }
 

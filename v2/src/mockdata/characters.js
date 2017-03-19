@@ -116,7 +116,7 @@ export default [{
         "Action": {
           "Name": "1 Damage",
           "IconUrl": "",
-          "Damage": true,
+          "Damage": false,
           "DamageValue": 1,
           "Abbreviation": "1",
           "id": 7
@@ -134,7 +134,7 @@ export default [{
         "Action": {
           "Name": "Dodge",
           "IconUrl": "",
-          "Damage": true,
+          "Damage": false,
           "DamageValue": 0,
           "Abbreviation": "<",
           "id": 2
@@ -175,7 +175,7 @@ export default [{
         "Action": {
           "Name": "Push",
           "IconUrl": "Push.png",
-          "Damage": true,
+          "Damage": false,
           "DamageValue": 0,
           "Abbreviation": ">",
           "id": 1
@@ -188,7 +188,7 @@ export default [{
         "Action": {
           "Name": "Dodge",
           "IconUrl": "",
-          "Damage": true,
+          "Damage": false,
           "DamageValue": 0,
           "Abbreviation": "<",
           "id": 2
@@ -224,7 +224,7 @@ export default [{
         "Action": {
           "Name": "Push",
           "IconUrl": "Push.png",
-          "Damage": true,
+          "Damage": false,
           "DamageValue": 0,
           "Abbreviation": ">",
           "id": 1
@@ -237,7 +237,7 @@ export default [{
         "Action": {
           "Name": "Dodge",
           "IconUrl": "",
-          "Damage": true,
+          "Damage": false,
           "DamageValue": 0,
           "Abbreviation": "<",
           "id": 2
@@ -319,7 +319,7 @@ export default [{
         "Action": {
           "Name": "Push",
           "IconUrl": "Push.png",
-          "Damage": true,
+          "Damage": false,
           "DamageValue": 0,
           "Abbreviation": ">",
           "id": 1
@@ -332,7 +332,7 @@ export default [{
         "Action": {
           "Name": "Push",
           "IconUrl": "Push.png",
-          "Damage": true,
+          "Damage": false,
           "DamageValue": 0,
           "Abbreviation": ">",
           "id": 1
@@ -345,7 +345,7 @@ export default [{
         "Action": {
           "Name": "Dodge",
           "IconUrl": "",
-          "Damage": true,
+          "Damage": false,
           "DamageValue": 0,
           "Abbreviation": "<",
           "id": 2
@@ -358,7 +358,7 @@ export default [{
         "Action": {
           "Name": "Dodge",
           "IconUrl": "",
-          "Damage": true,
+          "Damage": false,
           "DamageValue": 0,
           "Abbreviation": "<",
           "id": 2
@@ -399,7 +399,7 @@ export default [{
         "Action": {
           "Name": "Push",
           "IconUrl": "Push.png",
-          "Damage": true,
+          "Damage": false,
           "DamageValue": 0,
           "Abbreviation": ">",
           "id": 1
@@ -412,7 +412,7 @@ export default [{
         "Action": {
           "Name": "Dodge",
           "IconUrl": "",
-          "Damage": true,
+          "Damage": false,
           "DamageValue": 0,
           "Abbreviation": "<",
           "id": 2
@@ -586,7 +586,7 @@ export default [{
         "Action": {
           "Name": "Push",
           "IconUrl": "Push.png",
-          "Damage": true,
+          "Damage": false,
           "DamageValue": 0,
           "Abbreviation": ">",
           "id": 1
@@ -627,7 +627,7 @@ export default [{
         "Action": {
           "Name": "Push",
           "IconUrl": "Push.png",
-          "Damage": true,
+          "Damage": false,
           "DamageValue": 0,
           "Abbreviation": ">",
           "id": 1
@@ -640,7 +640,7 @@ export default [{
         "Action": {
           "Name": "Push",
           "IconUrl": "Push.png",
-          "Damage": true,
+          "Damage": false,
           "DamageValue": 0,
           "Abbreviation": ">",
           "id": 1
@@ -784,7 +784,7 @@ export default [{
         "Action": {
           "Name": "Push",
           "IconUrl": "Push.png",
-          "Damage": true,
+          "Damage": false,
           "DamageValue": 0,
           "Abbreviation": ">",
           "id": 1
@@ -807,7 +807,7 @@ export default [{
         "Action": {
           "Name": "Push",
           "IconUrl": "Push.png",
-          "Damage": true,
+          "Damage": false,
           "DamageValue": 0,
           "Abbreviation": ">",
           "id": 1
@@ -820,7 +820,7 @@ export default [{
         "Action": {
           "Name": "Push",
           "IconUrl": "Push.png",
-          "Damage": true,
+          "Damage": false,
           "DamageValue": 0,
           "Abbreviation": ">",
           "id": 1
@@ -946,7 +946,7 @@ export default [{
         "Action": {
           "Name": "Dodge",
           "IconUrl": "",
-          "Damage": true,
+          "Damage": false,
           "DamageValue": 0,
           "Abbreviation": "<",
           "id": 2
@@ -1041,7 +1041,7 @@ export default [{
         "Action": {
           "Name": "Dodge",
           "IconUrl": "",
-          "Damage": true,
+          "Damage": false,
           "DamageValue": 0,
           "Abbreviation": "<",
           "id": 2
@@ -1131,7 +1131,7 @@ export default [{
         "Action": {
           "Name": "Push",
           "IconUrl": "Push.png",
-          "Damage": true,
+          "Damage": false,
           "DamageValue": 0,
           "Abbreviation": ">",
           "id": 1
@@ -1203,7 +1203,7 @@ export default [{
         "Action": {
           "Name": "Push",
           "IconUrl": "Push.png",
-          "Damage": true,
+          "Damage": false,
           "DamageValue": 0,
           "Abbreviation": ">",
           "id": 1
@@ -1257,7 +1257,7 @@ export default [{
         "Action": {
           "Name": "Push",
           "IconUrl": "Push.png",
-          "Damage": true,
+          "Damage": false,
           "DamageValue": 0,
           "Abbreviation": ">",
           "id": 1
@@ -1270,7 +1270,7 @@ export default [{
         "Action": {
           "Name": "Dodge",
           "IconUrl": "",
-          "Damage": true,
+          "Damage": false,
           "DamageValue": 0,
           "Abbreviation": "<",
           "id": 2
@@ -1413,7 +1413,7 @@ export default [{
         "Action": {
           "Name": "Push",
           "IconUrl": "Push.png",
-          "Damage": true,
+          "Damage": false,
           "DamageValue": 0,
           "Abbreviation": ">",
           "id": 1
@@ -1508,7 +1508,7 @@ export default [{
         "Action": {
           "Name": "Push",
           "IconUrl": "Push.png",
-          "Damage": true,
+          "Damage": false,
           "DamageValue": 0,
           "Abbreviation": ">",
           "id": 1
@@ -1521,7 +1521,7 @@ export default [{
         "Action": {
           "Name": "Push",
           "IconUrl": "Push.png",
-          "Damage": true,
+          "Damage": false,
           "DamageValue": 0,
           "Abbreviation": ">",
           "id": 1
@@ -1557,7 +1557,7 @@ export default [{
         "Action": {
           "Name": "Push",
           "IconUrl": "Push.png",
-          "Damage": true,
+          "Damage": false,
           "DamageValue": 0,
           "Abbreviation": ">",
           "id": 1
@@ -1570,7 +1570,7 @@ export default [{
         "Action": {
           "Name": "Push",
           "IconUrl": "Push.png",
-          "Damage": true,
+          "Damage": false,
           "DamageValue": 0,
           "Abbreviation": ">",
           "id": 1
@@ -1754,7 +1754,7 @@ export default [{
         "Action": {
           "Name": "Push",
           "IconUrl": "Push.png",
-          "Damage": true,
+          "Damage": false,
           "DamageValue": 0,
           "Abbreviation": ">",
           "id": 1
@@ -1849,7 +1849,7 @@ export default [{
         "Action": {
           "Name": "Push",
           "IconUrl": "Push.png",
-          "Damage": true,
+          "Damage": false,
           "DamageValue": 0,
           "Abbreviation": ">",
           "id": 1
@@ -1862,7 +1862,7 @@ export default [{
         "Action": {
           "Name": "Push",
           "IconUrl": "Push.png",
-          "Damage": true,
+          "Damage": false,
           "DamageValue": 0,
           "Abbreviation": ">",
           "id": 1
@@ -1970,7 +1970,7 @@ export default [{
         "Action": {
           "Name": "Push",
           "IconUrl": "Push.png",
-          "Damage": true,
+          "Damage": false,
           "DamageValue": 0,
           "Abbreviation": ">",
           "id": 1
@@ -1983,7 +1983,7 @@ export default [{
         "Action": {
           "Name": "Push",
           "IconUrl": "Push.png",
-          "Damage": true,
+          "Damage": false,
           "DamageValue": 0,
           "Abbreviation": ">",
           "id": 1
@@ -2223,7 +2223,7 @@ export default [{
         "Action": {
           "Name": "Push",
           "IconUrl": "Push.png",
-          "Damage": true,
+          "Damage": false,
           "DamageValue": 0,
           "Abbreviation": ">",
           "id": 1
@@ -2259,7 +2259,7 @@ export default [{
         "Action": {
           "Name": "Push",
           "IconUrl": "Push.png",
-          "Damage": true,
+          "Damage": false,
           "DamageValue": 0,
           "Abbreviation": ">",
           "id": 1
@@ -2272,7 +2272,7 @@ export default [{
         "Action": {
           "Name": "Push",
           "IconUrl": "Push.png",
-          "Damage": true,
+          "Damage": false,
           "DamageValue": 0,
           "Abbreviation": ">",
           "id": 1
@@ -2464,7 +2464,7 @@ export default [{
         "Action": {
           "Name": "Dodge",
           "IconUrl": "",
-          "Damage": true,
+          "Damage": false,
           "DamageValue": 0,
           "Abbreviation": "<",
           "id": 2
@@ -2518,7 +2518,7 @@ export default [{
         "Action": {
           "Name": "Dodge",
           "IconUrl": "",
-          "Damage": true,
+          "Damage": false,
           "DamageValue": 0,
           "Abbreviation": "<",
           "id": 2
@@ -2554,7 +2554,7 @@ export default [{
         "Action": {
           "Name": "Push",
           "IconUrl": "Push.png",
-          "Damage": true,
+          "Damage": false,
           "DamageValue": 0,
           "Abbreviation": ">",
           "id": 1
@@ -2567,7 +2567,7 @@ export default [{
         "Action": {
           "Name": "Dodge",
           "IconUrl": "",
-          "Damage": true,
+          "Damage": false,
           "DamageValue": 0,
           "Abbreviation": "<",
           "id": 2
@@ -2782,7 +2782,7 @@ export default [{
         "Action": {
           "Name": "Push",
           "IconUrl": "Push.png",
-          "Damage": true,
+          "Damage": false,
           "DamageValue": 0,
           "Abbreviation": ">",
           "id": 1
@@ -2795,7 +2795,7 @@ export default [{
         "Action": {
           "Name": "Dodge",
           "IconUrl": "",
-          "Damage": true,
+          "Damage": false,
           "DamageValue": 0,
           "Abbreviation": "<",
           "id": 2
@@ -2877,7 +2877,7 @@ export default [{
         "Action": {
           "Name": "Dodge",
           "IconUrl": "",
-          "Damage": true,
+          "Damage": false,
           "DamageValue": 0,
           "Abbreviation": "<",
           "id": 2
@@ -2890,7 +2890,7 @@ export default [{
         "Action": {
           "Name": "Dodge",
           "IconUrl": "",
-          "Damage": true,
+          "Damage": false,
           "DamageValue": 0,
           "Abbreviation": "<",
           "id": 2
@@ -3077,7 +3077,7 @@ export default [{
         "Action": {
           "Name": "Push",
           "IconUrl": "Push.png",
-          "Damage": true,
+          "Damage": false,
           "DamageValue": 0,
           "Abbreviation": ">",
           "id": 1
@@ -3159,7 +3159,7 @@ export default [{
         "Action": {
           "Name": "Push",
           "IconUrl": "Push.png",
-          "Damage": true,
+          "Damage": false,
           "DamageValue": 0,
           "Abbreviation": ">",
           "id": 1
@@ -3172,7 +3172,7 @@ export default [{
         "Action": {
           "Name": "Push",
           "IconUrl": "Push.png",
-          "Damage": true,
+          "Damage": false,
           "DamageValue": 0,
           "Abbreviation": ">",
           "id": 1

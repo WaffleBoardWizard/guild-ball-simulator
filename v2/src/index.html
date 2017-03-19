@@ -5,30 +5,53 @@
   <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
   <title>
   </title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.9/semantic.min.css" />
+  <style>
+    .playbook-column {
+      display: inline-block;
+    }
+
+    .playbook-result {
+      border: 1px solid black;
+      padding: 6px;
+      border-radius: 50px;
+      text-align: center;
+      width: 50px;
+      height: 50px;
+    }
+
+    .playbook-result.momentous{
+      border: 3px solid red;
+
+    }
+
+    .playbook-result.enabled:hover{
+      background: red;
+      cursor: pointer;
+    }
+
+    .playbook-result.disabled{
+      opacity: .5;
+    }
+
+    .playbook-result-action {
+      font-weight: bold;
+      text-align: center;
+      font-size: 14px;
+      vertical-align: -webkit-baseline-middle;
+    }
+
+    .momentous {
+      background-color: #f7bfbf;
+    }
+  </style>
   <link href="http://netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vex-js/3.1.0/css/vex.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vex-js/3.1.0/css/vex-theme-os.min.css" />
   <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
   <script src="https://code.createjs.com/createjs-2015.11.26.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.9/semantic.min.js"></script>
 </head>
 
 <body>
-  <div class="ui basic modal">
-    <div class="ui icon header">
-      <i class="archive icon"></i> Archive Old Messages
-    </div>
-    <div class="content">
-      <p>Your inbox is getting full, would you like us to enable automatic archiving of old messages?</p>
-    </div>
-    <div class="actions">
-      <div class="ui red basic cancel inverted button">
-        <i class="remove icon"></i> No
-      </div>
-      <div class="ui green ok inverted button">
-        <i class="checkmark icon"></i> Yes
-      </div>
-    </div>
-  </div>
   <p style="display: none;"><i class="fa fa-car"></i> Force Font to load.</p>
   <button id="replay">Replay</button>
   <div></div>

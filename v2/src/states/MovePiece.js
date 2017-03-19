@@ -16,8 +16,15 @@ export default class MovePiece extends State {
 
     if (callback)
       this.callback = callback.bind(game);
+
+    this.message = params.message;
+
   }
 
+  onStart(){
+    if(this.message)
+      this.piece.showMessage(this.message);
+  }
 
   handleInput(input, pieceId, evt) {
     if (pieceId != this.pieceId) return;

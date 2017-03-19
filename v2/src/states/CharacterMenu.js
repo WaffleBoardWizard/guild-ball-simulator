@@ -14,10 +14,10 @@ export default class CharacterMenu extends State {
     this.menuButtons = this.menuFactory(this.character, this.game);
 
     this.menu = new Controls.MenuControl(this.character,
-        "circle",
-        this.menuButtons,
-        this.character.character.Size,
-        this.game.field);
+      "circle",
+      this.menuButtons,
+      this.character.character.Size,
+      this.game.field);
   }
 
   onStart() {
@@ -25,15 +25,17 @@ export default class CharacterMenu extends State {
   }
 
   onExit() {
-    if(this.menu.isOpen)
+    if (this.menu.isOpen)
       this.menu.hide(null, true);
   }
 
   handleInput(input, buttonId) {
     switch (input) {
       case Inputs.CLICK_MENU_BUTTON:
-        let btn = _.find(this.menuButtons, {id : buttonId});
-        if(btn){
+        let btn = _.find(this.menuButtons, {
+          id: buttonId
+        });
+        if (btn) {
           this.menu.hide(buttonId - 1);
           btn.action();
         }
@@ -50,9 +52,15 @@ export default class CharacterMenu extends State {
         click: function() {
           scope.menuButtonClick(1);
         },
-        action: function(){
+        action: function() {
           let activateCharacters = scope.activateCharacterInGroup.bind(scope, scope.reducePiecesToId(scope.getPieceByType("character")));
-          scope.switchState(new States.MovePiece({ pieceId : character.id,  x : character.x, y : character.y, speed: 1}, activateCharacters, scope));
+          scope.switchState(new States.MovePiece({
+            pieceId: character.id,
+            x: character.x,
+            y: character.y,
+            speed: 1,
+            message: "Jog",
+          }, activateCharacters, scope));
         }
       }, {
         id: 2,
@@ -61,7 +69,7 @@ export default class CharacterMenu extends State {
         click: function() {
           scope.menuButtonClick(2);
         },
-        action : function(){
+        action: function() {
           scope.kickBall(character);
         }
       },
@@ -80,7 +88,7 @@ export default class CharacterMenu extends State {
         click: function() {
           scope.menuButtonClick(4);
         },
-        action : function(){
+        action: function() {
           scope.attackPlayer(character);
         }
       }
