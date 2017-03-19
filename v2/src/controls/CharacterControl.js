@@ -116,10 +116,10 @@ p.stopIlluminate = function() {
   this.removeChild(this.illuminateCircle);
 }
 
-p.showMessage = function(message){
+p.showMessage = function(message, color){
   var me = this;
-  var text = new createjs.Text(message, "20px Arial", "red");
-  text.x = -this.baseSize;
+  var text = new createjs.Text(message, "20px Arial", color || "red");
+  //text.x = -this.baseSize / 2;
   this.addChild(text);
 
   createjs.Tween.get(text).to({alpha: 0.5}, 2000);

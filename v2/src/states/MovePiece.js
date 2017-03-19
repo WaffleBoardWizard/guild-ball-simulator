@@ -23,7 +23,7 @@ export default class MovePiece extends State {
 
   onStart(){
     if(this.message)
-      this.piece.showMessage(this.message);
+      this.piece.showMessage(this.message, "white");
   }
 
   handleInput(input, pieceId, evt) {
