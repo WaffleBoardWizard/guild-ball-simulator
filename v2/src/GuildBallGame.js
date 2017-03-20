@@ -11,6 +11,7 @@ import _ from 'lodash';
 import data from './mockdata/characters';
 import CharacterModel from './models/CharacterModel';
 import vex from 'vex-js';
+import Conditions from './Conditions';
 
 export default class GuildBallGame extends Game {
   constructor(canvasId) {
@@ -70,6 +71,7 @@ export default class GuildBallGame extends Game {
     let characterControl = new Controls.CharacterControl(character, this.assets.getResult(character.Name));
 
     this.addPieceToField(characterControl, x, y);
+
     this.characters.push(characterControl);
   }
 
@@ -169,6 +171,12 @@ export default class GuildBallGame extends Game {
                   let nonDamageActions = _.filter(actions, {
                     Damage: false
                   });
+                  var kd = _.find(actions, {
+                    Name: "Knock Down"
+                  });
+
+                  if(kd)
+                    me.addConditionToCharacter(otherCharacter.character, "Knocked Down");
 
                   var nextState = function() {
                     if (states.length == 0)
@@ -249,6 +257,16 @@ export default class GuildBallGame extends Game {
         console.log(ex);
       });
   }
+
+  getCondition(name){
+    return _.find(Conditions, {Name : name});
+  }
+
+  addConditionToCharacter(character, name){
+    var condition = this.getCondition(name);
+    character.addCondition(condition);
+  }
+
   //UI Functions
   illuminateAllCharacters() {
     this.illuminateCharacters(this.characters);

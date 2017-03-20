@@ -22,9 +22,14 @@ export default class CharacterModel{
     this.Image = params.Name + "png";
 
     this.tempModifiers = [];
-    
+
     this.PlayBookColumns = params.PlayBookColumns;
-    this.onHealthChangeEvents = [];
+
+
+    this.Conditions = [];
+
+    this.onHealthChangeEventHandlers = [];
+    this.onConditionsChangeEventHandlers =[];
   }
 
   heal(amount){
@@ -47,12 +52,39 @@ export default class CharacterModel{
   }
 
   addOnHealthChange(func){
-    this.onHealthChangeEvents.push(func);
+    this.onHealthChangeEventHandlers.push(func);
+  }
+
+  addOnConditionsChangeChange(func){
+    this.onConditionsChangeEventHandlers.push(func);
+  }
+
+  addCondition(condition){
+    console.log(this);
+    this.Conditions.push(condition);
+    this.applyConditionsModifiers(condition);
+    this.fireOnConditionAdded(condition);
+    console.log(this);
+  }
+
+  applyConditionsModifiers(condition){
+    condition.Modifiers.forEach( m => this.modifyCharacterStat( m.Stat, m.Value), this);
+  }
+
+  modifyCharacterStat(name, value){
+    debugger;
+    this[name] += value;
   }
 
   fireOnHealthChange(change){
-    this.onHealthChangeEvents.forEach(function(func){
+    this.onHealthChangeEventHandlers.forEach(function(func){
       func(change);
+    }, this);
+  }
+
+  fireOnConditionAdded(condition){
+    this.onConditionsChangeEventHandlers.forEach(function(func){
+      func(condition);
     }, this);
   }
 

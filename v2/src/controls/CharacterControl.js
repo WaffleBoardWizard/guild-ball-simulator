@@ -9,10 +9,12 @@ function CharacterControl(character, image) {
   this.image = image;
   this.baseSize =  this.character.Size * Measurements.MM
   this.character.addOnHealthChange(this.onDamage.bind(this));
+
   this.addImage();
   this.showHealthBar();
-
   this.id = this.character.Name;
+  this.character.addOnHealthChange(this.onDamage.bind(this));
+  this.character.addOnConditionsChangeChange(this.onConditionAdded.bind(this));
 };
 
 var p = createjs.extend(CharacterControl, GamePieceControl);
@@ -20,6 +22,11 @@ p.baseSize = null;
 p.healthBar = null;
 p.shape = null;
 p.illuminateCircle = null;
+p.conditionBars = [];
+
+p.onConditionAdded= function(condition){
+  this.showMessage(condition.Name);
+};
 
 p.showHealthBar = function() {
   if (this.healthBar)
