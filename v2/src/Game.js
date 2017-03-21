@@ -34,6 +34,11 @@ export default class Game {
     return _.map(pieces, 'id');
   }
 
+  placePieceOnTop(piece){
+    console.log("test");
+    this.field.swapChildren(piece, this.field.getChildAt(this.field.numChildren - 1));
+  }
+
   switchState(state, skipAction) {
     if (!skipAction) {
       this.actions.push({

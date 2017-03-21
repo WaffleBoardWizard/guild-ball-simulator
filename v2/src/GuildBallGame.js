@@ -67,12 +67,12 @@ export default class GuildBallGame extends Game {
   addCharacters() {
     data.forEach(function(c, i) {
       var model = new CharacterModel(c);
-      this.addCharacter(model, Measurements.Inch * (i + 1) * 3, Measurements.Inch * 12);
+      this.addCharacter(model, Measurements.Inch * ((i % 10) + 1) * 3, (Measurements.Inch * 8) * (Math.floor((i / 10)) + 1));
     }, this);
   }
 
   addCharacter(character, x, y, field) {
-    let characterControl = new Controls.CharacterControl(character, this.assets.getResult(character.Name));
+    let characterControl = new Controls.CharacterControl(character, this.assets.getResult(character.Name.replace(" ", "")));
 
     this.addPieceToField(characterControl, x, y);
 
@@ -91,7 +91,7 @@ export default class GuildBallGame extends Game {
     this.addPieceToField(terrianControl, Measurements.Foot * 2, Measurements.Foot * 2);
   }
 
-  addGoals(){
+  addGoals() {
     let awayGoal = new Controls.GoalControl(this.assets.getResult("Goal"));
     this.addPieceToField(awayGoal, (Measurements.Foot * 3) / 2, 5 * Measurements.Inch, Measurements.Inch);
     this.goals.push(awayGoal);
@@ -152,7 +152,7 @@ export default class GuildBallGame extends Game {
           }).catch(function(ex) {
             console.log(ex);
           });
-        } else if(kickParams.type == "field"){
+        } else if (kickParams.type == "field") {
           me.kickScatter(character.x, character.y, me.ball.x, me.ball.y);
         }
       }, this));
@@ -163,7 +163,7 @@ export default class GuildBallGame extends Game {
     let me = this;
 
     this.switchState(new States.SelectPiece(otherCharacterIds,
-      function(otherCharacterId) {
+      otherCharacterId => {
         let otherCharacter = this.getPiece(otherCharacterId);
         this.showConfirm("Bonus Time?").then(function(bonusTime) {
             let diceToRoll = character.character.TAC;
@@ -171,11 +171,11 @@ export default class GuildBallGame extends Game {
             if (bonusTime)
               diceToRoll++;
 
-            me.rollDice(diceToRoll, otherCharacter.character.Defense).then(function(results) {
+            me.rollDice(diceToRoll, otherCharacter.character.Defense).then(results => {
                 var hits = me.checkDiceResult(results, otherCharacter.character.Defense);
                 hits -= otherCharacter.character.Armor;
                 me.choosePlaybook(character.character, hits).then(actions => {
-                    me.applyPlaybookActions(character, otherCharacter, actions);
+                    me.applyActions(character, otherCharacter, actions);
                   })
                   .catch(function(ex) {
                     console.log(ex);
@@ -191,7 +191,70 @@ export default class GuildBallGame extends Game {
       }, this));
   }
 
-  applyPlaybookActions(character, otherCharacter, actions) {
+  performPlay(character, play) {
+    switch (play.action.Type) {
+      case "Attack":
+        this.performAttackPlay(character, play);
+        break;
+      case "Aura":
+        this.performAuraPlay(character, play);
+        break;
+      case "Buff":
+        this.performBuffPlay(character, play);
+        break;
+      default:
+
+    }
+  }
+
+  performBuffPlay(character, play) {
+    if (play.action.Target == "Self") {
+      play.action.Modifiers.forEach(modifer => character.character.modifyCharacterStat(modifer.Stat, modifer.Value));
+      this.activateCharacterInGroup(this.reducePiecesToId(this.getPieceByType("character")));
+    }
+    if (play.action.Target == "Friendly") {
+      let otherCharacterIds = this.reducePiecesToId(this.characters.filter(x => x != character));
+      this.switchState(new States.SelectPiece(otherCharacterIds, otherCharacterId => {
+        let otherCharacter = this.getPiece(otherCharacterId);
+        play.action.Modifiers.forEach(modifer => otherCharacter.character.modifyCharacterStat(modifer.Stat, modifer.Value));
+        this.activateCharacterInGroup(this.reducePiecesToId(this.getPieceByType("character")));
+      }, this));
+    }
+  }
+
+  performAuraPlay(character, play) {
+    play.action.Auras.forEach(aura => character.character.addAura(aura));
+    this.activateCharacterInGroup(this.reducePiecesToId(this.getPieceByType("character")));
+  }
+
+  performAttackPlay(character, play) {
+    let otherCharacterIds = this.reducePiecesToId(this.characters.filter(x => x != character));
+    let me = this;
+    if (play.action.Target == "Enemy") {
+      this.switchState(new States.SelectPiece(otherCharacterIds, otherCharacterId => {
+        let otherCharacter = this.getPiece(otherCharacterId);
+        let cost = Number(play.metaData.Cost);
+        let diceToRoll = cost;
+
+        me.rollDice(diceToRoll, otherCharacter.character.Defense).then(results => {
+          var hits = me.checkDiceResult(results, otherCharacter.character.Defense);
+
+          if (hits > 0) {
+            play.action.Modifiers.forEach(modifer => {
+              debugger
+              otherCharacter.character.modifyCharacterStat(modifer.Stat, modifer.Value)
+            });
+            me.applyActions(character, otherCharacter, play.action.Actions);
+            
+          }
+        });
+      }, this));
+    } else if (play.action.Target == "Self") {
+      me.applyActions(character, null, play.action.Actions);
+    }
+  }
+
+  applyActions(character, otherCharacter, actions) {
     let me = this;
     let states = [];
     let damageActions = _.filter(actions, {
@@ -449,18 +512,27 @@ export default class GuildBallGame extends Game {
   showCharacterPlays(character) {
     let me = this;
     return Q.Promise(function(resolve, reject, notify) {
-      let html = '';
+      let html = '<div class="ui cards">';
       let playid = 0;
       let plays = [];
+
       character.CharacterPlays.forEach((p, i) => {
         let play = me.getPlay(p.Name);
-        plays.push(play);
+        plays.push({
+          metaData: p,
+          action: play
+        });
 
-        html += '<div class="character-play" play="' + playid++ + '">';
-        html += '<div class="character-play-name">' + play.Name + "</div>";
-        html += '<div class="character-play-description">' + play.Description + "</div>";
+        html += '<div class="character-play card" play="' + playid++ + '">';
+        html += '<div class="content">';
+        html += '<div class="character-play-name header">' + play.Name + "</div>";
+        html += '<div class="character-play-description description">' + p.Description + "</div>";
         html += '</div>';
+        html += '</div>';
+
       });
+
+      html += '</div>';
       vex.dialog.open({
         message: 'Select a Character Play',
         input: html,

@@ -21,6 +21,7 @@ export default class CharacterMenu extends State {
   }
 
   onStart() {
+    this.game.placePieceOnTop(this.character);
     this.menu.show();
   }
 
@@ -101,7 +102,7 @@ export default class CharacterMenu extends State {
         },
         action: function() {
           scope.showCharacterPlays(character.character)
-            .then( p => console.log(p))
+            .then( play => scope.performPlay(character, play))
             .catch( ex => console.log(ex));
         }
       }

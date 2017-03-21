@@ -1,4 +1,133 @@
 export default [{
+    Name: "Second Wind",
+    Target: "TODO"
+  },
+  {
+    Name: "Deadbolt",
+    Target: "Enemy",
+    Type : "Attack",
+    Actions: [{
+      "Name": "3 Damage",
+      "Damage": true,
+      "DamageValue": 3,
+    },
+    {
+      "Name": "Push",
+      "Damage": false,
+      "DamageValue": 0,
+    },
+    {
+      "Name": "Knock Down",
+      "Damage": false,
+      "DamageValue": 0,
+    }],
+  },
+  {
+    Name: "Minefield",
+    Target: "Enemy",
+    Type: "Aura",
+    Auras:[
+      {
+        Length : 4,
+        Color: "red"
+      }
+    ]
+  },
+  {
+    Name: "Nimble",
+    Target: "Self",
+    Type: "Buff",
+    Modifiers:[
+      {
+        Stat : "Defense",
+        Value: 1
+      }
+    ]
+  },
+  {
+    Name: "Acrobatic",
+    Target: "Self",
+    Type: "Attack",
+    Actions: [
+    {
+      "Name": "Dodge",
+      "Damage": false,
+      "DamageValue": 0,
+    }]
+  },
+  {
+    Name: "Controller",
+    Target: "Self",
+    Type: "Buff",
+    Modifiers:[
+      {
+        Stat : "TODO",
+        Value: 1
+      }
+    ]
+  },
+  {
+    Name: "Alternator",
+    Target: "Friendly",
+    Type: "Buff",
+    Modifiers:[
+      {
+        Stat : "Jog",
+        Value: 2
+      },
+      {
+        Stat : "Sprint",
+        Value: 2
+      }
+    ]
+  },
+  {
+    Name: "Deletion",
+    Target: "Self",
+    Type: "Buff",
+    Modifiers:[
+      {
+        Stat : "TODO",
+        Value: 1
+      }
+    ]
+  },
+  {
+    Name: "Flurry",
+    Target: "Enemy",
+    Type : "Attack",
+    Actions: [{
+      "Name": "2 Damage",
+      "Damage": true,
+      "DamageValue": 2,
+    }]
+  },
+  {
+    Name: "Arrow to the Knee",
+    Target: "Enemy",
+    Type: "Attack",
+    Actions: [{
+      "Name": "2 Damage",
+      "Damage": true,
+      "DamageValue": 2,
+    }],
+    Modifiers:[
+      {
+        Stat : "KickDice",
+        Value: -2
+      },
+      {
+        Stat : "KickLength",
+        Value: -2
+      }
+    ]
+  },
+  {
+    Name: "Tether Ball",
+    Target: "Ball",
+    Type : "Misc"
+  },
+   {
     Name: "Super Shot",
     Description: "This model gains [+1 / +2”] KICK.",
     Cost: [1],

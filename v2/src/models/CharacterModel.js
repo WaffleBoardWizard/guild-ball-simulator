@@ -27,7 +27,9 @@ export default class CharacterModel{
     this.CharacterPlays = params.CharacterPlays;
 
     this.Conditions = [];
+    this.Auras = [];
 
+    this.onAuraChangedEventHandlers = [];
     this.onHealthChangeEventHandlers = [];
     this.onConditionsChangeEventHandlers =[];
   }
@@ -59,12 +61,20 @@ export default class CharacterModel{
     this.onConditionsChangeEventHandlers.push(func);
   }
 
+  addOnAurasChangeChange(func){
+    this.onAuraChangedEventHandlers.push(func);
+  }
+
   addCondition(condition){
-    console.log(this);
     this.Conditions.push(condition);
     this.applyConditionsModifiers(condition);
     this.fireOnConditionAdded(condition);
-    console.log(this);
+  }
+
+  addAura(aura){
+      this.Auras.push(aura);
+      debugger
+      this.fireOnAuraAdded(aura);
   }
 
   applyConditionsModifiers(condition){
@@ -72,7 +82,6 @@ export default class CharacterModel{
   }
 
   modifyCharacterStat(name, value){
-    debugger;
     this[name] += value;
   }
 
@@ -85,6 +94,12 @@ export default class CharacterModel{
   fireOnConditionAdded(condition){
     this.onConditionsChangeEventHandlers.forEach(function(func){
       func(condition);
+    }, this);
+  }
+
+  fireOnAuraAdded(aura){
+    this.onAuraChangedEventHandlers.forEach(function(func){
+      func(aura);
     }, this);
   }
 

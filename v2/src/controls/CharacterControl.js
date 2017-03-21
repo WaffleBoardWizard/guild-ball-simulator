@@ -16,10 +16,12 @@ function CharacterControl(character, image) {
   this.id = this.character.Name;
   this.character.addOnHealthChange(this.onDamage.bind(this));
   this.character.addOnConditionsChangeChange(this.onConditionAdded.bind(this));
+  this.character.addOnAurasChangeChange(this.onAuraAdded.bind(this));
 
   this.on("click", function(){
     console.log(this.character);
   }, this);
+
 };
 
 var p = createjs.extend(CharacterControl, GamePieceControl);
@@ -28,7 +30,7 @@ p.healthBar = null;
 p.shape = null;
 p.illuminateCircle = null;
 p.conditionBars = [];
-
+p.auras = [];
 p.showMoveIcon = function(){
   var text = new createjs.Text(FontAwesomeIcons.arrows, "32px FontAwesome");
   text.set({
@@ -37,6 +39,17 @@ p.showMoveIcon = function(){
     color: "white"
   });
   this.addChild(text);
+}
+
+p.onAuraAdded = function(aura){
+  this.removeAuras();
+
+  this.character.Auras.forEach( aura => this.showAura( aura.Length, aura.Color));
+}
+
+p.removeAuras = function () {
+  this.auras.forEach( a => this.removeChild(a), this);
+  this.auras = [];
 }
 
 p.onConditionAdded= function(condition){
@@ -78,6 +91,7 @@ p.onDamage = function(damage) {
   this.showMessage( damage + " Damage");
   this.showHealthBar();
 }
+
 p.showInfluenceBar = function() {
   var shape = new createjs.Shape().set({
     x: 0,
@@ -169,4 +183,14 @@ p.data = function(){
     characterData: data
   }
 }
+
+p.showAura = function(size, color){
+  let aura = new createjs.Shape();
+  aura.graphics.beginFill(color).drawCircle(0, 0, size * Measurements.Inch);
+  aura.alpha = .5;
+  this.addChildAt(aura, this.shape);
+
+  this.auras.push(aura);
+}
+
 export default createjs.promote(CharacterControl, "GamePieceControl");

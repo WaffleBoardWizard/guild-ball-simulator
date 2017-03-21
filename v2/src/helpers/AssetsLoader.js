@@ -2,12 +2,18 @@ import Q from 'q';
 const AssetsDirectory = require.context('../assets', false);
 
 var _AssetsToLoad = [
-    'ballista.PNG',
+    'Ballista.PNG',
     "Hoist.PNG",
-    "colossus.PNG",
-    "mainspring.PNG",
-    "ratchet.PNG",
-    "salvo.PNG",
+    "Colossus.PNG",
+    "Mainspring.PNG",
+    "Ratchet.PNG",
+    "Hoist.PNG",
+    "PinVice.png",
+    "Ratchet.PNG",
+    "Velocity.png",
+    "VETVelocity.png",
+    "Salvo.PNG",
+    "Mother.jpeg",
     "field.jpg",
     "die.png",
     "ball.png",
