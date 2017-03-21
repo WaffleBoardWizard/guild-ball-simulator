@@ -2,6 +2,7 @@ import GamePieceControl from './GamePieceControl';
 import MenuControl from './MenuControl';
 import FontAwesomeIcons from '../common/FontAwesomeIcons';
 import Measurements from '../common/Measurements';
+import FontAwesomeIcons from '../common/FontAwesomeIcons';
 
 function CharacterControl(character, image) {
   this.GamePieceControl_constructor("character");
@@ -15,6 +16,10 @@ function CharacterControl(character, image) {
   this.id = this.character.Name;
   this.character.addOnHealthChange(this.onDamage.bind(this));
   this.character.addOnConditionsChangeChange(this.onConditionAdded.bind(this));
+
+  this.on("click", function(){
+    console.log(this.character);
+  }, this);
 };
 
 var p = createjs.extend(CharacterControl, GamePieceControl);
@@ -23,6 +28,16 @@ p.healthBar = null;
 p.shape = null;
 p.illuminateCircle = null;
 p.conditionBars = [];
+
+p.showMoveIcon = function(){
+  var text = new createjs.Text(FontAwesomeIcons.arrows, "32px FontAwesome");
+  text.set({
+    textAlign: "center",
+    textBaseline: "middle",
+    color: "white"
+  });
+  this.addChild(text);
+}
 
 p.onConditionAdded= function(condition){
   this.showMessage(condition.Name);
@@ -126,6 +141,11 @@ p.stopIlluminate = function() {
 p.showMessage = function(message, color){
   var me = this;
   var text = new createjs.Text(message, "20px Arial", color || "red");
+  text.set({
+    textAlign: "center",
+    textBaseline: "middle"
+  });
+
   //text.x = -this.baseSize / 2;
   this.addChild(text);
 

@@ -24,7 +24,8 @@ var _AssetsToLoad = [
     "VETKatalyst.png",
     "Vitriol.png",
     "Smoke.png",
-    "Calculus.png"
+    "Calculus.png",
+    "Goal.png"
   ];
 export default {
 

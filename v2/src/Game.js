@@ -5,6 +5,7 @@ export default class Game {
   constructor() {
     this.stage = null;
     this.characters = [];
+    this.goals = [];
     this.ball = null;
     this.field = null;
     this._currentState = null;

@@ -5,3 +5,4 @@ export {default as BallControl}  from "./BallControl";
 export {default as TerrianControl}  from "./TerrianControl";
 export {default as CharacterControl}  from "./CharacterControl";
 export {default as MenuControl}  from "./MenuControl";
+export {default as GoalControl}  from "./GoalControl";

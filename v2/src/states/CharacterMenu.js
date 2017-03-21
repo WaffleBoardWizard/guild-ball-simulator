@@ -91,6 +91,19 @@ export default class CharacterMenu extends State {
         action: function() {
           scope.attackPlayer(character);
         }
+      },
+      {
+        id: 5,
+        Name: "Character Plays",
+        Icon: FontAwesomeIcons.map,
+        click: function() {
+          scope.menuButtonClick(5);
+        },
+        action: function() {
+          scope.showCharacterPlays(character.character)
+            .then( p => console.log(p))
+            .catch( ex => console.log(ex));
+        }
       }
     ];
   }

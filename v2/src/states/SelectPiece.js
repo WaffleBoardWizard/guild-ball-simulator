@@ -17,7 +17,7 @@ export default class SelectPiece extends State {
   }
 
   onExit() {
-    this.game.stopIllumatingAllCharacters(this.characters);
+    this.game.stopIllumatingAllCharacters(this.pieces);
   }
 
   handleInput(input, pieceId) {

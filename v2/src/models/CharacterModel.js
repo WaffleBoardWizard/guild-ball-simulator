@@ -24,7 +24,7 @@ export default class CharacterModel{
     this.tempModifiers = [];
 
     this.PlayBookColumns = params.PlayBookColumns;
-
+    this.CharacterPlays = params.CharacterPlays;
 
     this.Conditions = [];
 

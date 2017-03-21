@@ -17,7 +17,7 @@ export default [{
     Target: "Any"
   },
   {
-    Name: "Lure Of Gold",
+    Name: "Lure of Gold",
     Description: "Target other friendly Guild model may immediately make a Jog towards this model. Each model may only be moved by Lure of Gold once per turn",
     Cost: [2, "G"],
     OPT: false,
@@ -31,17 +31,13 @@ export default [{
   {
     Name: "Midas Touch",
     Description: "Target enemy model gains a burden-token. When a friendly Guild model makes an Attack against an enemy model that has a burden-token, the friendly Guild model may remove the burden-token to gain [+2] net hits.",
-    Cost: ["G"],
+    Cost: [2, "G"],
     OPT: false,
-    Sustain: true,
-    Range: "P",
-    Target: "Enemy",
-    Tokens: [{
-      Name: "Burden",
-      Modifiers: [{
-        Stat: "Hits",
-        Value: 2
-      }]
+    Sustain: false,
+    Range: 6,
+    Target: "Friendly",
+    Actions: [{
+      Name: "Jog"
     }]
   }
-]
+];
