@@ -12,6 +12,9 @@ export default class Game {
     this.assets = null;
     this.pieces = [];
     this.actions = [];
+    this.teams = [];
+
+    this.currentPlayer = null;
   }
 
   getPieceByType(type) {

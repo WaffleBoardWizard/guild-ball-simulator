@@ -8,11 +8,13 @@ import Q from 'q';
 import FontAwesomeIcons from './common/FontAwesomeIcons';
 import MathHelper from './helpers/MathHelper';
 import _ from 'lodash';
-import data from './mockdata/characters';
+import CharacterData from './mockdata/characters';
 import CharacterModel from './models/CharacterModel';
+import TeamModel from './models/TeamModel';
 import vex from 'vex-js';
 import Conditions from './Conditions';
 import Plays from './Plays';
+import TeamData from './mockdata/Teams';
 
 
 export default class GuildBallGame extends Game {
@@ -38,12 +40,16 @@ export default class GuildBallGame extends Game {
     this.createStage(canvasId);
     this.createField();
     this.createBall();
+    this.loadTeams();
     this.addCharacters();
     this.addTerrian();
     this.saveCharacterData();
     this.addGoals();
 
-    this.activateCharacterInGroup(this.reducePiecesToId(this.getPieceByType("character")));
+    this.currentTeam = this.teams[0];
+    this.showMessage(this.currentTeam.PlayerName + "'s Turn");
+
+    this.activateCharacterInGroup(this.reducePiecesToId(this.getTeamCharacters(this.currentTeam.PlayerName)));
   }
 
   createStage(canvasId) {
@@ -64,10 +70,17 @@ export default class GuildBallGame extends Game {
     this.addPieceToField(this.ball, Measurements.Foot / 2, Measurements.Foot / 2);
   }
 
+  loadTeams(){
+      TeamData.forEach( t => this.teams.push(new TeamModel(t)), this);
+  }
+
   addCharacters() {
-    data.forEach(function(c, i) {
-      var model = new CharacterModel(c);
-      this.addCharacter(model, Measurements.Inch * ((i % 10) + 1) * 3, (Measurements.Inch * 8) * (Math.floor((i / 10)) + 1));
+    this.teams.forEach( (team, i) =>{
+      team.Characters.forEach((characterName, j) =>{
+        var character = this.getCharacter(characterName);
+        var model = new CharacterModel(character, team.PlayerName);
+        this.addCharacter(model, Measurements.Inch * (j + 1) * 3, (Measurements.Inch * 8) * (i + 1));
+      }, this);
     }, this);
   }
 
@@ -203,7 +216,6 @@ export default class GuildBallGame extends Game {
         this.performBuffPlay(character, play);
         break;
       default:
-
     }
   }
 
@@ -216,7 +228,9 @@ export default class GuildBallGame extends Game {
       let otherCharacterIds = this.reducePiecesToId(this.characters.filter(x => x != character));
       this.switchState(new States.SelectPiece(otherCharacterIds, otherCharacterId => {
         let otherCharacter = this.getPiece(otherCharacterId);
-        play.action.Modifiers.forEach(modifer => otherCharacter.character.modifyCharacterStat(modifer.Stat, modifer.Value));
+        if(play.action.Modifiers)
+          play.action.Modifiers.forEach(modifer => otherCharacter.character.modifyCharacterStat(modifer.Stat, modifer.Value));
+
         this.activateCharacterInGroup(this.reducePiecesToId(this.getPieceByType("character")));
       }, this));
     }
@@ -240,12 +254,12 @@ export default class GuildBallGame extends Game {
           var hits = me.checkDiceResult(results, otherCharacter.character.Defense);
 
           if (hits > 0) {
+            if(play.action.Modifiers)
             play.action.Modifiers.forEach(modifer => {
-              debugger
               otherCharacter.character.modifyCharacterStat(modifer.Stat, modifer.Value)
             });
+
             me.applyActions(character, otherCharacter, play.action.Actions);
-            
           }
         });
       }, this));
@@ -381,11 +395,22 @@ export default class GuildBallGame extends Game {
     });
   }
 
+  getTeamCharacters(team){
+    var pieces = this.getPieceByType("character");
+
+    return _.filter(pieces, x => x.character.Team == team );
+  }
+
   addConditionToCharacter(character, name) {
     var condition = this.getCondition(name);
     character.addCondition(condition);
   }
 
+  getCharacter(characterName) {
+    return _.find(CharacterData, {
+      Name: characterName
+    });
+  }
   //UI Functions
   illuminateAllCharacters() {
     this.illuminateCharacters(this.characters);
@@ -458,12 +483,6 @@ export default class GuildBallGame extends Game {
     this.movePiece(this.ball, character.x, character.y);
   }
 
-  getCharacter(characterName) {
-    return _.find(data, {
-      Name: characterName
-    });
-  }
-
   showConfirm(message) {
     return Q.Promise(function(resolve, reject, notify) {
       vex.dialog.confirm({
@@ -525,7 +544,7 @@ export default class GuildBallGame extends Game {
 
         html += '<div class="character-play card" play="' + playid++ + '">';
         html += '<div class="content">';
-        html += '<div class="character-play-name header">' + play.Name + "</div>";
+        html += '<div class="character-play-name header">' + p.Name + "</div>";
         html += '<div class="character-play-description description">' + p.Description + "</div>";
         html += '</div>';
         html += '</div>';
@@ -548,6 +567,31 @@ export default class GuildBallGame extends Game {
         }
       });
     });
+  }
+
+  showMessage(message, color){
+    var me = this;
+    var text = new createjs.Text(message, "64px Arial", color || "red");
+    text.set({
+      textAlign: "center",
+      textBaseline: "middle"
+    });
+
+    text.x = Measurements.Inch * 18;
+    text.y = Measurements.Inch * 18;
+
+    this.field.addChild(text);
+
+    createjs.Tween.get(text).to({alpha: 0.5}, 2000);
+
+    createjs.Tween.get(text, {
+      loop: false
+    }).to({
+      scaleX: 1.5,
+      scaleY: 1.5
+    }, 2000, createjs.Ease.getPowInOut(4)).call(function(){
+      me.field.removeChild(text);
+    })
   }
   //END UI Functions
 

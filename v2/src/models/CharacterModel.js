@@ -2,7 +2,7 @@ import Measurements from '../common/Measurements';
 
 export default class CharacterModel{
 
-  constructor(params){
+  constructor(params, team){
     this.Name = params.Name;
     this.MeleeZone = params.MeleeZone;
     this.Jog = params.Jog;
@@ -20,6 +20,7 @@ export default class CharacterModel{
     this.IcySponge = params.IcySponge;
     this.Size = params.Size;
     this.Image = params.Name + "png";
+    this.Team = team;
 
     this.tempModifiers = [];
 
