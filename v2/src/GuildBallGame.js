@@ -49,7 +49,9 @@ export default class GuildBallGame extends Game {
     this.currentTeam = this.teams[0];
     this.showMessage(this.currentTeam.PlayerName + "'s Turn");
 
-    this.activateCharacterInGroup(this.reducePiecesToId(this.getTeamCharacters(this.currentTeam.PlayerName)));
+    //this.switchState(new States.SetInfluence({ teamId : "Andrew"}, null, this));
+
+   this.activateCharacterInGroup(this.reducePiecesToId(this.getTeamCharacters(this.currentTeam.PlayerName)));
   }
 
   createStage(canvasId) {
@@ -78,6 +80,7 @@ export default class GuildBallGame extends Game {
     this.teams.forEach( (team, i) =>{
       team.Characters.forEach((characterName, j) =>{
         var character = this.getCharacter(characterName);
+        team.Influence += character.InfluenceStart;
         var model = new CharacterModel(character, team.PlayerName);
         this.addCharacter(model, Measurements.Inch * (j + 1) * 3, (Measurements.Inch * 8) * (i + 1));
       }, this);

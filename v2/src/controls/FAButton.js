@@ -9,9 +9,13 @@ function FAButton(unicode, iconColor, bgColor, size) {
     textBaseline: "middle",
     color: iconColor
   });
+
   let shape = new createjs.Shape();
+
   shape.graphics.beginFill(bgColor).drawCircle(0, 0, size / 2);
+
   this.addChild(shape, text);
+
   this.btn = shape;
 };
 

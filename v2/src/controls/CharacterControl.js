@@ -3,6 +3,7 @@ import MenuControl from './MenuControl';
 import FontAwesomeIcons from '../common/FontAwesomeIcons';
 import Measurements from '../common/Measurements';
 import FontAwesomeIcons from '../common/FontAwesomeIcons';
+import FAButton from "./FAButton";
 
 function CharacterControl(character, image) {
   this.GamePieceControl_constructor("character");
@@ -11,9 +12,12 @@ function CharacterControl(character, image) {
   this.baseSize =  this.character.Size * Measurements.MM
   this.character.addOnHealthChange(this.onDamage.bind(this));
 
-  this.addImage();
   this.showHealthBar();
+  this.showInfluenceBar();
+  this.addImage();
+
   this.id = this.character.Name;
+
   this.character.addOnHealthChange(this.onDamage.bind(this));
   this.character.addOnConditionsChangeChange(this.onConditionAdded.bind(this));
   this.character.addOnAurasChangeChange(this.onAuraAdded.bind(this));
@@ -22,15 +26,19 @@ function CharacterControl(character, image) {
     console.log(this.character);
   }, this);
 
+  //this.showInflunceControls();
 };
 
 var p = createjs.extend(CharacterControl, GamePieceControl);
 p.baseSize = null;
 p.healthBar = null;
+p.influenceBar = null;
 p.shape = null;
 p.illuminateCircle = null;
 p.conditionBars = [];
 p.auras = [];
+
+
 p.showMoveIcon = function(){
   var text = new createjs.Text(FontAwesomeIcons.arrows, "32px FontAwesome");
   text.set({
@@ -55,6 +63,42 @@ p.removeAuras = function () {
 p.onConditionAdded= function(condition){
   this.showMessage(condition.Name);
 };
+
+p.showInfluenceBar = function() {
+  if (this.influenceBar)
+    this.removeChild(this.influenceBar);
+
+  this.influenceBar = new createjs.Shape().set({
+    x: 0,
+    y: 0
+  });
+
+  this.addChildAt(this.influenceBar, this.shape);
+
+  // Draw Random Segments
+  var thisArc, angle = 0;
+  var arc = 360 / this.character.InfluenceMax;
+
+  for (var i = 0; i <= this.character.InfluenceMax; i++) {
+    var angle = i * arc;
+    var startAngle = angle * Math.PI / 180;
+    var endAngle = Math.min(360, angle + arc) * Math.PI / 180;
+    this.influenceBar.graphics.s("black").ss(3);
+
+    if (i < this.character.Influence)
+      this.influenceBar.graphics.f("purple");
+    else
+      this.influenceBar.graphics.f("white");
+
+    this.influenceBar.graphics.moveTo(0, 0)
+    this.influenceBar.graphics.arc(0, 0, this.baseSize * .65, startAngle, endAngle);
+  }
+};
+
+p.onDamage = function(damage) {
+  this.showMessage( damage + " Damage");
+  this.showHealthBar();
+}
 
 p.showHealthBar = function() {
   if (this.healthBar)
@@ -84,35 +128,6 @@ p.showHealthBar = function() {
 
     this.healthBar.graphics.moveTo(0, 0)
     this.healthBar.graphics.arc(0, 0, this.baseSize * .5, startAngle, endAngle);
-  }
-};
-
-p.onDamage = function(damage) {
-  this.showMessage( damage + " Damage");
-  this.showHealthBar();
-}
-
-p.showInfluenceBar = function() {
-  var shape = new createjs.Shape().set({
-    x: 0,
-    y: 0
-  });
-  this.addChild(shape);
-
-  // Draw Random Segments
-  var thisArc, angle = 0;
-  var arc = 360 / this.character.InfluenceMax;
-
-  while (angle <= 360) {
-    var startAngle = angle * Math.PI / 180;
-    var endAngle = Math.min(360, angle + arc) * Math.PI / 180;
-    shape.graphics.s("black").ss(3);
-    shape.graphics.f("purple");
-    shape.graphics.moveTo(0, 0)
-    shape.graphics.arc(0, 0, this.baseSize * .6, startAngle, endAngle);
-    //shape.graphics.lt(0,0); // This could close each arc.
-
-    angle += arc;
   }
 };
 
@@ -189,8 +204,37 @@ p.showAura = function(size, color){
   aura.graphics.beginFill(color).drawCircle(0, 0, size * Measurements.Inch);
   aura.alpha = .5;
   this.addChildAt(aura, this.shape);
-
   this.auras.push(aura);
 }
 
+p.showInflunceControls = function(maxInfluence, getAvaliableInfluence, onInfluenceChange){
+  let me = this;
+  let add = new FAButton(FontAwesomeIcons.plus, "white", "red", 25);
+  add.x = -15
+  add.y = this.baseSize;
+  add.on('click', function(){
+    if(getAvaliableInfluence() > 0 && me.character.Influence < me.character.InfluenceMax){
+      me.character.Influence++;
+      me.showInfluenceBar();
+      onInfluenceChange(+1);
+    }
+  });
+
+
+
+  let minus = new FAButton(FontAwesomeIcons.minus, "white", "red", 25);
+  minus.x = 15;
+  minus.y = this.baseSize;
+  minus.on('click', function(){
+    console.log(maxInfluence)
+    if(getAvaliableInfluence() != maxInfluence && me.character.Influence != 0){
+      me.character.Influence--;
+      me.showInfluenceBar();
+      onInfluenceChange(-1);
+    }
+  });
+
+  this.addChild(add);
+  this.addChild(minus);
+}
 export default createjs.promote(CharacterControl, "GamePieceControl");

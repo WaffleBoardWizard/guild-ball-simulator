@@ -34,7 +34,7 @@ p.boundaries = {
 p.drawRect = function(x, y, width, height, color) {
   var rect = new createjs.Shape();
   rect.graphics.beginFill(color).drawRect(x, y, width, height);
-  rect.alpha = .5;
+  rect.alpha = .0;
   this.addChild(rect);
 
   return {
@@ -48,7 +48,7 @@ p.drawRect = function(x, y, width, height, color) {
 p.drawCircle = function(x, y, radius, color) {
   var circle = new createjs.Shape();
   circle.graphics.beginFill(color).drawCircle(x, y, radius);
-  circle.alpha = .5;
+  circle.alpha = .0;
   this.addChild(circle);
 
   return circle;

@@ -14,6 +14,8 @@ export default class CharacterModel{
     this.Armor = params.Armor;
     this.InfluenceStart = params.InfluenceStart;
     this.InfluenceMax = params.InfluenceMax;
+    this.Influence = params.Influence || 0;
+
     this.Keywords = params.Keywords;
     this.MaxHealth = params.Health || params.MaxHealth;
     this.CurrentHP = params.Health || params.CurrentHP;

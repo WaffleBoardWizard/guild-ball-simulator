@@ -14,7 +14,7 @@ export default class Game {
     this.actions = [];
     this.teams = [];
 
-    this.currentPlayer = null;
+    this.currentTeam = null;
   }
 
   getPieceByType(type) {
@@ -38,7 +38,6 @@ export default class Game {
   }
 
   placePieceOnTop(piece){
-    console.log("test");
     this.field.swapChildren(piece, this.field.getChildAt(this.field.numChildren - 1));
   }
 
