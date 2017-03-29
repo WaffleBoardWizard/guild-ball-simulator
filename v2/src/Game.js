@@ -15,6 +15,7 @@ export default class Game {
     this.teams = [];
 
     this.currentTeam = null;
+    this.team = null;
   }
 
   getPieceByType(type) {

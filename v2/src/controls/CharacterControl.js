@@ -19,12 +19,13 @@ function CharacterControl(character, image) {
   this.id = this.character.Name;
 
   this.character.addOnHealthChange(this.onDamage.bind(this));
-  this.character.addOnConditionsChangeChange(this.onConditionAdded.bind(this));
-  this.character.addOnAurasChangeChange(this.onAuraAdded.bind(this));
-
+  this.character.addOnConditionsChange(this.onConditionAdded.bind(this));
+  this.character.addOnAurasChange(this.onAuraAdded.bind(this));
+  this.character.addOnInfluenceChange(this.showInfluenceBar.bind(this));
   this.on("click", function(){
     console.log(this.character);
   }, this);
+
 
   //this.showInflunceControls();
 };
@@ -37,6 +38,7 @@ p.shape = null;
 p.illuminateCircle = null;
 p.conditionBars = [];
 p.auras = [];
+p.influenceControls = [];
 
 
 p.showMoveIcon = function(){
@@ -98,6 +100,7 @@ p.showInfluenceBar = function() {
 p.onDamage = function(damage) {
   this.showMessage( damage + " Damage");
   this.showHealthBar();
+  this.showInfluenceBar();
 }
 
 p.showHealthBar = function() {
@@ -234,7 +237,16 @@ p.showInflunceControls = function(maxInfluence, getAvaliableInfluence, onInfluen
     }
   });
 
+  this.influenceControls.push(add);
+  this.influenceControls.push(minus);
+
   this.addChild(add);
   this.addChild(minus);
 }
+
+p.hideInfluenceControls = function(){
+  this.influenceControls.forEach((c) => this.removeChild(c), this);
+  this.influenceControls = [];
+}
+
 export default createjs.promote(CharacterControl, "GamePieceControl");

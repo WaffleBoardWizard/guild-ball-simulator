@@ -18,9 +18,17 @@ export default class SetInfluence extends State {
         InfluenceMax -= value;
       });
     });
+
+    this.callback = callback.bind(this.game);
   }
 
   onStart(){
+    var confirm = this.game.showButton("Confirm");
+    confirm.on("click", () => this.callback());
+  }
+
+  onExit(){
+    this.characters.forEach( c => c.hideInfluenceControls());
   }
 
   handleInput(input, pieceId, evt) {

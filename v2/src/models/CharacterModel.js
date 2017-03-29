@@ -1,8 +1,13 @@
 import Measurements from '../common/Measurements';
 
-export default class CharacterModel{
+export default class CharacterModel {
 
-  constructor(params, team){
+  constructor(params, team) {
+    this.onAuraChangedEventHandlers = [];
+    this.onHealthChangeEventHandlers = [];
+    this.onConditionsChangeEventHandlers = [];
+    this.onInfluenceChangeEventHandlers = [];
+
     this.Name = params.Name;
     this.MeleeZone = params.MeleeZone;
     this.Jog = params.Jog;
@@ -32,77 +37,94 @@ export default class CharacterModel{
     this.Conditions = [];
     this.Auras = [];
 
-    this.onAuraChangedEventHandlers = [];
-    this.onHealthChangeEventHandlers = [];
-    this.onConditionsChangeEventHandlers =[];
   }
 
-  heal(amount){
+  get Influence() {
+    return this._Influence;
+  }
+
+  set Influence(value) {
+    this._Influence = value;
+    console.log("tets");
+    this.fireOnInfluenceChanged(this.Influence);
+  }
+
+  heal(amount) {
     this.CurrentHP += amount;
     this.fireOnHealthChange();
   }
 
-  damage(amount){
+  damage(amount) {
     this.CurrentHP -= amount;
     this.fireOnHealthChange(-amount);
   }
 
-  isTakenOut(){
+  isTakenOut() {
     return this.CurrentHP < 1;
   }
 
-  setHp(hp){
+  setHp(hp) {
     this.CurrentHP = hp;
     this.fireOnHealthChange();
   }
 
-  addOnHealthChange(func){
+  addOnHealthChange(func) {
     this.onHealthChangeEventHandlers.push(func);
   }
 
-  addOnConditionsChangeChange(func){
+  addOnConditionsChange(func) {
     this.onConditionsChangeEventHandlers.push(func);
   }
 
-  addOnAurasChangeChange(func){
+  addOnAurasChange(func) {
     this.onAuraChangedEventHandlers.push(func);
   }
 
-  addCondition(condition){
+  addOnInfluenceChange(func) {
+    this.onInfluenceChangeEventHandlers.push(func);
+  }
+
+  addCondition(condition) {
     this.Conditions.push(condition);
     this.applyConditionsModifiers(condition);
     this.fireOnConditionAdded(condition);
   }
 
-  addAura(aura){
-      this.Auras.push(aura);
-      debugger
-      this.fireOnAuraAdded(aura);
+  addAura(aura) {
+    this.Auras.push(aura);
+    debugger
+    this.fireOnAuraAdded(aura);
   }
 
-  applyConditionsModifiers(condition){
-    condition.Modifiers.forEach( m => this.modifyCharacterStat( m.Stat, m.Value), this);
+  applyConditionsModifiers(condition) {
+    condition.Modifiers.forEach(m => this.modifyCharacterStat(m.Stat, m.Value), this);
   }
 
-  modifyCharacterStat(name, value){
+  modifyCharacterStat(name, value) {
     this[name] += value;
   }
 
-  fireOnHealthChange(change){
-    this.onHealthChangeEventHandlers.forEach(function(func){
+  fireOnHealthChange(change) {
+    this.onHealthChangeEventHandlers.forEach(function(func) {
       func(change);
     }, this);
   }
 
-  fireOnConditionAdded(condition){
-    this.onConditionsChangeEventHandlers.forEach(function(func){
+  fireOnConditionAdded(condition) {
+    this.onConditionsChangeEventHandlers.forEach(function(func) {
       func(condition);
     }, this);
   }
 
-  fireOnAuraAdded(aura){
-    this.onAuraChangedEventHandlers.forEach(function(func){
+  fireOnAuraAdded(aura) {
+    this.onAuraChangedEventHandlers.forEach(function(func) {
       func(aura);
+    }, this);
+  }
+
+  fireOnInfluenceChanged(influence) {
+    this.onInfluenceChangeEventHandlers.forEach(function(func) {
+      func(influence);
     }, this);
   }
 

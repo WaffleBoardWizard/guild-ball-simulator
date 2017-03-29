@@ -45,13 +45,18 @@ export default class GuildBallGame extends Game {
     this.addTerrian();
     this.saveCharacterData();
     this.addGoals();
-
     this.currentTeam = this.teams[0];
+    this.team = this.teams[0];
+
     this.showMessage(this.currentTeam.PlayerName + "'s Turn");
 
-    //this.switchState(new States.SetInfluence({ teamId : "Andrew"}, null, this));
+    // this.switchState(new States.SetInfluence({ teamId : "Andrew"}, function() {
+    //   this.switchState(new States.SetInfluence({ teamId : "Joe"}, function() {
+    //      this.activateCharacterInGroup(this.reducePiecesToId(this.getTeamCharacters(this.currentTeam.PlayerName)));
+    //   }, this));
+    // }, this));
 
-   this.activateCharacterInGroup(this.reducePiecesToId(this.getTeamCharacters(this.currentTeam.PlayerName)));
+    this.activateCharacterInGroup(this.reducePiecesToId(this.getTeamCharacters(this.currentTeam.PlayerName)));
   }
 
   createStage(canvasId) {
@@ -208,6 +213,8 @@ export default class GuildBallGame extends Game {
   }
 
   performPlay(character, play) {
+
+    character.character.Influence -= Number(play.metaData.Cost);
     switch (play.action.Type) {
       case "Attack":
         this.performAttackPlay(character, play);
@@ -264,6 +271,12 @@ export default class GuildBallGame extends Game {
 
             me.applyActions(character, otherCharacter, play.action.Actions);
           }
+          else{
+            me.activateCharacterInGroup(me.reducePiecesToId(me.getPieceByType("character")));
+          }
+        })
+        .catch(function(ex) {
+          console.log(ex);
         });
       }, this));
     } else if (play.action.Target == "Self") {
@@ -296,8 +309,10 @@ export default class GuildBallGame extends Game {
       me.addConditionToCharacter(otherCharacter.character, "Knocked Down");
 
     var nextState = function() {
-      if (states.length == 0)
+      if (states.length == 0 || otherCharacter.character.isTakenOut()){
         me.activateCharacterInGroup(me.reducePiecesToId(me.getPieceByType("character")));
+        return;
+      }
 
       var state = states.pop();
       me.switchState(state);
@@ -595,6 +610,16 @@ export default class GuildBallGame extends Game {
     }, 2000, createjs.Ease.getPowInOut(4)).call(function(){
       me.field.removeChild(text);
     })
+  }
+
+  showButton(text){
+    let btn = new Controls.TextButton(text, "white", "green", 20);
+    btn.x = Measurements.Inch;
+    btn.y = Measurements.Inch;
+
+    this.field.addChild(btn);
+
+    return btn;
   }
   //END UI Functions
 

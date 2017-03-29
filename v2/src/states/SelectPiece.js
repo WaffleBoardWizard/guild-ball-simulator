@@ -24,6 +24,8 @@ export default class SelectPiece extends State {
     switch (input) {
       case Inputs.PIECE_CLICK:
         if (_.includes(this.piecesId, pieceId)) {
+          var character = this.game.getPiece(pieceId);
+          this.game.placePieceOnTop(character);
           if (this.callback)
             this.callback.bind(this.game, pieceId)();
         }

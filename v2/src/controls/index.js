@@ -7,3 +7,4 @@ export {default as CharacterControl}  from "./CharacterControl";
 export {default as MenuControl}  from "./MenuControl";
 export {default as GoalControl}  from "./GoalControl";
 export {default as FAButton}  from "./FAButton";
+export {default as TextButton}  from "./TextButton";

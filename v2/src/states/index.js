@@ -5,3 +5,4 @@ export {default as CharacterMenu}  from './CharacterMenu';
 export {default as ModifyCharacterHealth}  from './ModifyCharacterHealth';
 export {default as KickBall}  from './KickBall';
 export {default as SetInfluence}  from './SetInfluence';
+export {default as TakeOutCharacter}  from './TakeOutCharacter';
