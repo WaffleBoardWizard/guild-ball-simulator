@@ -12,8 +12,7 @@ function CharacterControl(character, image) {
   this.baseSize =  this.character.Size * Measurements.MM
   this.character.addOnHealthChange(this.onDamage.bind(this));
 
-  this.showHealthBar();
-  this.showInfluenceBar();
+
   this.addImage();
 
   this.id = this.character.Name;
@@ -22,12 +21,18 @@ function CharacterControl(character, image) {
   this.character.addOnConditionsChange(this.onConditionAdded.bind(this));
   this.character.addOnAurasChange(this.onAuraAdded.bind(this));
   this.character.addOnInfluenceChange(this.showInfluenceBar.bind(this));
-  this.on("click", function(){
+
+  //this.shape.addEventListener ("mouseover", function(){
+  //  console.log("mouse")
+    this.showHealthBar();
+    this.showInfluenceBar();
+//  }, this);
+
+  this.shape.on("click", function(){
     console.log(this.character);
   }, this);
 
 
-  //this.showInflunceControls();
 };
 
 var p = createjs.extend(CharacterControl, GamePieceControl);
