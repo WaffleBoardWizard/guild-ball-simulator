@@ -50,13 +50,13 @@ export default class GuildBallGame extends Game {
 
     this.showMessage(this.currentTeam.PlayerName + "'s Turn");
 
-    // this.switchState(new States.SetInfluence({ teamId : "Andrew"}, function() {
-    //   this.switchState(new States.SetInfluence({ teamId : "Joe"}, function() {
-    //      this.activateCharacterInGroup(this.reducePiecesToId(this.getTeamCharacters(this.currentTeam.PlayerName)));
-    //   }, this));
-    // }, this));
+    this.switchState(new States.SetInfluence({ teamId : "Andrew"}, function() {
+      this.switchState(new States.SetInfluence({ teamId : "Joe"}, function() {
+         this.activateCharacterInGroup(this.reducePiecesToId(this.getTeamCharacters(this.currentTeam.PlayerName)));
+      }, this));
+    }, this));
 
-    this.activateCharacterInGroup(this.reducePiecesToId(this.getTeamCharacters(this.currentTeam.PlayerName)));
+    //this.activateCharacterInGroup(this.reducePiecesToId(this.getTeamCharacters(this.currentTeam.PlayerName)));
   }
 
   createStage(canvasId) {
@@ -613,13 +613,15 @@ export default class GuildBallGame extends Game {
   }
 
   showButton(text){
-    let btn = new Controls.TextButton(text, "white", "green", 20);
-    btn.x = Measurements.Inch;
-    btn.y = Measurements.Inch;
-
-    this.field.addChild(btn);
+    let btn = $('<button class="ui primary button">' + text + '</button>');
+    this.clearMenuButtons();
+    $("#menu").append(btn);
 
     return btn;
+  }
+
+  clearMenuButtons(){
+    $("#menu").empty();
   }
   //END UI Functions
 
