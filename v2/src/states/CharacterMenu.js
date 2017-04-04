@@ -46,24 +46,7 @@ export default class CharacterMenu extends State {
   }
 
   menuFactory(character, scope) {
-    return [{
-        id: 1,
-        Name: "Confirm",
-        Icon: FontAwesomeIcons.check,
-        click: function() {
-          scope.menuButtonClick(1);
-        },
-        action: function() {
-          let activateCharacters = scope.activateCharacterInGroup.bind(scope, scope.reducePiecesToId(scope.getPieceByType("character")));
-          scope.switchState(new States.MovePiece({
-            pieceId: character.id,
-            x: character.x,
-            y: character.y,
-            speed: 1,
-            message: "Jog",
-          }, activateCharacters, scope));
-        }
-      }, {
+    var menu = [{
         id: 2,
         Name: "Kick",
         Icon: FontAwesomeIcons.undo,
@@ -107,5 +90,31 @@ export default class CharacterMenu extends State {
         }
       }
     ];
+
+    if(!character.character.turn.Advanced){
+      menu.push({
+          id: 1,
+          Name: "Confirm",
+          Icon: FontAwesomeIcons.check,
+          click: function() {
+            scope.menuButtonClick(1);
+          },
+          action: function() {
+            scope.switchState(new States.MovePiece({
+              pieceId: character.id,
+              x: character.x,
+              y: character.y,
+              speed: 1,
+              message: "Jog",
+            }, function(){
+              character.character.turn.Advanced = true;
+              scope.activateCurrentCharacter.bind(scope)();
+            }, scope));
+          }
+        });
+    }
+
+    return menu;
   }
+
 }

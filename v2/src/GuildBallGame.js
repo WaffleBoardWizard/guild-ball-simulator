@@ -37,6 +37,7 @@ export default class GuildBallGame extends Game {
     vex.defaultOptions.className = 'vex-theme-os';
 
     this.assets = assets;
+    this.bindExternalButtons();
     this.createStage(canvasId);
     this.createField();
     this.createBall();
@@ -52,18 +53,26 @@ export default class GuildBallGame extends Game {
 
     this.switchState(new States.SetInfluence({ teamId : "Andrew"}, function() {
       this.switchState(new States.SetInfluence({ teamId : "Joe"}, function() {
-         this.activateCharacterInGroup(this.reducePiecesToId(this.getTeamCharacters(this.currentTeam.PlayerName)));
+        this.activateCurrentTeamsNotActivatedPlayers();
       }, this));
     }, this));
-
-    //this.activateCharacterInGroup(this.reducePiecesToId(this.getTeamCharacters(this.currentTeam.PlayerName)));
   }
 
+  bindExternalButtons(){
+    $("#finishActivation").click(this.finishActivation.bind(this));
+  }
+
+  finishActivation(){
+      this.activatedCharacter.character.turn.activated = true;
+      this.currentTeam = this.teams.indexOf(this.currentTeam) == 0 ? this.teams[1] : this.teams[0];
+      this.activateCurrentTeamsNotActivatedPlayers();
+  }
   createStage(canvasId) {
     this.stage = new createjs.Stage("demoCanvas");
     createjs.Touch.enable(this.stage, false, true);
     createjs.Ticker.setFPS(60);
     createjs.Ticker.addEventListener("tick", this.stage);
+    this.stage.enableMouseOver(20);
   }
 
   createField() {
@@ -169,7 +178,7 @@ export default class GuildBallGame extends Game {
             if (!me.checkDiceResult(results, 4))
               me.kickScatter(character.x, character.y, otherCharacter.x, otherCharacter.y);
 
-            me.activateCharacterInGroup(me.reducePiecesToId(me.getPieceByType("character")));
+            me.activateCurrentCharacter();
           }).catch(function(ex) {
             console.log(ex);
           });
@@ -232,7 +241,7 @@ export default class GuildBallGame extends Game {
   performBuffPlay(character, play) {
     if (play.action.Target == "Self") {
       play.action.Modifiers.forEach(modifer => character.character.modifyCharacterStat(modifer.Stat, modifer.Value));
-      this.activateCharacterInGroup(this.reducePiecesToId(this.getPieceByType("character")));
+      this.activateCurrentCharacter();
     }
     if (play.action.Target == "Friendly") {
       let otherCharacterIds = this.reducePiecesToId(this.characters.filter(x => x != character));
@@ -241,14 +250,14 @@ export default class GuildBallGame extends Game {
         if(play.action.Modifiers)
           play.action.Modifiers.forEach(modifer => otherCharacter.character.modifyCharacterStat(modifer.Stat, modifer.Value));
 
-        this.activateCharacterInGroup(this.reducePiecesToId(this.getPieceByType("character")));
+        this.activateCurrentCharacter();
       }, this));
     }
   }
 
   performAuraPlay(character, play) {
     play.action.Auras.forEach(aura => character.character.addAura(aura));
-    this.activateCharacterInGroup(this.reducePiecesToId(this.getPieceByType("character")));
+    this.activateCurrentCharacter();
   }
 
   performAttackPlay(character, play) {
@@ -272,7 +281,7 @@ export default class GuildBallGame extends Game {
             me.applyActions(character, otherCharacter, play.action.Actions);
           }
           else{
-            me.activateCharacterInGroup(me.reducePiecesToId(me.getPieceByType("character")));
+            me.activateCurrentCharacter();
           }
         })
         .catch(function(ex) {
@@ -310,7 +319,7 @@ export default class GuildBallGame extends Game {
 
     var nextState = function() {
       if (states.length == 0 || otherCharacter.character.isTakenOut()){
-        me.activateCharacterInGroup(me.reducePiecesToId(me.getPieceByType("character")));
+        me.activateCurrentCharacter();
         return;
       }
 
@@ -364,8 +373,23 @@ export default class GuildBallGame extends Game {
     });
   }
 
+  setCharacterAsActivated(characterId){
+    this.activatedCharacter = this.getPiece(characterId);
+    this.showCharacterMenu(characterId);
+  }
+
   activateCharacterInGroup(charactersIds) {
-    this.switchState(new States.SelectPiece(charactersIds, this.showCharacterMenu, this));
+    this.switchState(new States.SelectPiece(charactersIds, this.setCharacterAsActivated, this));
+  }
+
+  activateCurrentTeamsNotActivatedPlayers(){
+    let characters = this.getTeamCharacters(this.currentTeam.PlayerName);
+    characters = _.filter(characters, c => !c.character.turn.activated);
+    this.activateCharacterInGroup(this.reducePiecesToId(characters));
+  }
+
+  activateCurrentCharacter(){
+    this.activateCharacterInGroup([this.activatedCharacter.id]);
   }
 
   showCharacterMenu(characterid) {

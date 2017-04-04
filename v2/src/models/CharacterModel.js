@@ -37,6 +37,10 @@ export default class CharacterModel {
     this.Conditions = [];
     this.Auras = [];
 
+    this.turn = params.turn || {
+      Activated : false,
+      Advanced: false
+    };
   }
 
   get Influence() {
