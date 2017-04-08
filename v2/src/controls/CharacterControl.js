@@ -32,6 +32,13 @@ function CharacterControl(character, image) {
     console.log(this.character);
   }, this);
 
+  const handler = {
+    set(target, key, value) {
+      console.log(`Setting value ${key} as ${value}`)
+    },
+  };
+
+  const p = new Proxy(character, handler);
 
 };
 

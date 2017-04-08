@@ -37,7 +37,6 @@ export default class GuildBallGame extends Game {
     vex.defaultOptions.className = 'vex-theme-os';
 
     this.assets = assets;
-    this.bindExternalButtons();
     this.createStage(canvasId);
     this.createField();
     this.createBall();
@@ -56,10 +55,6 @@ export default class GuildBallGame extends Game {
         this.activateCurrentTeamsNotActivatedPlayers();
       }, this));
     }, this));
-  }
-
-  bindExternalButtons(){
-    $("#finishActivation").click(this.finishActivation.bind(this));
   }
 
   finishActivation(){
@@ -375,6 +370,9 @@ export default class GuildBallGame extends Game {
 
   setCharacterAsActivated(characterId){
     this.activatedCharacter = this.getPiece(characterId);
+    var btn  = this.showButton("Finish Activation");
+
+    btn.on('click', this.finishActivation.bind(this));
     this.showCharacterMenu(characterId);
   }
 
