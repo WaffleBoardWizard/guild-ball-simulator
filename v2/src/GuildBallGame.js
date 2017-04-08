@@ -7,22 +7,16 @@ import * as States from './states';
 import Q from 'q';
 import FontAwesomeIcons from './common/FontAwesomeIcons';
 import MathHelper from './helpers/MathHelper';
-import _ from 'lodash';
-import CharacterData from './mockdata/characters';
-import CharacterModel from './models/CharacterModel';
-import TeamModel from './models/TeamModel';
-import vex from 'vex-js';
-import Conditions from './Conditions';
-import Plays from './Plays';
-import TeamData from './mockdata/Teams';
-
 
 export default class GuildBallGame extends Game {
-  constructor(canvasId) {
+  constructor(canvasId, selectedCharacter) {
     super();
 
-    let me = this;
+    this.actions = [];
 
+    let me = this;
+    this.selectedCharacter = selectedCharacter;
+    
     AssetsLoader.LoadAssets()
       .then(function(assets) {
         me.initialize(canvasId, assets);
@@ -30,44 +24,24 @@ export default class GuildBallGame extends Game {
       .catch(function(ex) {
         console.log(ex);
       });
+
+
   }
-
   initialize(canvasId, assets) {
-    vex.registerPlugin(require('vex-dialog'))
-    vex.defaultOptions.className = 'vex-theme-os';
-
     this.assets = assets;
     this.createStage(canvasId);
     this.createField();
     this.createBall();
-    this.loadTeams();
     this.addCharacters();
     this.addTerrian();
-    this.saveCharacterData();
-    this.addGoals();
-    this.currentTeam = this.teams[0];
-    this.team = this.teams[0];
-
-    this.showMessage(this.currentTeam.PlayerName + "'s Turn");
-
-    this.switchState(new States.SetInfluence({ teamId : "Andrew"}, function() {
-      this.switchState(new States.SetInfluence({ teamId : "Joe"}, function() {
-        this.activateCurrentTeamsNotActivatedPlayers();
-      }, this));
-    }, this));
+    this.activateCharacterInGroup(this.characters);
   }
 
-  finishActivation(){
-      this.activatedCharacter.character.turn.activated = true;
-      this.currentTeam = this.teams.indexOf(this.currentTeam) == 0 ? this.teams[1] : this.teams[0];
-      this.activateCurrentTeamsNotActivatedPlayers();
-  }
   createStage(canvasId) {
     this.stage = new createjs.Stage("demoCanvas");
     createjs.Touch.enable(this.stage, false, true);
     createjs.Ticker.setFPS(60);
     createjs.Ticker.addEventListener("tick", this.stage);
-    this.stage.enableMouseOver(20);
   }
 
   createField() {
@@ -76,31 +50,29 @@ export default class GuildBallGame extends Game {
   }
 
   createBall() {
-    this.ball = new Controls.BallControl(this.assets.getResult("ball"));
+    this.ball = new Controls.BallControl(this.assets.getResult("ball"), this.assets.getResult("kickscatter30"));
 
     this.addPieceToField(this.ball, Measurements.Foot / 2, Measurements.Foot / 2);
   }
 
-  loadTeams(){
-      TeamData.forEach( t => this.teams.push(new TeamModel(t)), this);
-  }
-
   addCharacters() {
-    this.teams.forEach( (team, i) =>{
-      team.Characters.forEach((characterName, j) =>{
-        var character = this.getCharacter(characterName);
-        team.Influence += character.InfluenceStart;
-        var model = new CharacterModel(character, team.PlayerName);
-        this.addCharacter(model, Measurements.Inch * (j + 1) * 3, (Measurements.Inch * 8) * (i + 1));
-      }, this);
-    }, this);
+    var ballista = {
+      image: this.assets.getResult("ballista"),
+      baseSize: 30 * Measurements.MM
+    }
+    var colossus = {
+      image: this.assets.getResult("colossus"),
+      baseSize: 40 * Measurements.MM
+    }
+
+    this.addCharacter(ballista, Measurements.Inch * 8, Measurements.Inch * 16);
+    this.addCharacter(colossus, Measurements.Foot, Measurements.Foot / 2);
   }
 
-  addCharacter(character, x, y, field) {
-    let characterControl = new Controls.CharacterControl(character, this.assets.getResult(character.Name.replace(" ", "")));
+  addCharacter(characterProps, x, y, field) {
+    let characterControl = new Controls.CharacterControl(characterProps, field);
 
     this.addPieceToField(characterControl, x, y);
-
     this.characters.push(characterControl);
   }
 
@@ -113,33 +85,20 @@ export default class GuildBallGame extends Game {
 
     var terrianControl = new Controls.TerrianControl(house);
 
-    this.addPieceToField(terrianControl, Measurements.Foot * 2, Measurements.Foot * 2);
+    this.addPieceToField(terrianControl, Measurements.Foot, Measurements.Foot);
   }
 
-  addGoals() {
-    let awayGoal = new Controls.GoalControl(this.assets.getResult("Goal"));
-    this.addPieceToField(awayGoal, (Measurements.Foot * 3) / 2, 5 * Measurements.Inch, Measurements.Inch);
-    this.goals.push(awayGoal);
-
-    let homeGoal = new Controls.GoalControl(this.assets.getResult("Goal"));
-    this.addPieceToField(homeGoal, (Measurements.Foot * 3) / 2, (Measurements.Foot * 3) - (5 * Measurements.Inch), Measurements.Inch);
-    this.goals.push(homeGoal);
+  switchState(state) {
+    this._currentState = state;
   }
-
 
   bindInputsToPiece(piece) {
     piece.on("pressmove", function(evt) {
-      this.pressMovePiece({
-        pieceId: piece.id,
-        mouseX: evt.rawX,
-        mouseY: evt.rawY
-      });
+      this.pressMovePiece(piece, evt);
     }, this);
 
     piece.on("click", function(evt) {
-      this.clickPiece({
-        pieceId: piece.id
-      });
+      this.clickPiece(piece, evt);
     }, this);
 
     piece.on("mouseup", function(evt) {}, this);
@@ -148,308 +107,59 @@ export default class GuildBallGame extends Game {
   }
 
   checkDiceResult(diceResults, goal) {
-    let result = 0;
+    let result = false;
     diceResults.forEach(function(d) {
       if (d >= goal)
-        result++;
+        result = true;
     });
     return result;
   }
 
-  kickBall(character) {
-    let otherCharacterIds = this.reducePiecesToId(this.characters.filter(x => x != character));
-    let goalIds = this.reducePiecesToId(this.goals);
+  kickBall(character){
+    let otherCharacters = this.characters.filter(x => x != character);
     let me = this;
 
-    this.switchState(new States.KickBall({
-        charactersId: otherCharacterIds.concat(goalIds)
-      },
-      function(kickParams) {
-        if (kickParams.type == "piece") {
-          let otherCharacter = this.getPiece(kickParams.pieceId);
-          this.rollDice(character.character.KickDice, 4).then(function(results) {
-            me.snapBallToCharacter(otherCharacter);
-
-            if (!me.checkDiceResult(results, 4))
-              me.kickScatter(character.x, character.y, otherCharacter.x, otherCharacter.y);
-
-            me.activateCurrentCharacter();
-          }).catch(function(ex) {
-            console.log(ex);
-          });
-        } else if (kickParams.type == "field") {
-          me.kickScatter(character.x, character.y, me.ball.x, me.ball.y);
-        }
-      }, this));
-  }
-
-  attackPlayer(character) {
-    let otherCharacterIds = this.reducePiecesToId(this.characters.filter(x => x != character));
-    let me = this;
-
-    this.switchState(new States.SelectPiece(otherCharacterIds,
-      otherCharacterId => {
-        let otherCharacter = this.getPiece(otherCharacterId);
-        this.showConfirm("Bonus Time?").then(function(bonusTime) {
-            let diceToRoll = character.character.TAC;
-
-            if (bonusTime)
-              diceToRoll++;
-
-            me.rollDice(diceToRoll, otherCharacter.character.Defense).then(results => {
-                var hits = me.checkDiceResult(results, otherCharacter.character.Defense);
-                hits -= otherCharacter.character.Armor;
-                me.choosePlaybook(character.character, hits).then(actions => {
-                    me.applyActions(character, otherCharacter, actions);
-                  })
-                  .catch(function(ex) {
-                    console.log(ex);
-                  });
-              })
-              .catch(function(ex) {
-                console.log(ex);
-              });
-          })
-          .catch(function(ex) {
-            console.log(ex);
-          });
-      }, this));
-  }
-
-  performPlay(character, play) {
-
-    character.character.Influence -= Number(play.metaData.Cost);
-    switch (play.action.Type) {
-      case "Attack":
-        this.performAttackPlay(character, play);
-        break;
-      case "Aura":
-        this.performAuraPlay(character, play);
-        break;
-      case "Buff":
-        this.performBuffPlay(character, play);
-        break;
-      default:
-    }
-  }
-
-  performBuffPlay(character, play) {
-    if (play.action.Target == "Self") {
-      play.action.Modifiers.forEach(modifer => character.character.modifyCharacterStat(modifer.Stat, modifer.Value));
-      this.activateCurrentCharacter();
-    }
-    if (play.action.Target == "Friendly") {
-      let otherCharacterIds = this.reducePiecesToId(this.characters.filter(x => x != character));
-      this.switchState(new States.SelectPiece(otherCharacterIds, otherCharacterId => {
-        let otherCharacter = this.getPiece(otherCharacterId);
-        if(play.action.Modifiers)
-          play.action.Modifiers.forEach(modifer => otherCharacter.character.modifyCharacterStat(modifer.Stat, modifer.Value));
-
-        this.activateCurrentCharacter();
-      }, this));
-    }
-  }
-
-  performAuraPlay(character, play) {
-    play.action.Auras.forEach(aura => character.character.addAura(aura));
-    this.activateCurrentCharacter();
-  }
-
-  performAttackPlay(character, play) {
-    let otherCharacterIds = this.reducePiecesToId(this.characters.filter(x => x != character));
-    let me = this;
-    if (play.action.Target == "Enemy") {
-      this.switchState(new States.SelectPiece(otherCharacterIds, otherCharacterId => {
-        let otherCharacter = this.getPiece(otherCharacterId);
-        let cost = Number(play.metaData.Cost);
-        let diceToRoll = cost;
-
-        me.rollDice(diceToRoll, otherCharacter.character.Defense).then(results => {
-          var hits = me.checkDiceResult(results, otherCharacter.character.Defense);
-
-          if (hits > 0) {
-            if(play.action.Modifiers)
-            play.action.Modifiers.forEach(modifer => {
-              otherCharacter.character.modifyCharacterStat(modifer.Stat, modifer.Value)
-            });
-
-            me.applyActions(character, otherCharacter, play.action.Actions);
+    this.switchState(new States.SelectPiece(otherCharacters,
+      function(otherCharacter) {
+        this.rollDice(1).then(function(result) {
+          me.snapBallToCharacter(otherCharacter);
+          if (!me.checkDiceResult(result, 4)) {
+            me.kickScatter(character.x, character.y, otherCharacter.x, otherCharacter.y);
           }
-          else{
-            me.activateCurrentCharacter();
-          }
-        })
-        .catch(function(ex) {
+          me.showCharacterMenu(character);
+        }).catch(function(ex) {
           console.log(ex);
         });
       }, this));
-    } else if (play.action.Target == "Self") {
-      me.applyActions(character, null, play.action.Actions);
-    }
   }
 
-  applyActions(character, otherCharacter, actions) {
-    let me = this;
-    let states = [];
-    let damageActions = _.filter(actions, {
-      Damage: true
-    });
-    let damage = _.reduce(damageActions, (sum, a) => sum += a.DamageValue, 0);
-    if (damage) {
-      me.switchState(new States.ModifyCharacterHealth({
-        characterId: otherCharacter.id,
-        hits: damage
-      }, null, me));
-    }
-
-    let nonDamageActions = _.filter(actions, {
-      Damage: false
-    });
-    var kd = _.find(actions, {
-      Name: "Knock Down"
-    });
-
-    if (kd)
-      me.addConditionToCharacter(otherCharacter.character, "Knocked Down");
-
-    var nextState = function() {
-      if (states.length == 0 || otherCharacter.character.isTakenOut()){
-        me.activateCurrentCharacter();
-        return;
-      }
-
-      var state = states.pop();
-      me.switchState(state);
-    };
-
-    nonDamageActions.forEach(a => {
-      switch (a.Name) {
-        case "Push":
-          states.push(new States.MovePiece({
-            pieceId: otherCharacter.id,
-            x: otherCharacter.x,
-            y: otherCharacter.y,
-            message: "Push",
-            speed: 1
-          }, nextState, me))
-          break;
-        case "Dodge":
-          states.push(new States.MovePiece({
-            pieceId: character.id,
-            x: character.x,
-            y: character.y,
-            message: "Dodge",
-            speed: 1
-          }, nextState, me))
-          break;
-        default:
-      }
-    });
-
-    nextState();
-  }
-
-  choosePlaybook(character, hits) {
-    let me = this;
-
-    return Q.Promise(function(resolve, reject) {
-      console.log(hits);
-      me.showPlayBook(character, hits).then(actions => {
-        if (character.PlayBookColumns.length < hits) {
-          hits -= character.PlayBookColumns.length
-          me.choosePlaybook(character, hits).then(nextActions => {
-            actions = actions.concat(nextActions);
-            resolve(actions);
-          });
-        } else {
-          resolve(actions);
-        }
-      });
-    });
-  }
-
-  setCharacterAsActivated(characterId){
-    this.activatedCharacter = this.getPiece(characterId);
-    var btn  = this.showButton("Finish Activation");
-
-    btn.on('click', this.finishActivation.bind(this));
-    this.showCharacterMenu(characterId);
-  }
-
-  activateCharacterInGroup(charactersIds) {
-    this.switchState(new States.SelectPiece(charactersIds, this.setCharacterAsActivated, this));
-  }
-
-  activateCurrentTeamsNotActivatedPlayers(){
-    let characters = this.getTeamCharacters(this.currentTeam.PlayerName);
-    characters = _.filter(characters, c => !c.character.turn.activated);
-    this.activateCharacterInGroup(this.reducePiecesToId(characters));
-  }
-
-  activateCurrentCharacter(){
-    this.activateCharacterInGroup([this.activatedCharacter.id]);
-  }
-
-  showCharacterMenu(characterid) {
-    this.switchState(new States.CharacterMenu(characterid, null, this));
+  activateCharacterInGroup(characters) {
+    this.switchState(new States.SelectPiece(characters, this.showCharacterMenu, this));
   }
 
   kickScatter(fromX, fromY, toX, toY) {
-    let me = this;
-    let angle = Math.atan2(toY - fromY, toX - fromX) * 180 / Math.PI;
-    me.ball.drawScatter(angle);
+    var me = this;
 
-    this.rollDice(2, 7)
-      .then(function(results) {
-        let direction = results[0];
-        let distance = results[1];
-
-        me.ball.highlighScatterLine(direction);
+    this.rollDice(2)
+      .then(function(r) {
+        var angle = Math.atan2(toY - fromY, toX - fromX) * 180 / Math.PI;
+        var distance = r[1];
+        var direction = r[0];
+        me.ball.rotateScatter(angle + 90);
 
         if (direction > 3)
           direction++;
 
         let coord = MathHelper.CalculateXYWithDistanceAndAngle(distance * Measurements.Inch, (22.5 * direction) + angle - 90);
 
-
         setTimeout(function() {
           me.movePiece(me.ball, coord.x + me.ball.x, coord.y + me.ball.y);
-          me.ball.removeScatter();
         }, 2000, this);
 
       })
       .catch(function(ex) {
         console.log(ex);
       });
-  }
-
-  getCondition(name) {
-    return _.find(Conditions, {
-      Name: name
-    });
-  }
-
-  getPlay(name) {
-    return _.find(Plays, {
-      Name: name
-    });
-  }
-
-  getTeamCharacters(team){
-    var pieces = this.getPieceByType("character");
-
-    return _.filter(pieces, x => x.character.Team == team );
-  }
-
-  addConditionToCharacter(character, name) {
-    var condition = this.getCondition(name);
-    character.addCondition(condition);
-  }
-
-  getCharacter(characterName) {
-    return _.find(CharacterData, {
-      Name: characterName
-    });
   }
   //UI Functions
   illuminateAllCharacters() {
@@ -476,250 +186,73 @@ export default class GuildBallGame extends Game {
     piece.x = x;
     piece.y = y;
 
-    this.pieces.push(piece)
     this.bindInputsToPiece(piece);
     this.field.addChild(piece);
-
-    this.switchState(new States.MovePiece({
-        pieceId: piece.id,
-        x: x,
-        y: y,
-        speed: 1
-      },
-      null,
-      this));
+    this.pieces.push(piece)
   }
 
-  movePiece(piece, x, y) {
-    this.switchState(new States.MovePiece({
-        pieceId: piece.id,
-        x: x,
-        y: y,
-        speed: 1000
-      },
-      null,
-      this));
+  movePiece(piece, toX, toY) {
+    createjs.Tween.get(piece, {
+      loop: false
+    }).to({
+      x: toX,
+      y: toY
+    }, 1000, createjs.Ease.getPowInOut(4));
   }
 
-  rollDice(numberOfDice, goal) {
+  rollDice(numberOfDice) {
     var me = this;
     return Q.Promise(function(resolve, reject, notify) {
-      let results = [];
 
+      let dice = [];
+      let results = [];
       for (var i = 0; i < numberOfDice; i++) {
-        results.push(MathHelper.RandomNumber(1, 6));
+        var die = new Controls.DieControl(me.assets.getResult("die"));
+        die.x = i * 125;
+        die.y = 0;
+        me.field.addChild(die);
+        dice.push(die);
+        var result = die.roll(1000);
+        results.push(result);
       }
 
-      me.switchState(new States.RollDice({
-        results,
-        goal
-      }, function() {
+      setTimeout(function() {
         resolve(results);
-      }, me));
+      }, 1000);
+
+      setTimeout(function() {
+        dice.forEach(function(die) {
+          me.field.removeChild(die);
+        });
+      }, 4000)
     });
+  }
+
+  showCharacterMenu(character) {
+    var menu = this.menuFactory(character, this);
+    new Controls.MenuControl(character,
+        "circle",
+        menu,
+        character.properties.baseSize,
+        this.field)
+      .show();
   }
 
   snapBallToCharacter(character) {
     this.movePiece(this.ball, character.x, character.y);
   }
 
-  showConfirm(message) {
-    return Q.Promise(function(resolve, reject, notify) {
-      vex.dialog.confirm({
-        message: message,
-        callback: resolve,
-      })
-    });
-  }
-
-  showPlayBook(character, hits) {
-    return Q.Promise(function(resolve, reject, notify) {
-      let actions = [];
-      let html = '';
-      let actionId = 0;
-      character.PlayBookColumns.forEach((c, i) => {
-        html += '<div class="playbook-column">';
-        c.PlaybookResults.forEach((r, j) => {
-          actions.push(r.PlaybookResultActions);
-          html += '<div action="' + actionId++ + '" class="playbook-result ' + (i < hits ? "enabled" : "disabled") + ' ' + (r.Momentous ? "momentous" : "") + '">';
-          r.PlaybookResultActions.forEach(a => {
-            html += '<span class="playbook-result-action">' + a.Action.Abbreviation + '</span>';
-          });
-          html += '</div>';
-        });
-        html += '</div>';
-      });
-
-      vex.dialog.open({
-        message: 'Select a playbook result.',
-        input: html,
-        buttons: [],
-        callback: function(data) {},
-        afterOpen: function() {
-          $(".playbook-result.enabled").click((evt) => {
-            var a = $(evt.currentTarget).attr("action");
-            var acts = actions[Number(a)];
-            this.close();
-
-            resolve(acts.map(action => action.Action));
-          })
-        }
-      });
-    });
-  }
-
-  showCharacterPlays(character) {
-    let me = this;
-    return Q.Promise(function(resolve, reject, notify) {
-      let html = '<div class="ui cards">';
-      let playid = 0;
-      let plays = [];
-
-      character.CharacterPlays.forEach((p, i) => {
-        let play = me.getPlay(p.Name);
-        plays.push({
-          metaData: p,
-          action: play
-        });
-
-        html += '<div class="character-play card" play="' + playid++ + '">';
-        html += '<div class="content">';
-        html += '<div class="character-play-name header">' + p.Name + "</div>";
-        html += '<div class="character-play-description description">' + p.Description + "</div>";
-        html += '</div>';
-        html += '</div>';
-
-      });
-
-      html += '</div>';
-      vex.dialog.open({
-        message: 'Select a Character Play',
-        input: html,
-        buttons: [],
-        callback: function(data) {},
-        afterOpen: function() {
-          $(".character-play").click((evt) => {
-            var pId = $(evt.currentTarget).attr("play");
-            var play = plays[Number(pId)];
-            this.close();
-            resolve(play);
-          })
-        }
-      });
-    });
-  }
-
-  showMessage(message, color){
-    var me = this;
-    var text = new createjs.Text(message, "64px Arial", color || "red");
-    text.set({
-      textAlign: "center",
-      textBaseline: "middle"
-    });
-
-    text.x = Measurements.Inch * 18;
-    text.y = Measurements.Inch * 18;
-
-    this.field.addChild(text);
-
-    createjs.Tween.get(text).to({alpha: 0.5}, 2000);
-
-    createjs.Tween.get(text, {
-      loop: false
-    }).to({
-      scaleX: 1.5,
-      scaleY: 1.5
-    }, 2000, createjs.Ease.getPowInOut(4)).call(function(){
-      me.field.removeChild(text);
-    })
-  }
-
-  showButton(text){
-    let btn = $('<button class="ui primary button">' + text + '</button>');
-    this.clearMenuButtons();
-    $("#menu").append(btn);
-
-    return btn;
-  }
-
-  clearMenuButtons(){
-    $("#menu").empty();
-  }
   //END UI Functions
 
   //INPUT HANDLERS
-  clickPiece(params, skipAction) {
-    if (!skipAction) {
-      this.actions.push({
-        id: this.actions.length + 1,
-        type: "Input",
-        params: params,
-        input: Inputs.PIECE_CLICK,
-        replaySpeed: 1
-      });
-    }
-
-    this._currentState.handleInput(Inputs.PIECE_CLICK, params.pieceId);
+  clickPiece(piece, evt) {
+    this._currentState.handleInput(Inputs.PIECE_CLICK, piece, evt);
   }
 
-  pressMovePiece(params, skipAction) {
-    if (!skipAction) {
-      this.actions.push({
-        id: this.actions.length + 1,
-        type: "Input",
-        params: params,
-        input: Inputs.PIECE_DRAG,
-        replaySpeed: 10
-      });
-    }
-
-    this._currentState.handleInput(Inputs.PIECE_DRAG, params.pieceId, {
-      mouseX: params.mouseX,
-      mouseY: params.mouseY
-    });
-  }
-
-  menuButtonClick(buttonId, skipAction) {
-    if (!skipAction) {
-      this.actions.push({
-        id: this.actions.length + 1,
-        type: "Input",
-        params: buttonId,
-        input: Inputs.CLICK_MENU_BUTTON,
-        replaySpeed: 1000
-      });
-    }
-
-    this._currentState.handleInput(Inputs.CLICK_MENU_BUTTON, buttonId);
+  pressMovePiece(piece, evt) {
+    this._currentState.handleInput(Inputs.PIECE_DRAG, piece, evt);
   }
   //END INPUT HANDLERS
 
-  saveCharacterData() {
-    var characters = this.getPieceByType("character").map(c => c.data());
-    this.actions.push({
-      id: this.actions.length + 1,
-      type: "SetCharacterData",
-      params: characters,
-      replaySpeed: 1
-    });
-  }
 
-  loadCharacters(characters) {
-    this.removeCharacterPieces();
-
-    characters.forEach(c => {
-      var model = new CharacterModel(JSON.parse(c.characterData));
-      this.addCharacter(model, c.x, c.y)
-    }, this);
-  }
-
-  removeCharacterPieces() {
-    this.getPieceByType("character")
-      .forEach(c => {
-        _.remove(this.pieces, {
-          id: c.id
-        });
-        this.field.removeChild(c)
-      }, this);
-  }
 }
