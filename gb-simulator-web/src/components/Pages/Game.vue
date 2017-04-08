@@ -16,11 +16,12 @@ export default {
   name: 'hello',
   data () {
     return {
-      msg: 'Welcome to Your Vue.js App'
+      msg: 'Welcome to Your Vue.js App',
+      selectedCharacter : null
     }
   },
   mounted: function(){
-    var game = new GuildBallGame("demoCanvas");
+    var game = new GuildBallGame("demoCanvas", this.selectedCharacter);
   }
 }
 </script>

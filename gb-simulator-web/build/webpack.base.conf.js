@@ -37,14 +37,14 @@ module.exports = {
         loader: 'babel-loader',
         include: [resolve('src'), resolve('test')]
       },
-      {
-        test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
-        loader: 'url-loader',
-        options: {
-          limit: 10000,
-          name: utils.assetsPath('img/[name].[hash:7].[ext]')
-        }
-      },
+      // {
+      //   test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
+      //   loader: 'url-loader',
+      //   options: {
+      //     limit: 10000,
+      //     name: utils.assetsPath('img/[name].[hash:7].[ext]')
+      //   }
+      // },
       {
         test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
         loader: 'url-loader',
@@ -55,8 +55,8 @@ module.exports = {
       },
       {
           test: /\.(jpe?g|png|gif|svg)$/i,
-          loader: "file-loader?name=../../v2/src/assets/[name].[ext]"
-        }
+          loader: "file-loader?name=./src/assets/[name].[ext]"
+      }
     ]
   }
 }
