@@ -1,7 +1,13 @@
 <template>
   <div class="hello">
-    <div id="menu"></div>
+
+    <div id="menu">
+    </div>
     <h1>{{ msg }}</h1>
+    <h1 v-if="selectedCharacter">{{ selectedCharacter.Name }}</h1>
+    <h1 v-if="selectedCharacter">{{ selectedCharacter.Influence }}</h1>
+
+
     <p style="display: none;"><i class="fa fa-car"></i> Force Font to load.</p>
     <button id="replay">Replay</button>
     <button id="finishActivation">Finish Activation</button>
@@ -17,11 +23,20 @@ export default {
   data () {
     return {
       msg: 'Welcome to Your Vue.js App',
-      selectedCharacter : null
+      selectedCharacter : {
+          Name: null
+      }
     }
   },
   mounted: function(){
-    var game = new GuildBallGame("demoCanvas", this.selectedCharacter);
+    var game = new GuildBallGame("demoCanvas", {
+      showCharacter : this.showCharacter
+    });
+  },
+  methods: {
+    showCharacter(character){
+      this.selectedCharacter = character;
+    }
   }
 }
 </script>
