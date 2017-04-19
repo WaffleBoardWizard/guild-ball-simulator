@@ -10,8 +10,12 @@ export default [
   "Armor": 0,
   "InfluenceStart": 4,
   "InfluenceMax": 6,
+  "Influence" : 0,
+
   "IconUrl": "Midas",
   "Health": 14,
+  "MaxHealth": 14,
+
   "IcySponge": 7,
   "Season": 1,
   "Size": 30,
@@ -445,8 +449,12 @@ export default [
   "Armor": 1,
   "InfluenceStart": 4,
   "InfluenceMax": 6,
+  "Influence" : 0,
+
   "IconUrl": "Smoke",
   "Health": 16,
+  "MaxHealth": 16,
+
   "IcySponge": 8,
   "Season": 2,
   "Size": 30,
@@ -683,8 +691,12 @@ export default [
   "Armor": 2,
   "InfluenceStart": 1,
   "InfluenceMax": 2,
+  "Influence" : 0,
+
   "IconUrl": "Flask",
   "Health": 8,
+  "MaxHealth": 8,
+
   "IcySponge": 4,
   "Season": 1,
   "Size": 30,
@@ -858,8 +870,12 @@ export default [
   "Armor": 0,
   "InfluenceStart": 1,
   "InfluenceMax": 3,
+  "Influence" : 0,
+
   "IconUrl": "Naja",
   "Health": 7,
+  "MaxHealth": 7,
+
   "IcySponge": 4,
   "Season": 2,
   "Size": 30,
@@ -1061,8 +1077,12 @@ export default [
   "Armor": 1,
   "InfluenceStart": 2,
   "InfluenceMax": 4,
+  "Influence" : 0,
+
   "IconUrl": "Calculus",
   "Health": 15,
+  "MaxHealth": 15,
+
   "IcySponge": 8,
   "Season": 1,
   "Size": 30,
@@ -1313,8 +1333,12 @@ export default [
   "Armor": 1,
   "InfluenceStart": 2,
   "InfluenceMax": 4,
+  "Influence" : 0,
+
   "IconUrl": "Katalyst",
   "Health": 27,
+  "MaxHealth": 27,
+
   "IcySponge": 15,
   "Season": 1,
   "Size": 40,
@@ -1649,8 +1673,12 @@ export default [
   "Armor": 1,
   "InfluenceStart": 2,
   "InfluenceMax": 2,
+  "Influence" : 0,
+
   "IconUrl": "VETKatalyst",
   "Health": 29,
+  "MaxHealth": 29,
+
   "IcySponge": 19,
   "Season": 2,
   "Size": 50,
@@ -2075,8 +2103,12 @@ export default [
   "Armor": 1,
   "InfluenceStart": 2,
   "InfluenceMax": 4,
+  "Influence" : 0,
+
   "IconUrl": "Mercury",
   "Health": 15,
+  "MaxHealth": 15,
+
   "IcySponge": 8,
   "Season": 1,
   "Size": 30,
@@ -2315,8 +2347,12 @@ export default [
   "Armor": 1,
   "InfluenceStart": 2,
   "InfluenceMax": 4,
+  "Influence" : 0,
+
   "IconUrl": "Venin",
   "Health": 16,
+  "MaxHealth": 16,
+
   "IcySponge": 10,
   "Season": 2,
   "Size": 30,
@@ -2641,8 +2677,12 @@ export default [
   "Armor": 0,
   "InfluenceStart": 2,
   "InfluenceMax": 4,
+  "Influence" : 0,
+
   "IconUrl": "Vitriol",
   "Health": 12,
+  "MaxHealth": 12,
+
   "IcySponge": 6,
   "Season": 1,
   "Size": 30,
@@ -2910,8 +2950,12 @@ export default [
   "Armor": 1,
   "InfluenceStart": 4,
   "InfluenceMax": 5,
+  "Influence" : 0,
+
   "IconUrl": "Tapper",
   "Health": 18,
+  "MaxHealth": 18,
+
   "IcySponge": 9,
   "Season": 1,
   "Size": 30,
@@ -3192,8 +3236,10 @@ export default [
   "Armor": 1,
   "InfluenceStart": 4,
   "InfluenceMax": 6,
+  "Influence" : 0,
   "IconUrl": "Ballista",
   "Health": 18,
+  "MaxHealth" : 18,
   "IcySponge": 9,
   "Season": 1,
   "Size": 30,
@@ -3562,9 +3608,12 @@ export default [
   "Defense": 5,
   "Armor": 0,
   "InfluenceStart": 4,
+  "Influence" : 0,
   "InfluenceMax": 6,
   "IconUrl": "Pin Vice",
   "Health": 11,
+  "MaxHealth": 11,
+
   "IcySponge": 6,
   "Season": 2,
   "Size": 30,
@@ -3982,8 +4031,10 @@ export default [
   "Armor": 1,
   "InfluenceStart": 1,
   "InfluenceMax": 3,
+  "Influence" : 0,
   "IconUrl": "Mainspring",
   "Health": 7,
+  "MaxHealth": 7,
   "IcySponge": 4,
   "Season": 1,
   "Size": 30,
@@ -4138,8 +4189,12 @@ export default [
   "Armor": 1,
   "InfluenceStart": 1,
   "InfluenceMax": 3,
+  "Influence" : 0,
+
   "IconUrl": "Mother",
   "Health": 9,
+  "MaxHealth": 9,
+
   "IcySponge": 5,
   "Season": 1,
   "Size": 40,
@@ -4330,8 +4385,12 @@ export default [
   "Armor": 1,
   "InfluenceStart": 2,
   "InfluenceMax": 4,
+  "Influence" : 0,
+
   "IconUrl": "Hoist",
   "Health": 11,
+  "MaxHealth": 11,
+
   "IcySponge": 6,
   "Season": 2,
   "Size": 30,
@@ -4667,8 +4726,12 @@ export default [
   "Armor": 2,
   "InfluenceStart": 2,
   "InfluenceMax": 3,
+  "Influence" : 0,
+
   "IconUrl": "Colossus",
   "Health": 20,
+  "MaxHealth": 20,
+
   "IcySponge": 10,
   "Season": 1,
   "Size": 50,
@@ -4987,7 +5050,10 @@ export default [
   "Armor": 1,
   "InfluenceStart": 2,
   "InfluenceMax": 4,
+  "Influence" : 0,
+
   "IconUrl": "Ratchet",
+  "MaxHealth": 17,
   "Health": 17,
   "IcySponge": 9,
   "Season": 1,
@@ -5283,8 +5349,12 @@ export default [
   "Armor": 1,
   "InfluenceStart": 2,
   "InfluenceMax": 4,
+  "Influence" : 0,
+
   "IconUrl": "Salvo",
   "Health": 14,
+  "MaxHealth": 14,
+
   "IcySponge": 6,
   "Season": 1,
   "Size": 30,
@@ -5568,8 +5638,12 @@ export default [
   "Armor": 0,
   "InfluenceStart": 2,
   "InfluenceMax": 4,
+  "Influence" : 0,
+
   "IconUrl": "Velocity",
   "Health": 11,
+  "MaxHealth": 11,
+
   "IcySponge": 6,
   "Season": 1,
   "Size": 30,
@@ -5888,8 +5962,12 @@ export default [
   "Armor": 1,
   "InfluenceStart": 2,
   "InfluenceMax": 4,
+  "Influence" : 0,
+
   "IconUrl": "VETVelocity",
   "Health": 14,
+  "MaxHealth": 14,
+
   "IcySponge": 6,
   "Season": 2,
   "Size": 30,
@@ -6237,8 +6315,12 @@ export default [
   "Armor": 1,
   "InfluenceStart": 2,
   "InfluenceMax": 4,
+  "Influence" : 0,
+
   "IconUrl": "Compound",
   "Health": 20,
+  "MaxHealth": 20,
+
   "IcySponge": 10,
   "Season": 1,
   "Size": 40,

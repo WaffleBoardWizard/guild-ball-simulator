@@ -17,7 +17,6 @@
         scatter.x = 250;
         scatter.y = 165;
         this.addChildAt(scatter, ball);
-        
     };
 
     var p = createjs.extend(BallControl, createjs.Container);

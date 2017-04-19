@@ -2,7 +2,6 @@ import GamePieceControl from './GamePieceControl';
 import MenuControl from './MenuControl';
 import FontAwesomeIcons from '../common/FontAwesomeIcons';
 import Measurements from '../common/Measurements';
-import FontAwesomeIcons from '../common/FontAwesomeIcons';
 import FAButton from "./FAButton";
 
 function CharacterControl(character, image) {
@@ -10,35 +9,27 @@ function CharacterControl(character, image) {
   this.character = character;
   this.image = image;
   this.baseSize =  this.character.Size * Measurements.MM
-  this.character.addOnHealthChange(this.onDamage.bind(this));
+  //this.character.addOnHealthChange(this.onDamage.bind(this));
 
 
   this.addImage();
 
   this.id = this.character.Name;
 
-  this.character.addOnHealthChange(this.onDamage.bind(this));
-  this.character.addOnConditionsChange(this.onConditionAdded.bind(this));
-  this.character.addOnAurasChange(this.onAuraAdded.bind(this));
-  this.character.addOnInfluenceChange(this.showInfluenceBar.bind(this));
+  // this.character.addOnHealthChange(this.onDamage.bind(this));
+  // this.character.addOnConditionsChange(this.onConditionAdded.bind(this));
+  // this.character.addOnAurasChange(this.onAuraAdded.bind(this));
+  // this.character.addOnInfluenceChange(this.showInfluenceBar.bind(this));
 
   //this.shape.addEventListener ("mouseover", function(){
   //  console.log("mouse")
-    this.showHealthBar();
-    this.showInfluenceBar();
+  this.updateBars();
 //  }, this);
 
   this.shape.on("click", function(){
     console.log(this.character);
   }, this);
 
-  const handler = {
-    set(target, key, value) {
-      console.log(`Setting value ${key} as ${value}`)
-    },
-  };
-
-  const p = new Proxy(character, handler);
 
 };
 
@@ -52,6 +43,10 @@ p.conditionBars = [];
 p.auras = [];
 p.influenceControls = [];
 
+p.updateBars = function(){
+  this.showInfluenceBar();
+  this.showHealthBar();
+};
 
 p.showMoveIcon = function(){
   var text = new createjs.Text(FontAwesomeIcons.arrows, "32px FontAwesome");
@@ -87,7 +82,7 @@ p.showInfluenceBar = function() {
     y: 0
   });
 
-  this.addChildAt(this.influenceBar, this.shape);
+  this.addChildAt(this.influenceBar, this.getChildIndex(this.illuminateCircle) + 1);
 
   // Draw Random Segments
   var thisArc, angle = 0;
@@ -124,7 +119,8 @@ p.showHealthBar = function() {
     y: 0
   });
 
-  this.addChildAt(this.healthBar, this.shape);
+  this.addChildAt(this.healthBar, this.getChildIndex(this.influenceBar) + 1);
+
 
   // Draw Random Segments
   var thisArc, angle = 0;
@@ -136,7 +132,7 @@ p.showHealthBar = function() {
     var endAngle = Math.min(360, angle + arc) * Math.PI / 180;
     this.healthBar.graphics.s("black").ss(3);
 
-    if (i < this.character.CurrentHP)
+    if (i < this.character.Health)
       this.healthBar.graphics.f("red");
     else
       this.healthBar.graphics.f("white");
@@ -161,11 +157,11 @@ p.addImage = function() {
   this.addChild(this.shape);
 }
 
-p.illuminate = function() {
+p.illuminate = function(color) {
   this.illuminateCircle = new createjs.Shape();
-  this.illuminateCircle.graphics.beginFill("blue").drawCircle(0, 0, (this.baseSize * .6) - 1)
+  this.illuminateCircle.graphics.beginFill(color || "blue").drawCircle(0, 0, (this.baseSize * .6) - 1)
   this.illuminateCircle.alpha = .5;
-  this.addChildAt(this.illuminateCircle, this.shape);
+  this.addChildAt(this.illuminateCircle);
   var me = this;
   createjs.Tween.get(this.illuminateCircle, {
     loop: true
@@ -230,8 +226,8 @@ p.showInflunceControls = function(maxInfluence, getAvaliableInfluence, onInfluen
   add.on('click', function(){
     if(getAvaliableInfluence() > 0 && me.character.Influence < me.character.InfluenceMax){
       me.character.Influence++;
-      me.showInfluenceBar();
-      onInfluenceChange(+1);
+      //me.showInfluenceBar();
+      //onInfluenceChange(+1);
     }
   });
 
@@ -241,11 +237,10 @@ p.showInflunceControls = function(maxInfluence, getAvaliableInfluence, onInfluen
   minus.x = 15;
   minus.y = this.baseSize;
   minus.on('click', function(){
-    console.log(maxInfluence)
     if(getAvaliableInfluence() != maxInfluence && me.character.Influence != 0){
       me.character.Influence--;
-      me.showInfluenceBar();
-      onInfluenceChange(-1);
+      //me.showInfluenceBar();
+      //onInfluenceChange(-1);
     }
   });
 

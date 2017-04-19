@@ -42,8 +42,7 @@ export default class CharacterModel {
       Advanced: false
     };
   }
-
-
+  
   heal(amount) {
     this.CurrentHP += amount;
     this.fireOnHealthChange();
