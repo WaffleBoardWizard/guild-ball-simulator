@@ -3,37 +3,49 @@
   <p style="display: none;"><i class="fa fa-car"></i> Force Font to load.</p>
 
   <div id="menu">
-
+    <div class="message" v-if="message">
+      <h1>{{message}}</h1>
+    </div>
     <div class="current-team" v-if="currentTeam">
       <h1>{{currentTeam.PlayerName}}'s Turn</h1>
     </div>
     <div class="influnce-menu" v-if="showInflunceMenu">
-      <div  class="influence-total">
-        <h4>
-              Total Influence
-        </h4>
-        <h2 class="">
-            {{TotalInfluence(currentTeam)}}
-        </h2>
+      <div class="influence-totals">
+        <div class="influence-total">
+          <h4>
+                Total Influence
+          </h4>
+          <h2 class="">
+              {{TotalInfluence(currentTeam)}}
+          </h2>
+        </div>
+        <div class="influence-total">
+          <h4>
+                Remaining Influence
+          </h4>
+          <h2 class="">
+              {{CurrentTeamsRemainingInfluence}}
+          </h2>
+        </div>
       </div>
-      <div class="influence-total">
-        <h4>
-              Remaining Influence
-        </h4>
-        <h2 class="">
-            {{CurrentTeamsRemainingInfluence}}
-        </h2>
-      </div>
+
+      <!-- <div class="characters">
+          <div class="" v-for="character in charactersToSetInfluence">
+            <MiniCharacter :character="character"  style="display:inline-block;"/>
+          </div>
+        </div> -->
       <div class="">
         <md-button @click.native="next" class="md-raised md-primary">Submit</md-button>
       </div>
+
     </div>
+
     <div v-if="confirmActivationCharacter" class="confirm-activate-character" style="display:inline-block">
       <BigCharacter :character="confirmActivationCharacter" />
       <md-button @click.native="confirmActivation" class="md-raised md-primary">Activate</md-button>
     </div>
     <div v-if="activatedCharacter" class="activate-character" style="text-align:left;">
-      <BigCharacter :character="activatedCharacter" style="display:inline-block;"/>
+      <BigCharacter :character="activatedCharacter" style="display:inline-block;" />
       <div class="actions" v-if="actions">
         <h1>Actions</h1>
         <div class="action" v-for="action in actions">
@@ -43,7 +55,7 @@
     </div>
   </div>
 
-  <TeamsSideBar :teams="teams"/>
+  <TeamsSideBar :teams="gameData.Teams" v-if="gameData"/>
 
   <canvas id="demoCanvas" width="1200" height="1200"></canvas>
 
@@ -67,29 +79,30 @@
 </template>
 
 <script>
+import axios from 'axios';
 import * as Controls from '../Controls';
 import GameBoard from "../Controls/GameBoard/GameBoard";
 import GuildBallUI from "../../GuildBallUI";
 import GuildBallGameLogic from "../../GuildBallGameLogic";
-import TeamData from '../../mockdata/Teams';
-import CharacterData from '../../mockdata/characters';
 import TeamModel from '../../models/TeamModel';
 import _ from 'lodash';
+
 
 let ui = null;
 let logic = null;
 export default {
   name: 'Game',
   components: {
-    DiceRollVsDialog : Controls.DiceRollVsDialog,
+    DiceRollVsDialog: Controls.DiceRollVsDialog,
     DiceRollDialog: Controls.DiceRollDialog,
-    PlaybookDialog : Controls.PlaybookDialog,
+    PlaybookDialog: Controls.PlaybookDialog,
     TeamsSideBar: Controls.TeamsSideBar,
-    BigCharacter: Controls.BigCharacter
+    BigCharacter: Controls.BigCharacter,
+    MiniCharacter: Controls.MiniCharacter
   },
   data() {
     return {
-      teams: [],
+      gameData: null,
       selectedCharacter: {
         Name: null
       },
@@ -98,6 +111,7 @@ export default {
       confirmActivationCharacter: null,
       actions: null,
       showInflunceMenu: false,
+      charactersToSetInfluence: [],
       confirm: {
         title: null,
         contentHTML: "",
@@ -120,36 +134,54 @@ export default {
         }
       },
       diceRoll: {
-        open : false,
-        message : "DeadBolt",
-        result: [5,4,3]
+        open: false,
+        message: "DeadBolt",
+        result: [5, 4, 3]
       },
       playbookResult: {
-        open : false,
+        open: false,
         playbookColumns: [],
-        result: [5,4,3],
+        result: [5, 4, 3],
         goal: 4
-      }
+      },
+      message: null
     }
   },
   mounted: function() {
-    this.loadTeams();
-    let fieldControl = new GameBoard("demoCanvas");
+    let me = this;
+    let playerName = this.getParameterByName('team');
+    console.log(playerName);
+    axios.get("game").then(response => {
+      me.gameData = response.data;
+      let fieldControl = new GameBoard("demoCanvas");
+      fieldControl
+        .initialize()
+        .then(() => {
+          ui = new GuildBallUI(fieldControl, me);
+          logic = new GuildBallGameLogic(ui, me.gameData, playerName);
+          this.$socket.emit("joingame", playerName);
 
-    fieldControl
-      .initialize()
-      .then(() => {
-        ui = new GuildBallUI(fieldControl, this);
-        logic = new GuildBallGameLogic(ui, this.teams);
-      })
-      .catch(function(ex) {
-        console.log(ex);
-      });
+        })
+        .catch(function(ex) {
+          console.log(ex);
+        });
 
+    });
+  },
+  sockets: {
+    connect: function() {
+      console.log('socket connected')
+    },
+    startGame: function(){
+      console.log("game started");
+    },
+    switchState: function(state){
+      console.log("switching state");
+      logic.switchStateA(state);
+    }
   },
   computed: {
     CurrentTeamsRemainingInfluence() {
-
       let maxInfluence = 0;
 
       this.currentTeam.Characters.forEach(character => {
@@ -166,8 +198,16 @@ export default {
   },
 
   methods: {
-    confirmActivation() {
+    getParameterByName(name, url) {
+    if (!url) url = window.location.href;
+    name = name.replace(/[\[\]]/g, "\\$&");
+    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
     },
+    confirmActivation() {},
     showCharacter(character) {
       this.selectedCharacter = character;
     },
@@ -179,29 +219,6 @@ export default {
       }, this);
 
       return maxInfluence;
-    },
-    loadTeams() {
-      TeamData.forEach(t => {
-        let teamCharacters = []
-        t.CharacterNames.forEach(c => {
-          teamCharacters.push(this.addTurnData(this.getCharacter(c)));
-        }, this);
-        t.Characters = teamCharacters;
-        this.teams.push(new TeamModel(t));
-      }, this);
-    },
-    getCharacter(characterName) {
-      return _.find(CharacterData, {
-        Name: characterName
-      });
-    },
-    addTurnData(character) {
-      character.Turn = {
-        Activated: false,
-        Advanced: false,
-      };
-
-      return character;
     },
     next() {
       logic.next();
@@ -243,7 +260,7 @@ export default {
           playbookColumns: playbookColumns,
           onClose: result => {
             me.playbookResult.open = false,
-            resolve(result)
+              resolve(result)
           },
           goal: goal
         };
@@ -251,10 +268,10 @@ export default {
     }
   },
   watch: {
-    teams: {
+    gameData: {
       handler: function(val, oldVal) {
-        if (this.teams && ui) {
-          this.teams.forEach(team => {
+        if (this.gameData.Teams && ui) {
+          this.gameData.Teams.forEach(team => {
             team.Characters.forEach(character => {
               ui.updateCharacter(character.Name);
             }, this);
@@ -269,12 +286,13 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-h1{
+h1 {
   padding: 5px;
   margin: 0;
 }
-.playbook-column {
-  display: inline-block;
+
+#menu {
+  height: 175px;
 }
 
 .playbook-result {
@@ -324,45 +342,44 @@ h1{
   z-index: 0;
 }
 
-
 .current-team {
   background: red;
   color: white;
 }
 
-.influence-total{
+.influence-total {
   display: inline-block;
   border: 1px solid black;
   padding: 5px;
   width: 100px;
 }
 
-.influence-total h4{
+.influence-total h4 {
   margin: 0;
 }
 
-.influence-total h2{
+.influence-total h2 {
   font-size: 48px;
   margin: 12px;
 }
 
-.actions{
+.actions {
   display: inline-block;
   width: 500px;
   vertical-align: bottom;
 }
 
-.actions h1{
+.actions h1 {
   text-align: center;
 }
-.action{
+
+.action {
   display: inline-block;
   width: 48%;
   margin: 5px;
 }
 
-.action button{
+.action button {
   width: 100%;
 }
-
 </style>

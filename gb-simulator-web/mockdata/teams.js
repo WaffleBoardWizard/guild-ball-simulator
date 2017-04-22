@@ -1,4 +1,4 @@
-export default [{
+module.exports = [{
   PlayerName : "Andrew",
   CharacterNames : ["Ballista", "Mainspring", "Velocity", "Compound", "Colossus", "Salvo"],
   Color : "red",

@@ -4,3 +4,4 @@ export {default as DiceRollDialog}  from "./DiceRollDialog";
 export {default as PlaybookDialog} from "./PlaybookDialog"
 export {default as TeamsSideBar} from "./TeamsSideBar"
 export {default as BigCharacter} from "./BigCharacter"
+export {default as MiniCharacter} from "./MiniCharacter"

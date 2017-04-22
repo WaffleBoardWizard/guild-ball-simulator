@@ -107,12 +107,31 @@ export default class GuildBallUI {
     this.fieldControl.stopIlluminatingCharacter(character);
   }
 
-  showInfluenceControls(character, maxInfluence, remainingInfluence) {
-    this.fieldControl.showInfluenceControls(character, maxInfluence, remainingInfluence);
+  showInfluenceControls(team){
+    let maxInfluence = 0;
+
+    this.vueControl.charactersToSetInfluence = team.Characters;
+    this.vueControl.showInflunceMenu = true;
+
+    team.Characters.forEach(character => {
+      maxInfluence += character.InfluenceStart;
+    }, this);
+
+    team.Characters.forEach(character => {
+      this.fieldControl.showInfluenceControls(character.Name, maxInfluence, () => {
+        let usedInfluence = 0;
+        team.Characters.forEach(character => {
+          usedInfluence += character.Influence;
+        }, this);
+        return maxInfluence - usedInfluence;
+      });
+    }, this);
   }
 
-  hideInfluenceControls(character) {
-    this.fieldControl.hideInfluenceControls(character);
+  hideInfluenceControls() {
+    this.vueControl.showInflunceMenu = false;
+    this.vueControl.charactersToSetInfluence.forEach(character =>
+        this.fieldControl.hideInfluenceControls(character.Name), this);
   }
 
   updateCharacter(character) {
@@ -233,5 +252,17 @@ export default class GuildBallUI {
   dodgeCharacter(character, distance){
     this.showCharacterMessage(character, "Dodge");
     return this.moveCharacter(character);
+  }
+
+  showMessage(message){
+    this.vueControl.message = message;
+  }
+
+  clearMessage(){
+    this.vueControl.message = null;
+  }
+
+  emit(action, params){
+    this.vueControl.$socket.emit(action, params);
   }
 }

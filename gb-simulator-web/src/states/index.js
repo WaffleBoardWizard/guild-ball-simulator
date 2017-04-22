@@ -8,3 +8,6 @@ export {default as SetInfluence}  from './SetInfluence';
 export {default as TakeOutCharacter}  from './TakeOutCharacter';
 export {default as ChooseCharacterToActivate} from "./ChooseCharacterToActivate"
 export {default as ActivateCharacter} from "./ActivateCharacter"
+export {default as StartingGame} from "./StartingGame"
+export {default as StartGameCoinFlip} from "./StartGameCoinFlip"
+export {default as RecieveKickChoice} from "./RecieveKickChoice"

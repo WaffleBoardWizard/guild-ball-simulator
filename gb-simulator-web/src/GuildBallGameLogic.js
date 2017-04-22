@@ -6,11 +6,13 @@ import * as Inputs from './Inputs';
 import MathHelper from './helpers/MathHelper';
 
 export default class GuildBallGameLogic {
-  constructor(ui, teams) {
+  constructor(ui, gameData, player) {
     this.UI = ui;
+    this.gameData = gameData;
+    this.player = player;
+    this.teams = gameData.Teams;
     this.activatedCharacter = null;
     this.currentTeam = null;
-    this.teams = teams;
     this.actions = [];
     this._currentState = null;
     this.futureStates = [];
@@ -27,14 +29,15 @@ export default class GuildBallGameLogic {
     //this.attackPlayer(this.teams[0].Characters[0], this.teams[0].Characters[1]);
     //me.rollDiceAndShow(6);
     //this.UI.showPlayBook(this.teams[0].Characters[0].PlayBookColumns, this.rollDice(6));
-
-    this.switchState(new States.SetInfluence({
-      teamId: this.teams[0].PlayerName
-    }, this));
-
-    this.futureStates.push(new States.SetInfluence({
-      teamId: this.teams[1].PlayerName
-    }, this));
+    //
+    // this.switchState(new States.SetInfluence({
+    //   teamId: this.teams[0].PlayerName
+    // }, this));
+    //
+    // this.futureStates.push(new States.SetInfluence({
+    //   teamId: this.teams[1].PlayerName
+    // }, this));
+    this.switchStateA(this.gameData.CurrentState);
   }
 
   bindEventHandlers() {
@@ -61,7 +64,9 @@ export default class GuildBallGameLogic {
     let i = 2;
     this.teams.forEach(team => {
       team.Characters.forEach(c => {
-        this.UI.addCharacter(c, i, i);
+        let x = c.x || i;
+        let y = c.y || i;
+        this.UI.addCharacter(c, x, y);
         i += 2;
       }, this);
     }, this);
@@ -144,30 +149,13 @@ export default class GuildBallGameLogic {
   }
 
   allowTeamToSetInfluence(team) {
-    let maxInfluence = 0;
-    this.UI.showInflunceMenu(true);
-
-    team.Characters.forEach(character => {
-      maxInfluence += character.InfluenceStart;
-    }, this);
-
-    team.Characters.forEach(character => {
-      this.UI.showInfluenceControls(character.Name, maxInfluence, () => {
-        let usedInfluence = 0;
-        team.Characters.forEach(character => {
-          usedInfluence += character.Influence;
-        }, this);
-        return maxInfluence - usedInfluence;
-      });
-    }, this);
+    this.UI.showInfluenceControls(team);
   }
 
   hideInfluenceControls(team) {
     this.UI.hideCurrentTeam();
     this.UI.showInflunceMenu(false);
-    team.Characters.forEach(character =>
-      this.UI.hideInfluenceControls(character.Name), this);
-
+    this.UI.hideInfluenceControls();
   }
 
   setCharacterAsActivated(character) {
@@ -516,17 +504,10 @@ export default class GuildBallGameLogic {
       this));
   }
 
-  switchState(state, skipAction, validated) {
+  switchState(state, doNotEmit, validated) {
     let me = this;
-
-    if (!skipAction) {
-      this.actions.push({
-        id: this.actions.length + 1,
-        type: "State",
-        params: state.params,
-        state: state.state,
-        replaySpeed: state.replaySpeed
-      });
+    if(!doNotEmit){
+      this.UI.emit("switchState", { Name : state.state, Params : state.params });
     }
 
     if (this._currentState) {
@@ -545,6 +526,10 @@ export default class GuildBallGameLogic {
 
     this._currentState = state;
     this._currentState.onStart();
+  }
+
+  switchStateA(state){
+    this.switchState(new States[state.Name](state.Params || state.params, this), true);
   }
 
   replayState(actions) {

@@ -1,4 +1,4 @@
-export default [
+module.exports = [
   {
   "Name": "Midas",
   "MeleeZone": 1,

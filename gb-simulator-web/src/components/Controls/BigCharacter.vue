@@ -67,6 +67,9 @@
             </div>
           </div>
         </div>
+
+      </md-tab>
+      <md-tab id="playbook" md-label="Playbook">
         <h4>Playbook</h4>
         <Playbook :playbook="character.PlayBookColumns" />
       </md-tab>
