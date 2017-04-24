@@ -119,6 +119,15 @@ export default class GameBoard extends Game {
     this.movePiece(this.ball, character.x, character.y);
   }
 
+  moveCharacterFromTo(characterName, fromX, fromY, toX, toY){
+    createjs.Tween.get(this.getPiece(characterName), {
+      loop: false
+    }).to({
+      x: toX * Measurements.Inch,
+      y: toY  * Measurements.Inch
+    },  1000, createjs.Ease.getPowInOut(4));
+  }
+
   removeCharacterPieces() {
     this.getPieceByType("character")
       .forEach(c => {

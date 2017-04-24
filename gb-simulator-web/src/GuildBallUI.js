@@ -254,6 +254,10 @@ export default class GuildBallUI {
     return this.moveCharacter(character);
   }
 
+  moveCharacterFromTo(character, fromX, fromY, toX, toY){
+    this.fieldControl.moveCharacterFromTo(character, fromX, fromY, toX, toY);
+  }
+
   showMessage(message){
     this.vueControl.message = message;
   }

@@ -26,10 +26,14 @@ export default class StartGameCoinFlip extends State {
         Roll : team2Result
       }).then( x => {
         let team = null
-        if( team1Result > team2Result)
+        if( team1Result > team2Result){
           team = this.game.teams[0].PlayerName;
-        else
+          me.game.addLog(this.game.teams[0].PlayerName + ' has won initiative');
+        }
+        else{
           team = this.game.teams[1].PlayerName;
+          me.game.addLog(this.game.teams[1].PlayerName + ' has won initiative');
+        }
 
         me.game.switchState(new States.RecieveKickChoice({team : team}, me.game))
       });

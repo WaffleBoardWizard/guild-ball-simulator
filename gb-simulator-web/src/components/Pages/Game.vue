@@ -54,7 +54,11 @@
       </div>
     </div>
   </div>
-
+  <div class="logs" v-if="gameData">
+    <div class="" v-for="log in gameData.Logs">
+        <strong>{{log.CreatedOn}}</strong> : {{log.Message}}
+    </div>
+  </div>
   <TeamsSideBar :teams="gameData.Teams" v-if="gameData"/>
 
   <canvas id="demoCanvas" width="1200" height="1200"></canvas>
@@ -178,6 +182,14 @@ export default {
     switchState: function(state){
       console.log("switching state");
       logic.switchStateA(state);
+    },
+    logAdded: function(log){
+      console.log("adding log");
+      this.gameData.Logs.push(log);
+    },
+    actionAdded: function(action){
+      console.log("adding action");
+      logic.performAction(action);
     }
   },
   computed: {
@@ -270,7 +282,12 @@ export default {
   watch: {
     gameData: {
       handler: function(val, oldVal) {
+
+        if(this.gameData)
+          this.$socket.emit("updateGameData", this.gameData);
+
         if (this.gameData.Teams && ui) {
+
           this.gameData.Teams.forEach(team => {
             team.Characters.forEach(character => {
               ui.updateCharacter(character.Name);
@@ -381,5 +398,13 @@ h1 {
 
 .action button {
   width: 100%;
+}
+
+.logs{
+  position: fixed;
+  top: 200px;
+  width: 100px;
+  z-index: 200px;
+  background: white;
 }
 </style>

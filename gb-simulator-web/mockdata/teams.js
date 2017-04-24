@@ -5,7 +5,8 @@ module.exports = [{
   Points :  0,
   Influence : 0,
   Momentum  : 0,
-  Team: "Engineers"
+  Team: "Engineers",
+  CurrentAction: -1
 },
 {
   PlayerName : "Joe",
@@ -14,5 +15,6 @@ module.exports = [{
   Points :  0,
   Influence : 0,
   Momentum  : 0,
-  Team: "Alchemists"
+  Team: "Alchemists",
+  CurrentAction: -1
 }];

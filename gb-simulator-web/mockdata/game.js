@@ -11,5 +11,10 @@ module.exports = {
     CurrentState : {
       Name : "StartingGame",
       Params : null,
-    }
+    },
+    Actions : [],
+    Logs : [{
+    CreatedOn : new Date(),  
+    Message: "Game Has Started"
+    }]
 };

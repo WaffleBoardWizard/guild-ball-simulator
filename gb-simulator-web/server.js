@@ -90,6 +90,28 @@ io.on('connection', function(socket) {
     io.emit("switchState", state);
   });
 
+  socket.on('addAction', function (action) {
+    gameData.Actions.push(action);
+    io.emit("actionAdded", { id : gameData.Actions.length - 1, action : action});
+  });
+
+  socket.on('addLog', function (log) {
+    gameData.Logs.push(log);
+    io.emit("logAdded", log);
+  });
+
+  socket.on('updateCurrentAction', request =>{
+    var player = _.find(gameData.Teams, {PlayerName : request.player });
+    console.log(player.CurrentAction);
+    console.log(request.currentAction);
+    player.CurrentAction = request.currentAction;
+    console.log(_.find(gameData.Teams, {PlayerName : request.player }).CurrentAction);
+  });
+
+  socket.on("updateGameData", request =>{
+    gameData = request;
+  });
+
   socket.on('joingame', player => {
     var validPlayer = _.find(gameData.Teams, {PlayerName : player });
 

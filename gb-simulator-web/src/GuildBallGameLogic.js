@@ -3,20 +3,20 @@ import Plays from './Plays';
 import CharacterModel from './models/CharacterModel';
 import * as States from './States';
 import * as Inputs from './Inputs';
+import * as Actions from "./actions";
 import MathHelper from './helpers/MathHelper';
 
 export default class GuildBallGameLogic {
   constructor(ui, gameData, player) {
     this.UI = ui;
     this.gameData = gameData;
-    this.player = player;
     this.teams = gameData.Teams;
+    this.player = player;
+    this.playerTeam = this.getTeam(this.player);
     this.activatedCharacter = null;
     this.currentTeam = null;
     this.actions = [];
-    this._currentState = null;
     this.futureStates = [];
-
     this.initialize();
   }
 
@@ -37,12 +37,73 @@ export default class GuildBallGameLogic {
     // this.futureStates.push(new States.SetInfluence({
     //   teamId: this.teams[1].PlayerName
     // }, this));
-    this.switchStateA(this.gameData.CurrentState);
+
+    this.catchUpOnActions(this.gameData.Actions)
+      .then( x =>{
+        // me.updateCurrentAction();
+        let state = me.gameData.CurrentState;
+        me.gameData.CurrentState = null;
+        me.switchStateA(state);
+      });
   }
 
   bindEventHandlers() {
     this.UI.onPieceClicked = this.PieceClicked.bind(this);
   }
+
+  addLog(log){
+    this.UI.emit("addLog", {
+      Message: log,
+      CreatedOn : new Date()
+    });
+  }
+
+  addAction(action){
+    this.playerTeam.CurrentAction++;
+    // this.updateCurrentAction();
+
+    this.UI.emit("addAction", action);
+  }
+
+  // updateCharacterData(){
+  //   this.UI.emit('updateCharacters', {
+  //     player: this.player,
+  //     characterData: this.playerTeam.Characters
+  //   })
+  // }
+
+  performAction(action){
+    if(action.id > this.playerTeam.CurrentAction)
+      {
+        console.log('performing action');
+        new Actions[action.action.name](action.action.params, this).perform();
+      }
+  }
+
+  catchUpOnActions(actions){
+    let me = this;
+
+    return new Promise(function(resolve, reject) {
+      let missingActions = actions.slice(me.playerTeam.CurrentAction + 1);
+      let totalTime = 0;
+      missingActions.forEach(action =>{
+        setTimeout(()=>{
+          me.playerTeam.CurrentAction++;
+          new Actions[action.name](action.params, me).perform();
+        },totalTime);
+        totalTime += action.replaySpeed;
+      }, me);
+
+      setTimeout(resolve, totalTime);
+    });
+  }
+  //
+  // updateCurrentAction(){
+  //   this.UI.emit('updateCurrentAction', {
+  //     player: this.player,
+  //     currentAction: this.playerTeam.CurrentAction
+  //   })
+  // }
 
   switchTeam() {
     let team = this.teams.indexOf(this.currentTeam) == 0 ? this.teams[1] : this.teams[0];
@@ -99,8 +160,8 @@ export default class GuildBallGameLogic {
 
     if (this.futureStates.length > 0) {
       let me = this;
-      if (!validated && this._currentState.validateExit) {
-        this._currentState
+      if (!validated && this.gameData.CurrentState.validateExit) {
+        this.gameData.CurrentState
           .validateExit()
           .then( validated => {
             if(validated)
@@ -510,9 +571,9 @@ export default class GuildBallGameLogic {
       this.UI.emit("switchState", { Name : state.state, Params : state.params });
     }
 
-    if (this._currentState) {
-      if (!validated && this._currentState.validateExit) {
-        this._currentState
+    if (this.gameData.CurrentState) {
+      if (!validated && this.gameData.CurrentState.validateExit) {
+        this.gameData.CurrentState
           .validateExit()
           .then( validated => {
             if(validated)
@@ -521,11 +582,11 @@ export default class GuildBallGameLogic {
 
           return;
       }
-      this._currentState.onExit();
+      this.gameData.CurrentState.onExit();
     }
 
-    this._currentState = state;
-    this._currentState.onStart();
+    this.gameData.CurrentState = state;
+    this.gameData.CurrentState.onStart();
   }
 
   switchStateA(state){
@@ -588,6 +649,6 @@ export default class GuildBallGameLogic {
       });
     }
 
-    this._currentState.handleInput("PIECE_CLICKED", params.pieceId);
+    this.gameData.CurrentState.handleInput("PIECE_CLICKED", params.pieceId);
   }
 }
