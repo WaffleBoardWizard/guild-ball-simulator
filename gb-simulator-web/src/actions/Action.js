@@ -10,7 +10,4 @@ export default class Action{
 
   }
 
-  toJson(){
-    return JSON.stringify(this);
-  }
 }

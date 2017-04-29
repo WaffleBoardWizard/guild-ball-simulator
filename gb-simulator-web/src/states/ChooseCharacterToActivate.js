@@ -3,20 +3,31 @@ import Inputs from "../Inputs"
 import * as States from "./"
 
 export default class ChooseCharacterToActivate extends State {
-  constructor(params, game) {
-    super("ChooseCharacterToActivate", params, game, params.speed);
-    this.teamId = params.teamId;
-    this.team = this.game.getTeam(params.teamId);
+  constructor(params,activeTeamId, game) {
+    super("ChooseCharacterToActivate", params, activeTeamId, game, params.speed);
+    this.team = this.game.getTeam(this.activeTeamId);
     this.unActivatedCharacters = _.filter(this.team.Characters, c => c.Turn.Activated == false);
   }
 
   onStart(){
-    this.game.setCurrentTeam(this.team);
     this.game.highlightCharacters(this.unActivatedCharacters);
   }
 
-  onExit(){
+  onActiveTeamStart(){
+    this.game.UI.showMessage("Please Activate a Character");
+    this.game.setCurrentTeam(this.team);
+  }
+
+  onNonActiveTeamStart(){
+    this.game.UI.showMessage(this.Team.PlayerName + " is choosing a character to Activate");
+  }
+
+  onActiveTeamExit(){
     this.game.stopHilightingCharacters(this.team.Characters);
+  }
+
+  onExit(){
+    this.game.UI.clearMessage();
   }
 
   handleInput(input, pieceId, evt) {

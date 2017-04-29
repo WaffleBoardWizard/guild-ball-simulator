@@ -24,12 +24,12 @@ var _AssetsToLoad = [
     "Compound.PNG",
     "Mercury.PNG",
     "Midas.PNG",
-    "Naja.png",
-    "Tapper.png",
+    "Naja.PNG",
+    "Tapper.PNG",
     "Venin.PNG",
     "VETKatalyst.png",
-    "Vitriol.png",
-    "Smoke.png",
+    "Vitriol.PNG",
+    "Smoke.PNG",
     "Calculus.PNG",
     "Goal.png"
   ];

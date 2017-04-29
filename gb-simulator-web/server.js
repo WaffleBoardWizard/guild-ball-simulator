@@ -84,32 +84,20 @@ let players = [];
 io.on('connection', function(socket) {
   console.log("connected");
 
-  socket.on('switchState', function (state) {
-    console.log("changing state");
+  socket.on('switchState', state => {
     gameData.CurrentState = state;
     io.emit("switchState", state);
   });
 
-  socket.on('addAction', function (action) {
+  socket.on('addAction', action => {
+    console.log('adding action');
     gameData.Actions.push(action);
     io.emit("actionAdded", { id : gameData.Actions.length - 1, action : action});
   });
 
-  socket.on('addLog', function (log) {
-    gameData.Logs.push(log);
-    io.emit("logAdded", log);
-  });
-
   socket.on('updateCurrentAction', request =>{
     var player = _.find(gameData.Teams, {PlayerName : request.player });
-    console.log(player.CurrentAction);
-    console.log(request.currentAction);
     player.CurrentAction = request.currentAction;
-    console.log(_.find(gameData.Teams, {PlayerName : request.player }).CurrentAction);
-  });
-
-  socket.on("updateGameData", request =>{
-    gameData = request;
   });
 
   socket.on('joingame', player => {
@@ -121,7 +109,7 @@ io.on('connection', function(socket) {
       console.log(gameData.State);
       console.log(players);
       if(players.length >= 2 && gameData.CurrentState.Name == "StartingGame"){
-        io.emit("switchState", { Name : "StartGameCoinFlip", Params : null });
+        io.emit("switchState", { Name : "StartGameCoinFlip", Params : null, activeTeamId: "Andrew" });
       }
     }
   })

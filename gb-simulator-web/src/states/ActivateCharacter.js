@@ -3,13 +3,13 @@ import Inputs from '../Inputs';
 import * as States from './';
 
 export default class ActivateCharacter extends State {
-  constructor(params, game) {
-    super("ActivateCharacter", params, game, params.speed);
+  constructor(params, activeTeamId, game) {
+    super("ActivateCharacter", params, activeTeamId, game, params.speed);
     this.characterName = params.characterName;
     this.character = this.game.getCharacter(params.characterName);
   }
 
-  onStart(){
+  onActiveTeamStart(){
     let me = this;
     let actions = [
       {
@@ -91,8 +91,5 @@ export default class ActivateCharacter extends State {
   }
 
   onExit(){
-  }
-
-  handleInput(input, pieceId, evt) {
   }
 }

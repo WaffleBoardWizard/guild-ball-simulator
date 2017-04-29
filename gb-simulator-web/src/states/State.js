@@ -1,19 +1,26 @@
 export default class State{
-  constructor(state, params, game, replaySpeed){
+  constructor(state, params, activeTeamId, game){
+    this.id = Math.floor(Math.random() * 10000000000);
     this.game = game;
     this.state = state;
     this.params = params
-    this.replaySpeed =  replaySpeed;
+    this.activeTeamId = activeTeamId;
+  }
+  onStart(){
   }
 
-  onStart(){
+  onActiveTeamStart(){
+  }
 
+  onNonActiveTeamStart(){
   }
 
   onExit(){
-
   }
 
-  handleInput(input, params){
+  onActiveTeamExit(){
+  }
+
+  onNonActiveTeamExit(){
   }
 }

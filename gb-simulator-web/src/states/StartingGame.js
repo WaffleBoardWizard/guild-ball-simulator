@@ -1,8 +1,8 @@
 import State from "./State";
 
 export default class StartingGame extends State {
-  constructor(params, game) {
-    super("StartingGame", params, game, 500);
+  constructor(params, activeTeamId, game) {
+    super("StartingGame", params, activeTeamId, game, 500);
   }
 
   onStart() {
@@ -11,8 +11,5 @@ export default class StartingGame extends State {
 
   onExit() {
     this.game.UI.clearMessage();
-  }
-
-  handleInput(input, pieceId) {
   }
 }

@@ -2,16 +2,33 @@ import State from "./State";
 import Inputs from "../Inputs"
 
 export default class SetInfluence extends State {
-  constructor(params, game) {
-    super("SetInfluence", params, game, params.speed);
+  constructor(params, game, activeTeamId) {
+    super("SetInfluence", params, activeTeamId, game, params.speed);
     this.teamId = params.teamId;
-    this.team = this.game.getTeam(params.teamId);
+    this.team = this.game.getTeam(this.activeTeamId);
   }
 
-  onStart(){
+  onActiveTeamStart(){
+    this.game.UI.showMessage("Please Set Your Influence");
     this.game.highlightCharacters(this.team.Characters);
     this.game.setCurrentTeam(this.team);
     this.game.allowTeamToSetInfluence(this.team);
+  }
+
+  onNonActiveTeamStart(){
+    this.game.UI.showMessage(this.Team.PlayerName + " is Setting Influence");
+  }
+
+  onActiveTeamExit(){
+    this.game.stopHilightingCharacters(this.team.Characters);
+    this.game.hideInfluenceControls(this.team);
+  }
+
+  onNonActiveTeamExit(){
+  }
+
+  onExit(){
+    this.game.UI.clearMessage();
   }
 
   validateExit(){
@@ -33,14 +50,5 @@ export default class SetInfluence extends State {
         resolve(true);
       }
     });
-  }
-
-  onExit(){
-    this.game.stopHilightingCharacters(this.team.Characters);
-    this.game.hideInfluenceControls(this.team);
-  }
-
-  handleInput(input, pieceId, evt) {
-
   }
 }

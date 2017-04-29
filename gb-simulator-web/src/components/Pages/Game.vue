@@ -282,12 +282,7 @@ export default {
   watch: {
     gameData: {
       handler: function(val, oldVal) {
-
-        if(this.gameData)
-          this.$socket.emit("updateGameData", this.gameData);
-
         if (this.gameData.Teams && ui) {
-
           this.gameData.Teams.forEach(team => {
             team.Characters.forEach(character => {
               ui.updateCharacter(character.Name);
