@@ -6,6 +6,6 @@ export default class Log extends Action{
   }
 
   perform(){
-    this.game.gameData.Logs.push(Object.assign({}, this.params));
+    this.game.gameData.Logs.push(this.params);
   }
 }

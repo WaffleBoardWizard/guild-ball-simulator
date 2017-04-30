@@ -3,8 +3,6 @@ import * as States from "./";
 
 export default class RecieveKickChoice extends State {
   constructor(params, activeTeamId, game) {
-    debugger
-
     super("RecieveKickChoice", params, activeTeamId, game);
   }
 
@@ -13,15 +11,13 @@ export default class RecieveKickChoice extends State {
 
     this.game.UI.showMessage("Coin Flip");
 
-    this.game.UI.showConfirm("Recieve", "Would you like to recieve?").then(x => {
-      if (x) {
-        me.game.switchState(new States.SetupCharacters({
-          team: me.params.team
-        }, me.game));
+    this.game.UI.showConfirm("Recieve", "Would you like to recieve?").then(confirm => {
+      if (confirm) {
+        me.game.switchState(new States.SetupCharacters({ kicking : true}, me.activeTeamId, me.game));
+        me.game.addInfoLog(me.activeTeamId + ' has chosen to Kick');
       } else {
-        me.game.switchState(new States.SetupCharacters({
-          team: me.params.team
-        }, me.game));
+        me.game.switchState(new States.SetupCharacters({ kicking : true}, me.game.getOpposingTeamId(), me.game));
+        me.game.addInfoLog(me.activeTeamId + ' has chosen to Recieve');
       }
     }).catch(e => console.log(e))
   }

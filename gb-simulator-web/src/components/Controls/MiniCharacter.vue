@@ -11,6 +11,9 @@
       Influence : {{character.Influence}}
       <md-progress :md-progress="(character.Influence / character.InfluenceMax) * 100"></md-progress>
     </div>
+    <div class="" v-if="character.HasBall">
+      Has Ball
+    </div>
   </div>
 </div>
 </template>

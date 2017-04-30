@@ -31,7 +31,6 @@ export default class GuildBallUI {
       if (resposne)
         resolve;
     });
-
   }
 
   showButton(text) {
@@ -107,7 +106,7 @@ export default class GuildBallUI {
     this.fieldControl.stopIlluminatingCharacter(character);
   }
 
-  showInfluenceControls(team){
+  showInfluenceControls(team) {
     let maxInfluence = 0;
 
     this.vueControl.charactersToSetInfluence = team.Characters;
@@ -131,7 +130,7 @@ export default class GuildBallUI {
   hideInfluenceControls() {
     this.vueControl.showInflunceMenu = false;
     this.vueControl.charactersToSetInfluence.forEach(character =>
-        this.fieldControl.hideInfluenceControls(character.Name), this);
+      this.fieldControl.hideInfluenceControls(character.Name), this);
   }
 
   updateCharacter(character) {
@@ -160,34 +159,33 @@ export default class GuildBallUI {
     return promise;
   }
 
-  moveCharacter(character) {
-    let me = this;
-    return new Promise((resolve, reject) => {
-      me.fieldControl.movePiece(character.Name)
-        .then(resolve)
-        .catch(x => console.log(x));
-    });
+  moveBall(x, y, instant) {
+    this.fieldControl.moveBall(x, y, instant);
   }
 
-  hideCurrentTeam(){
+  moveCharacter(character) {
+    return this.fieldControl.movePiece(character.Name);
+  }
+
+  hideCurrentTeam() {
     this.vueControl.currentTeam = null;
   }
 
-  showInflunceMenu(value){
+  showInflunceMenu(value) {
     this.vueControl.showInflunceMenu = value;
   }
 
-  showConfirm(title, message, okMessage, cancelMesseage){
+  showConfirm(title, message, okMessage, cancelMesseage) {
     let me = this;
     return new Promise(function(resolve, reject) {
       let yes = okMessage || "Yes";
       let no = cancelMesseage || "No";
       me.vueControl.confirm = {
-        title : title,
-        contentHTML : message,
-        okText : yes,
+        title: title,
+        contentHTML: message,
+        okText: yes,
         cancelText: no,
-        onOpen: function(){},
+        onOpen: function() {},
         onClose: answer => resolve(answer == "ok")
       };
 
@@ -195,7 +193,7 @@ export default class GuildBallUI {
     });
   }
 
-  showDiceRollVs(firstPlayer, secondPlayer){
+  showDiceRollVs(firstPlayer, secondPlayer) {
     let me = this;
 
     return new Promise(function(resolve, reject) {
@@ -204,7 +202,7 @@ export default class GuildBallUI {
     });
   }
 
-  showDiceRoll(message, results){
+  showDiceRoll(message, results) {
     let me = this;
 
     return new Promise(function(resolve, reject) {
@@ -213,7 +211,7 @@ export default class GuildBallUI {
     });
   }
 
-  showPlayBook(playbookColumns, results, goal){
+  showPlayBook(playbookColumns, results, goal) {
     let me = this;
 
     return new Promise(function(resolve, reject) {
@@ -222,51 +220,109 @@ export default class GuildBallUI {
     });
   }
 
-  selectCharacter(characters){
+  selectCharacter(characters) {
     let me = this;
 
-    characters.forEach( character => this.highlightCharacter(character.Name), this);
+    characters.forEach(character => this.highlightCharacter(character.Name), this);
 
     return new Promise(function(resolve, reject) {
-        let onClick = piece =>{
-          let validCharacter = _.find(characters, { Name : piece.pieceId});
-          if(validCharacter){
-            me.onPieceClicked = this;
-            characters.forEach( character => me.stopHighlightingCharacter(character.Name));
-            resolve(validCharacter);
-          }
-        };
-        me.onPieceClicked = onClick;
+      let onClick = piece => {
+        let validCharacter = _.find(characters, {
+          Name: piece.pieceId
+        });
+        if (validCharacter) {
+          me.vueControl.confirmActivationCharacter = validCharacter;
+        }
+      };
+
+      me.onPieceClicked = onClick;
+
+      me.vueControl.confirmActivation = () => {
+        characters.forEach(character => me.stopHighlightingCharacter(character.Name));
+        resolve(me.vueControl.confirmActivationCharacter);
+
+        me.vueControl.confirmActivationCharacter = null;
+        me.vueControl.confirmActivation = null;
+      }
     });
   }
 
-  showCharacterMessage(character, message){
+  setupCharacters(characters, boundary) {
+    let me = this;
+    let promises = [];
+
+    return new Promise(function(resolve, reject) {
+      characters.forEach((character, index) => {
+        let prom = null;
+
+        let onMove = r => {
+          if (r) {
+            character.x = r.x,
+              character.y = r.y;
+          }
+
+          promises[index] = me.moveCharacter(character);
+
+          promises[index]
+            .promise
+            .then(onMove)
+            .catch(e => console.log(e));
+        };
+
+        onMove();
+      });
+
+      me.vueControl.next = () => {
+        promises.forEach(prom => prom.cancel());
+        resolve();
+      }
+    });
+  }
+
+  kickBallFromCharacter(character) {
+    let me = this;
+
+    return new Promise(function(resolve, reject) {
+      var cancel = me.fieldControl.allowBallToMove(character.Name);
+
+      me.vueControl.next = () => {
+        cancel();
+        resolve(me.fieldControl.getBallCoordinates());
+      }
+    });
+  }
+
+  snapBallToCharacter(character) {
+    this.fieldControl.snapBallToCharacter(character);
+  }
+
+  showCharacterMessage(character, message) {
     this.fieldControl.showCharacterMessage(character.Name, message);
   }
 
-  pushCharacter(character, distance){
+  pushCharacter(character, distance) {
     this.showCharacterMessage(character, "Push");
     return this.moveCharacter(character);
   }
 
-  dodgeCharacter(character, distance){
+  dodgeCharacter(character, distance) {
     this.showCharacterMessage(character, "Dodge");
     return this.moveCharacter(character);
   }
 
-  moveCharacterFromTo(character, fromX, fromY, toX, toY){
-    this.fieldControl.moveCharacterFromTo(character, fromX, fromY, toX, toY);
+  moveCharacterFromTo(character, fromX, fromY, toX, toY, instant) {
+    this.fieldControl.moveCharacterFromTo(character, fromX, fromY, toX, toY, instant);
   }
 
-  showMessage(message){
+  showMessage(message) {
     this.vueControl.message = message;
   }
 
-  clearMessage(){
+  clearMessage() {
     this.vueControl.message = null;
   }
 
-  emit(action, params){
+  emit(action, params) {
     this.vueControl.$socket.emit(action, params);
   }
 }

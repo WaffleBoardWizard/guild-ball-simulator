@@ -11,11 +11,19 @@ module.exports = {
     CurrentState : {
       Name : "StartingGame",
       Params : null,
-      id : Math.floor(Math.random() * 10000000000)      
+      id : Math.floor(Math.random() * 10000000000)
+    },
+    Ball : {
+      free : true,
+      x : 0,
+      y : 0
     },
     Actions : [],
     Logs : [{
     CreatedOn : new Date(),
-    Message: "Game Has Started"
+    Params: {
+      Message: "Game Has Started"
+    },
+    Type: 'info'
     }]
 };

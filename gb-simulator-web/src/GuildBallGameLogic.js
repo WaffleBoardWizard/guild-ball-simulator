@@ -48,28 +48,50 @@ export default class GuildBallGameLogic {
     this.UI.onPieceClicked = this.PieceClicked.bind(this);
   }
 
+  getOpposingTeam(){
+    let me = this;
+
+    return _.find(this.gameData.Teams, team => team.PlayerName != me.player);
+  }
+
+  getOpposingTeamId(){
+    return this.getOpposingTeam().PlayerName;
+  }
+
+  incrementCurrentPlayersAction(){
+    this.UI.emit("updateCurrentAction", {
+      player : this.player,
+      currentAction : ++this.playerTeam.CurrentAction
+    });
+  }
   addAction(action) {
-    this.playerTeam.CurrentAction++;
+    action.perform();
+    this.incrementCurrentPlayersAction();
 
     let copyAction = Object.assign({}, action);
     delete copyAction.game;
+
     this.UI.emit("addAction", copyAction);
   }
 
-  addLog(log) {
+  addInfoLog(message){
+    this.addLog({
+      Message: message
+    }, 'info');
+  }
+
+  addLog(params, type) {
     let action = new Actions.Log({
-      Message: log,
+      Params: params,
+      Type : type,
       CreatedOn: new Date()
     }, this);
-
-    action.perform();
 
     this.addAction(action);
   }
 
   performAction(action) {
     if (action.id > this.playerTeam.CurrentAction) {
-      console.log('performing action');
       new Actions[action.action.name](action.action.params, this).perform();
     }
   }
@@ -80,12 +102,17 @@ export default class GuildBallGameLogic {
     return new Promise(function(resolve, reject) {
       let missingActions = actions.slice(me.playerTeam.CurrentAction + 1);
       let totalTime = 0;
-      missingActions.forEach(action => {
-        setTimeout(() => {
-          me.playerTeam.CurrentAction++;
-          new Actions[action.name](action.params, me).perform();
-        }, totalTime);
-        totalTime += action.replaySpeed;
+
+      actions.forEach((action, index) => {
+        if(index > me.playerTeam.CurrentAction){
+         setTimeout(() => {
+            me.incrementCurrentPlayersAction();
+            new Actions[action.name](action.params, me).perform();
+          }, totalTime);
+          totalTime += action.replaySpeed;
+        } else{
+          new Actions[action.name](action.params, me).perform(true);
+        }
       }, me);
 
       setTimeout(resolve, totalTime);
@@ -167,6 +194,10 @@ export default class GuildBallGameLogic {
 
   getCharacter(characterName) {
     return _.find(this.teams[0].Characters.concat(this.teams[1].Characters), {Name: characterName});
+  }
+
+  getCharacterThatHasBall() {
+    return _.find(this.teams[0].Characters.concat(this.teams[1].Characters), {HasBall: true});
   }
 
   highlightCharacters(characters, color) {
@@ -588,6 +619,6 @@ export default class GuildBallGameLogic {
       });
     }
 
-    this._currentState.handleInput("PIECE_CLICKED", params.pieceId);
+    //this._currentState.handleInput("PIECE_CLICKED", params.pieceId);
   }
 }

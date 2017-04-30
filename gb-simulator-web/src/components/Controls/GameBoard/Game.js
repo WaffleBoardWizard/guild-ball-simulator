@@ -104,45 +104,17 @@ export default class Game {
     if (this.onPieceClicked)
       this.onPieceClicked(params);
   }
-
-  pressMovePiece(params, skipAction) {
-    // if (!skipAction) {
-    //   this.actions.push({
-    //     id: this.actions.length + 1,
-    //     type: "Input",
-    //     params: params,
-    //     input: Inputs.PIECE_DRAG,
-    //     replaySpeed: 10
-    //   });
-    // }
-
-    //  this._currentState.handleInput(Inputs.PIECE_DRAG, params.pieceId, {
-    //    mouseX: params.mouseX,
-    //    mouseY: params.mouseY
-    //  });
-  }
-
-  menuButtonClick(buttonId, skipAction) {
-    if (!skipAction) {
-      this.actions.push({
-        id: this.actions.length + 1,
-        type: "Input",
-        params: buttonId,
-        input: Inputs.CLICK_MENU_BUTTON,
-        replaySpeed: 1000
-      });
-    }
-
-    this._currentState.handleInput(Inputs.CLICK_MENU_BUTTON, buttonId);
-  }
   //END INPUT HANDLERS
 
   movePiece(pieceId) {
     let me = this;
-    return new Promise((resolve, reject) => {
+    let cancel = null;
+
+    let promise = new Promise((resolve, reject) => {
       let piece = me.getPiece(pieceId);
       let pressMoveListener = piece.on("pressmove", onMove, this);
       let clickListener = piece.on("click", onClick, this);
+
 
       function onMove(evt) {
         piece.x = evt.rawX;
@@ -158,6 +130,17 @@ export default class Game {
         });
       };
 
+      cancel = function() {
+        piece.off("pressmove", pressMoveListener);
+        piece.off("click", clickListener);
+      }
     });
+
+
+
+    return {
+      promise,
+      cancel
+    }
   }
 }

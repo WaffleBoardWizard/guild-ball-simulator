@@ -6,9 +6,10 @@
     <div class="message" v-if="message">
       <h1>{{message}}</h1>
     </div>
-    <div class="current-team" v-if="currentTeam">
-      <h1>{{currentTeam.PlayerName}}'s Turn</h1>
+    <div class="">
+      <md-button @click.native="next" class="md-raised md-primary">Finished</md-button>
     </div>
+
     <div class="influnce-menu" v-if="showInflunceMenu">
       <div class="influence-totals">
         <div class="influence-total">
@@ -54,22 +55,12 @@
       </div>
     </div>
   </div>
-  <div class="logs" v-if="gameData">
-    <div class="" v-for="log in gameData.Logs">
-        <strong>{{log.CreatedOn}}</strong> : {{log.Message}}
-    </div>
-  </div>
+
+  <Logs v-if="gameData" :logs="gameData.Logs" class="logs" />
+
   <TeamsSideBar :teams="gameData.Teams" v-if="gameData"/>
 
   <canvas id="demoCanvas" width="1200" height="1200"></canvas>
-
-  <!--DiceRollVsDialog  -->
-  <DiceRollVsDialog :first-player="diceRollVs.firstPlayer" :second-player="diceRollVs.secondPlayer" :open="diceRollVs.open" :onClose="diceRollVs.onClose" />
-  <!--END DiceRollVsDialog  -->
-
-  <!--DiceRollDialog  -->
-  <DiceRollDialog :message="diceRoll.message" :results="diceRoll.results" :open="diceRoll.open" :onClose="diceRoll.onClose" />
-  <!--END DiceRollDialog  -->
 
   <!--PlaybookDialog  -->
   <PlaybookDialog :goal="playbookResult.goal" :playbook-columns="playbookResult.playbookColumns" :results="playbookResult.results" :open="playbookResult.open" :onClose="playbookResult.onClose" :playbookResult="playbookResult.onClose" />
@@ -97,12 +88,11 @@ let logic = null;
 export default {
   name: 'Game',
   components: {
-    DiceRollVsDialog: Controls.DiceRollVsDialog,
-    DiceRollDialog: Controls.DiceRollDialog,
     PlaybookDialog: Controls.PlaybookDialog,
     TeamsSideBar: Controls.TeamsSideBar,
     BigCharacter: Controls.BigCharacter,
-    MiniCharacter: Controls.MiniCharacter
+    MiniCharacter: Controls.MiniCharacter,
+    Logs: Controls.Logs
   },
   data() {
     return {
@@ -123,24 +113,6 @@ export default {
         cancelText: null,
         onOpen: function() {},
         onClose: function() {}
-      },
-      diceRollVs: {
-        open: false,
-        firstPlayer: {
-          Name: "Andrew",
-          Roll: 6,
-          Modifer: 1
-        },
-        secondPlayer: {
-          Name: "Joe",
-          Roll: 2,
-          Modifer: 1
-        }
-      },
-      diceRoll: {
-        open: false,
-        message: "DeadBolt",
-        result: [5, 4, 3]
       },
       playbookResult: {
         open: false,
@@ -398,8 +370,540 @@ h1 {
 .logs{
   position: fixed;
   top: 200px;
-  width: 100px;
   z-index: 200px;
+  overflow: scroll;
+  height: 300px;
+}
+</style>
+    confirmActivation() {},
+    showCharacter(character) {
+      this.selectedCharacter = character;
+    },
+    TotalInfluence(team) {
+      let maxInfluence = 0;
+
+      team.Characters.forEach(character => {
+        maxInfluence += character.InfluenceStart;
+      }, this);
+
+      return maxInfluence;
+    },
+    next() {
+      logic.next();
+    },
+    showConfirm() {
+      this.$refs["confirmDialog"].open();
+    },
+    showDiceRollVs(firstPlayer, secondPlayer, onClose) {
+      let me = this;
+
+      return new Promise(function(resolve, reject) {
+        me.diceRollVs = {
+          open: true,
+          firstPlayer: firstPlayer,
+          secondPlayer: secondPlayer,
+          onClose: resolve
+        };
+      });
+    },
+    showDiceRoll(message, results) {
+      let me = this;
+
+      return new Promise(function(resolve, reject) {
+        me.diceRoll = {
+          open: true,
+          results: results,
+          message: message,
+          onClose: resolve
+        };
+      });
+    },
+    showPlayBook(playbookColumns, results, goal) {
+      let me = this;
+      console.log(playbookColumns);
+      return new Promise(function(resolve, reject) {
+        me.playbookResult = {
+          open: true,
+          results: results,
+          playbookColumns: playbookColumns,
+          onClose: result => {
+            me.playbookResult.open = false,
+              resolve(result)
+          },
+          goal: goal
+        };
+      });
+    }
+  },
+  watch: {
+    gameData: {
+      handler: function(val, oldVal) {
+        if (this.gameData.Teams && ui) {
+          this.gameData.Teams.forEach(team => {
+            team.Characters.forEach(character => {
+              ui.updateCharacter(character.Name);
+            }, this);
+          }, this);
+        }
+      },
+      deep: true
+    }
+  }
+}
+");
+      var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+        results = regex.exec(url);
+      if (!results) return null;
+      if (!results[2]) return '';
+      return decodeURIComponent(results[2].replace(/\+/g, " "));
+    },
+    confirmActivation() {},
+    showCharacter(character) {
+      this.selectedCharacter = character;
+    },
+    TotalInfluence(team) {
+      let maxInfluence = 0;
+
+      team.Characters.forEach(character => {
+        maxInfluence += character.InfluenceStart;
+      }, this);
+
+      return maxInfluence;
+    },
+    next() {
+      logic.next();
+    },
+    showConfirm() {
+      this.$refs["confirmDialog"].open();
+    },
+    showDiceRollVs(firstPlayer, secondPlayer, onClose) {
+      let me = this;
+
+      return new Promise(function(resolve, reject) {
+        me.diceRollVs = {
+          open: true,
+          firstPlayer: firstPlayer,
+          secondPlayer: secondPlayer,
+          onClose: resolve
+        };
+      });
+    },
+    showDiceRoll(message, results) {
+      let me = this;
+
+      return new Promise(function(resolve, reject) {
+        me.diceRoll = {
+          open: true,
+          results: results,
+          message: message,
+          onClose: resolve
+        };
+      });
+    },
+    showPlayBook(playbookColumns, results, goal) {
+      let me = this;
+      console.log(playbookColumns);
+      return new Promise(function(resolve, reject) {
+        me.playbookResult = {
+          open: true,
+          results: results,
+          playbookColumns: playbookColumns,
+          onClose: result => {
+            me.playbookResult.open = false,
+              resolve(result)
+          },
+          goal: goal
+        };
+      });
+    }
+  },
+  watch: {
+    gameData: {
+      handler: function(val, oldVal) {
+        if (this.gameData.Teams && ui) {
+          this.gameData.Teams.forEach(team => {
+            team.Characters.forEach(character => {
+              ui.updateCharacter(character.Name);
+            }, this);
+          }, this);
+        }
+      },
+      deep: true
+    }
+  }
+}
+</script>
+
+<!-- Add "scoped" attribute to limit CSS to this component only -->
+<style scoped>
+h1 {
+  padding: 5px;
+  margin: 0;
+}
+
+#menu {
+  height: 175px;
+}
+
+.playbook-result {
+  border: 1px solid black;
+  padding: 6px;
+  border-radius: 50px;
+  text-align: center;
+  width: 50px;
+  height: 50px;
+}
+
+.playbook-result.momentous {
+  border: 3px solid red;
+}
+
+.playbook-result.enabled:hover {
+  background: red;
+  cursor: pointer;
+}
+
+.playbook-result.disabled {
+  opacity: .5;
+}
+
+.playbook-result-action {
+  font-weight: bold;
+  text-align: center;
+  font-size: 14px;
+  vertical-align: -webkit-baseline-middle;
+}
+
+.momentous {
+  background-color: #f7bfbf;
+}
+
+#menu {
+  position: fixed;
+  width: 100%;
   background: white;
+  border: 1px solid black;
+  z-index: 2;
+}
+
+#demoCanvas {
+  margin-top: 120px;
+  float: left;
+  z-index: 0;
+}
+
+.current-team {
+  background: red;
+  color: white;
+}
+
+.influence-total {
+  display: inline-block;
+  border: 1px solid black;
+  padding: 5px;
+  width: 100px;
+}
+
+.influence-total h4 {
+  margin: 0;
+}
+
+.influence-total h2 {
+  font-size: 48px;
+  margin: 12px;
+}
+
+.actions {
+  display: inline-block;
+  width: 500px;
+  vertical-align: bottom;
+}
+
+.actions h1 {
+  text-align: center;
+}
+
+.action {
+  display: inline-block;
+  width: 48%;
+  margin: 5px;
+}
+
+.action button {
+  width: 100%;
+}
+
+.logs {
+  position: fixed;
+  top: 200px;
+  z-index: 200px;
+  overflow: scroll;
+  height: 300px;
+}
+</style>
+    confirmActivation() {},
+    showCharacter(character) {
+      this.selectedCharacter = character;
+    },
+    TotalInfluence(team) {
+      let maxInfluence = 0;
+
+      team.Characters.forEach(character => {
+        maxInfluence += character.InfluenceStart;
+      }, this);
+
+      return maxInfluence;
+    },
+    next() {
+      logic.next();
+    },
+    showConfirm() {
+      this.$refs["confirmDialog"].open();
+    },
+    showDiceRollVs(firstPlayer, secondPlayer, onClose) {
+      let me = this;
+
+      return new Promise(function(resolve, reject) {
+        me.diceRollVs = {
+          open: true,
+          firstPlayer: firstPlayer,
+          secondPlayer: secondPlayer,
+          onClose: resolve
+        };
+      });
+    },
+    showDiceRoll(message, results) {
+      let me = this;
+
+      return new Promise(function(resolve, reject) {
+        me.diceRoll = {
+          open: true,
+          results: results,
+          message: message,
+          onClose: resolve
+        };
+      });
+    },
+    showPlayBook(playbookColumns, results, goal) {
+      let me = this;
+      console.log(playbookColumns);
+      return new Promise(function(resolve, reject) {
+        me.playbookResult = {
+          open: true,
+          results: results,
+          playbookColumns: playbookColumns,
+          onClose: result => {
+            me.playbookResult.open = false,
+              resolve(result)
+          },
+          goal: goal
+        };
+      });
+    }
+  },
+  watch: {
+    gameData: {
+      handler: function(val, oldVal) {
+        if (this.gameData.Teams && ui) {
+          this.gameData.Teams.forEach(team => {
+            team.Characters.forEach(character => {
+              ui.updateCharacter(character.Name);
+            }, this);
+          }, this);
+        }
+      },
+      deep: true
+    }
+  }
+}
+");
+      var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+        results = regex.exec(url);
+      if (!results) return null;
+      if (!results[2]) return '';
+      return decodeURIComponent(results[2].replace(/\+/g, " "));
+    },
+    confirmActivation() {},
+    showCharacter(character) {
+      this.selectedCharacter = character;
+    },
+    TotalInfluence(team) {
+      let maxInfluence = 0;
+
+      team.Characters.forEach(character => {
+        maxInfluence += character.InfluenceStart;
+      }, this);
+
+      return maxInfluence;
+    },
+    next() {
+      logic.next();
+    },
+    showConfirm() {
+      this.$refs["confirmDialog"].open();
+    },
+    showDiceRollVs(firstPlayer, secondPlayer, onClose) {
+      let me = this;
+
+      return new Promise(function(resolve, reject) {
+        me.diceRollVs = {
+          open: true,
+          firstPlayer: firstPlayer,
+          secondPlayer: secondPlayer,
+          onClose: resolve
+        };
+      });
+    },
+    showDiceRoll(message, results) {
+      let me = this;
+
+      return new Promise(function(resolve, reject) {
+        me.diceRoll = {
+          open: true,
+          results: results,
+          message: message,
+          onClose: resolve
+        };
+      });
+    },
+    showPlayBook(playbookColumns, results, goal) {
+      let me = this;
+      console.log(playbookColumns);
+      return new Promise(function(resolve, reject) {
+        me.playbookResult = {
+          open: true,
+          results: results,
+          playbookColumns: playbookColumns,
+          onClose: result => {
+            me.playbookResult.open = false,
+              resolve(result)
+          },
+          goal: goal
+        };
+      });
+    }
+  },
+  watch: {
+    gameData: {
+      handler: function(val, oldVal) {
+        if (this.gameData.Teams && ui) {
+          this.gameData.Teams.forEach(team => {
+            team.Characters.forEach(character => {
+              ui.updateCharacter(character.Name);
+            }, this);
+          }, this);
+        }
+      },
+      deep: true
+    }
+  }
+}
+</script>
+
+<!-- Add "scoped" attribute to limit CSS to this component only -->
+<style scoped>
+h1 {
+  padding: 5px;
+  margin: 0;
+}
+
+#menu {
+  height: 175px;
+}
+
+.playbook-result {
+  border: 1px solid black;
+  padding: 6px;
+  border-radius: 50px;
+  text-align: center;
+  width: 50px;
+  height: 50px;
+}
+
+.playbook-result.momentous {
+  border: 3px solid red;
+}
+
+.playbook-result.enabled:hover {
+  background: red;
+  cursor: pointer;
+}
+
+.playbook-result.disabled {
+  opacity: .5;
+}
+
+.playbook-result-action {
+  font-weight: bold;
+  text-align: center;
+  font-size: 14px;
+  vertical-align: -webkit-baseline-middle;
+}
+
+.momentous {
+  background-color: #f7bfbf;
+}
+
+#menu {
+  position: fixed;
+  width: 100%;
+  background: white;
+  border: 1px solid black;
+  z-index: 2;
+}
+
+#demoCanvas {
+  margin-top: 120px;
+  float: left;
+  z-index: 0;
+}
+
+.current-team {
+  background: red;
+  color: white;
+}
+
+.influence-total {
+  display: inline-block;
+  border: 1px solid black;
+  padding: 5px;
+  width: 100px;
+}
+
+.influence-total h4 {
+  margin: 0;
+}
+
+.influence-total h2 {
+  font-size: 48px;
+  margin: 12px;
+}
+
+.actions {
+  display: inline-block;
+  width: 500px;
+  vertical-align: bottom;
+}
+
+.actions h1 {
+  text-align: center;
+}
+
+.action {
+  display: inline-block;
+  width: 48%;
+  margin: 5px;
+}
+
+.action button {
+  width: 100%;
+}
+
+.logs {
+  position: fixed;
+  top: 200px;
+  z-index: 200px;
+  overflow: scroll;
+  height: 300px;
 }
 </style>

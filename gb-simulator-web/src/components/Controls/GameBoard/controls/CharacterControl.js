@@ -9,23 +9,9 @@ function CharacterControl(character, image) {
   this.character = character;
   this.image = image;
   this.baseSize =  this.character.Size * Measurements.MM
-  //this.character.addOnHealthChange(this.onDamage.bind(this));
-
-
   this.addImage();
-
   this.id = this.character.Name;
-
-  // this.character.addOnHealthChange(this.onDamage.bind(this));
-  // this.character.addOnConditionsChange(this.onConditionAdded.bind(this));
-  // this.character.addOnAurasChange(this.onAuraAdded.bind(this));
-  // this.character.addOnInfluenceChange(this.showInfluenceBar.bind(this));
-
-  //this.shape.addEventListener ("mouseover", function(){
-  //  console.log("mouse")
-  this.updateBars();
-//  }, this);
-
+  this.update();
   this.shape.on("click", function(){
     console.log(this.character);
   }, this);
@@ -43,10 +29,13 @@ p.conditionBars = [];
 p.auras = [];
 p.influenceControls = [];
 
-p.updateBars = function(){
+p.update = function(){
   this.showInfluenceBar();
   this.showHealthBar();
+  if(this.character.HasBall)
+    this.showMoveIcon();
 };
+
 
 p.showMoveIcon = function(){
   var text = new createjs.Text(FontAwesomeIcons.arrows, "32px FontAwesome");

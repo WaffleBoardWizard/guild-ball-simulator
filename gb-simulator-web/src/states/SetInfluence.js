@@ -2,9 +2,10 @@ import State from "./State";
 import Inputs from "../Inputs"
 
 export default class SetInfluence extends State {
-  constructor(params, game, activeTeamId) {
+  constructor(params, activeTeamId, game) {
     super("SetInfluence", params, activeTeamId, game, params.speed);
     this.teamId = params.teamId;
+
     this.team = this.game.getTeam(this.activeTeamId);
   }
 
@@ -16,7 +17,7 @@ export default class SetInfluence extends State {
   }
 
   onNonActiveTeamStart(){
-    this.game.UI.showMessage(this.Team.PlayerName + " is Setting Influence");
+    this.game.UI.showMessage(this.team.PlayerName + " is Setting Influence");
   }
 
   onActiveTeamExit(){

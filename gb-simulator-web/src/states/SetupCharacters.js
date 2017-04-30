@@ -9,17 +9,14 @@ export default class SetupCharacters extends State {
 
   onActiveTeamStart() {
     let me = this;
-    let team = this.game.getTeam(this.params.team);
+    let team = this.game.getTeam(this.activeTeamId);
     let characters = team.Characters;
 
     this.game.UI.showMessage("Please Setup For Kick Off");
     this.game.highlightCharacters(characters);
 
-    characters.forEach(character => {
-      this.game.UI.moveCharacter(character).then(r => {
-        character.x = r.x;
-        character.y = r.y;
-
+    this.game.UI.setupCharacters(characters, null).then( () => {
+      characters.forEach( character => {
         me.game.addAction(new Actions.MovePiece({
           character: character.Name,
           from: {
@@ -27,18 +24,40 @@ export default class SetupCharacters extends State {
             y: 0
           },
           to: {
-            x: r.x,
-            y: r.y
+            x: character.x,
+            y: character.y
           }
-        }));
-      }).catch(e => console.log(e));
-    }, this);
+        }, me.game));
+      });
+
+      me.game.addAction(new Actions.FinishSetup({teamId: me.activeTeamId}, me.game));
+
+      if(me.params && me.params.kicking)
+        me.game.switchState(new States.AssignKicker(null, me.activeTeamId, me.game));
+      else{
+        let opposingTeam = me.game.getOpposingTeam();
+        if(opposingTeam.HasSetup)
+          me.game.switchState(new States.MoveCharacter({
+            characterName : me.game.getCharacterThatHasBall().Name,
+            nextState : "KickOff"
+          }, me.game.getOpposingTeamId(), me.game));
+        else
+          me.game.switchState(new States.SetupCharacters(null, me.game.getOpposingTeamId(), me.game));
+      }
+    })
+    .catch( x => console.log(x));
   }
 
   onNonActiveTeamStart() {
     this.game.UI.showMessage("Please wait...");
   }
 
+  onActiveTeamExit(){
+    let team = this.game.getTeam(this.activeTeamId);
+    let characters = team.Characters;
+
+    this.game.stopHilightingCharacters(characters);
+  }
   onExit() {
     this.game.UI.clearMessage();
   }

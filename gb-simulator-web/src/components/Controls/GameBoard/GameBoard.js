@@ -23,20 +23,20 @@ export default class GameBoard extends Game {
     let me = this;
     return Q.Promise(function(resolve, reject, notify) {
 
-    AssetsLoader.LoadAssets()
-      .then(function(assets) {
-        me.assets = assets;
-        me.createStage(canvasId);
-        me.createField();
-        me.createBall();
-        me.addTerrian();
-        me.addGoals();
-        resolve();
-      })
-      .catch(function(ex) {
-        console.log(ex);
-        reject(ex);
-      });
+      AssetsLoader.LoadAssets()
+        .then(function(assets) {
+          me.assets = assets;
+          me.createStage(canvasId);
+          me.createField();
+          me.createBall();
+          me.addTerrian();
+          me.addGoals();
+          resolve();
+        })
+        .catch(function(ex) {
+          console.log(ex);
+          reject(ex);
+        });
     });
   }
 
@@ -76,20 +76,20 @@ export default class GameBoard extends Game {
     this.illuminateCharacters(this.characters);
   }
 
-  illuminateCharacter(characterName, color){
+  illuminateCharacter(characterName, color) {
     this.getPiece(characterName).illuminate(color);
   }
 
-  showCharacterMessage(characterName, message){
-      this.getPiece(characterName).showMessage(message);
+  showCharacterMessage(characterName, message) {
+    this.getPiece(characterName).showMessage(message);
   }
 
-  stopIlluminatingCharacter(characterName){
-      this.getPiece(characterName).stopIlluminate();
+  stopIlluminatingCharacter(characterName) {
+    this.getPiece(characterName).stopIlluminate();
   }
 
-  updateCharacter(characterName){
-    this.getPiece(characterName).updateBars();
+  updateCharacter(characterName) {
+    this.getPiece(characterName).update();
   }
 
   stopIllumatingAllCharacters() {
@@ -102,11 +102,11 @@ export default class GameBoard extends Game {
     });
   }
 
-  showInfluenceControls(characterName, maxInfluence, avaliableInfluence){
+  showInfluenceControls(characterName, maxInfluence, avaliableInfluence) {
     this.getPiece(characterName).showInflunceControls(maxInfluence, avaliableInfluence);
   }
 
-  hideInfluenceControls(characterName, maxInfluence, avaliableInfluence){
+  hideInfluenceControls(characterName, maxInfluence, avaliableInfluence) {
     this.getPiece(characterName).hideInfluenceControls();
   }
 
@@ -116,16 +116,71 @@ export default class GameBoard extends Game {
   }
 
   snapBallToCharacter(character) {
-    this.movePiece(this.ball, character.x, character.y);
+    let piece = this.getPiece(character.Name);
+    this.ball.x = piece.x;
+    this.ball.y = piece.y + Measurements.Inch;
   }
 
-  moveCharacterFromTo(characterName, fromX, fromY, toX, toY){
-    createjs.Tween.get(this.getPiece(characterName), {
-      loop: false
-    }).to({
-      x: toX * Measurements.Inch,
-      y: toY  * Measurements.Inch
-    },  1000, createjs.Ease.getPowInOut(4));
+  getBallCoordinates() {
+    return {
+      x: this.ball.x / Measurements.Inch,
+      y: this.ball.y / Measurements.Inch
+    }
+  }
+
+  allowBallToMove(characterName) {
+    let me = this;
+    let character = this.getPiece(characterName);
+    let pressMoveListener = this.ball.on("pressmove", onMove, this);
+    let clickListener = this.ball.on("click", onClick, this);
+
+
+    function onMove(evt) {
+      this.ball.x = evt.rawX;
+      this.ball.y = evt.rawY;
+    };
+
+    function onClick(evt) {
+      let angle = Math.atan2(this.ball.y - character.y, this.ball.x - character.x) * 180 / Math.PI;
+      this.ball.removeScatter();
+      this.ball.drawScatter(angle);
+    };
+
+    onClick.bind(this)();
+
+    return function() {
+      me.ball.off("pressmove", pressMoveListener);
+      me.ball.off("click", clickListener);
+    }
+  }
+
+  moveBall(x, y, instant) {
+    if (instant) {
+      this.ball.x = x * Measurements.Inch;
+      this.ball.y = y * Measurements.Inch;
+    } else {
+      createjs.Tween.get(this.ball, {
+        loop: false
+      }).to({
+        x: x * Measurements.Inch,
+        y: y * Measurements.Inch
+      }, 1000, createjs.Ease.getPowInOut(4));
+    }
+  }
+
+  moveCharacterFromTo(characterName, fromX, fromY, toX, toY, instant) {
+    if (instant) {
+      let character = this.getPiece(characterName);
+      character.x = toX * Measurements.Inch;
+      character.y = toY * Measurements.Inch;
+    } else {
+      createjs.Tween.get(this.getPiece(characterName), {
+        loop: false
+      }).to({
+        x: toX * Measurements.Inch,
+        y: toY * Measurements.Inch
+      }, 1000, createjs.Ease.getPowInOut(4));
+    }
   }
 
   removeCharacterPieces() {
@@ -138,7 +193,7 @@ export default class GameBoard extends Game {
       }, this);
 
 
-}
+  }
 
   //END UI Functions
 }
