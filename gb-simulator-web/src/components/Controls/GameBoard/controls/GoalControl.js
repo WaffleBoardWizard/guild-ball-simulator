@@ -1,6 +1,6 @@
 import GamePieceControl from "./GamePieceControl";
 import Measurements from '../common/Measurements';
-import MathHelper from '../helpers/MathHelper';
+import MathHelper from '@/Helpers/MathHelper';
 var BALL_IMAGE = require("../assets/ball.png");
 
 function GoalControl(goalImage) {

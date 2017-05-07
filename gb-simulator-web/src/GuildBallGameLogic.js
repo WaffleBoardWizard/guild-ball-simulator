@@ -2,9 +2,8 @@ import Conditions from './Conditions';
 import Plays from './Plays';
 import CharacterModel from './models/CharacterModel';
 import * as States from './States';
-import * as Inputs from './Inputs';
-import * as Actions from "./actions";
-import MathHelper from './helpers/MathHelper';
+import * as Actions from "@/actions";
+import MathHelper from '@/Helpers/MathHelper';
 
 export default class GuildBallGameLogic {
   constructor(ui, gameData, player) {
@@ -501,31 +500,31 @@ export default class GuildBallGameLogic {
   //     }, this));
   // }
 
-  kickBall(character) {
-    let otherCharacterIds = this.reducePiecesToId(this.characters.filter(x => x != character));
-    let goalIds = this.reducePiecesToId(this.goals);
-    let me = this;
-
-    this.switchState(new States.KickBall({
-      charactersId: otherCharacterIds.concat(goalIds)
-    }, function(kickParams) {
-      if (kickParams.type == "piece") {
-        let otherCharacter = this.getPiece(kickParams.pieceId);
-        this.rollDice(character.character.KickDice, 4).then(function(results) {
-          me.snapBallToCharacter(otherCharacter);
-
-          if (!me.checkDiceResult(results, 4))
-            me.kickScatter(character.x, character.y, otherCharacter.x, otherCharacter.y);
-
-          me.activateCurrentCharacter();
-        }).catch(function(ex) {
-          console.log(ex);
-        });
-      } else if (kickParams.type == "field") {
-        me.kickScatter(character.x, character.y, me.ball.x, me.ball.y);
-      }
-    }, this));
-  }
+  // kickBall(character) {
+  //   let otherCharacterIds = this.reducePiecesToId(this.characters.filter(x => x != character));
+  //   let goalIds = this.reducePiecesToId(this.goals);
+  //   let me = this;
+  //
+  //   this.switchState(new States.KickBall({
+  //     charactersId: otherCharacterIds.concat(goalIds)
+  //   }, function(kickParams) {
+  //     if (kickParams.type == "piece") {
+  //       let otherCharacter = this.getPiece(kickParams.pieceId);
+  //       this.rollDice(character.character.KickDice, 4).then(function(results) {
+  //         me.snapBallToCharacter(otherCharacter);
+  //
+  //         if (!me.checkDiceResult(results, 4))
+  //           me.kickScatter(character.x, character.y, otherCharacter.x, otherCharacter.y);
+  //
+  //         me.activateCurrentCharacter();
+  //       }).catch(function(ex) {
+  //         console.log(ex);
+  //       });
+  //     } else if (kickParams.type == "field") {
+  //       me.kickScatter(character.x, character.y, me.ball.x, me.ball.y);
+  //     }
+  //   }, this));
+  // }
 
   checkDiceResult(diceResults, goal) {
     let result = 0;

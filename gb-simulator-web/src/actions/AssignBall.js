@@ -1,4 +1,4 @@
-import Action from "./Action";
+import Action from "@/actions/Action";
 
 export default class AssignBall extends Action{
   constructor(params, game){

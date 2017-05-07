@@ -1,5 +1,4 @@
 import State from "./State";
-import Inputs from "../Inputs"
 
 export default class SetInfluence extends State {
   constructor(params, activeTeamId, game) {

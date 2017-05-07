@@ -1,5 +1,4 @@
 import State from './State';
-import Inputs from '../Inputs';
 import * as States from './';
 
 export default class ActivateCharacter extends State {

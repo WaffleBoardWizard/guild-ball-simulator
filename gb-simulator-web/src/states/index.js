@@ -1,11 +1,6 @@
 export {default as SelectPiece}  from './SelectPiece';
 export {default as MovePiece}  from './MovePiece';
-export {default as RollDice}  from './RollDice';
-export {default as CharacterMenu}  from './CharacterMenu';
-export {default as ModifyCharacterHealth}  from './ModifyCharacterHealth';
-export {default as KickBall}  from './KickBall';
 export {default as SetInfluence}  from './SetInfluence';
-export {default as TakeOutCharacter}  from './TakeOutCharacter';
 export {default as ChooseCharacterToActivate} from "./ChooseCharacterToActivate"
 export {default as ActivateCharacter} from "./ActivateCharacter"
 export {default as StartingGame} from "./StartingGame"
@@ -17,3 +12,4 @@ export {default as MoveCharacter} from "./MoveCharacter"
 export {default as KickOff} from "./KickOff"
 export {default as RollKickScatter} from "./RollKickScatter"
 export {default as RollKickForSuccess} from "./RollKickForSuccess"
+export {default as BonusTime} from "./BonusTime"

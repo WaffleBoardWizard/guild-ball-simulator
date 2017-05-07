@@ -1,6 +1,5 @@
 import State from "./State";
-import Inputs from "../Inputs"
-import * as Actions from "../Actions"
+import * as Actions from "@/actions";
 import * as States from "../States"
 
 export default class MoveCharacter extends State {

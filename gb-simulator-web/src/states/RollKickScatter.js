@@ -1,7 +1,7 @@
 import State from './State';
 import * as States from './'
-import * as Actions from "../actions";
-import MathHelper from "../Helpers/MathHelper";
+import * as Actions from "@/actions";
+import MathHelper from '@/Helpers/MathHelper';
 
 export default class RollKickScatter extends State {
   constructor(params, activeTeamId, game) {

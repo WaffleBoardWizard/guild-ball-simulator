@@ -1,5 +1,4 @@
 import State from "./State";
-import Inputs from "../Inputs";
 import FontAwesomeIcons from '../common/FontAwesomeIcons';
 
 export default class SelectPiece extends State {
