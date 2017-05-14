@@ -31,7 +31,7 @@ export default class RollKickForSuccess extends State {
       allowReroll : this.game.checkDiceResult(results, success),
       characterName: this.params.characterName,
       afterKickState: this.params.afterKickState
-    }, this.params.activeTeamId, this.game));
+    }, this.activeTeamId, this.game), true);
   }
 
   onNonActiveTeamStart() {

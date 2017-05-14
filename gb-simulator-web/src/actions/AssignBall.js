@@ -8,7 +8,6 @@ export default class AssignBall extends Action{
   perform(instant){
     let character = this.game.getCharacter(this.params.characterId);
     character.HasBall = true;
-
     if(!instant)
       this.game.UI.showCharacterMessage(character, "Has Ball");
   }

@@ -40,7 +40,25 @@
       </div>
 
     </div>
-
+    <div v-if="showMovementControl" class="influence-totals">
+      <div class="influence-total">
+        <h4>
+              Remaining Movement
+        </h4>
+        <h2 class="">
+            {{movementControl.movementLeft}}
+        </h2>
+      </div>
+      <div class="influence-total">
+        <h4>
+              Used Movement
+        </h4>
+        <h2 class="">
+            {{movementControl.movementUsed}}
+        </h2>
+      </div>
+      <md-button v-if="movementControl.movementUsed > 0" @click.native="movementControl.undo" class="md-raised md-primary">Undo</md-button>
+    </div>
     <div v-if="confirmActivationCharacter" class="confirm-activate-character" style="display:inline-block">
       <BigCharacter :character="confirmActivationCharacter" />
       <md-button @click.native="confirmActivation" class="md-raised md-primary">Activate</md-button>
@@ -120,13 +138,21 @@ export default {
         result: [5, 4, 3],
         goal: 4
       },
+      showMovementControl: false,
+      movementControl: {
+        movementUsed : 0,
+        movementLeft : 0,
+        undo : function(){
+
+        }
+      },
       message: null
     }
   },
   mounted: function() {
     let me = this;
     let playerName = this.getParameterByName('team');
-    console.log(playerName);
+
     axios.get("game").then(response => {
       me.gameData = response.data;
       let fieldControl = new GameBoard("demoCanvas");

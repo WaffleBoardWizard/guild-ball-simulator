@@ -1,7 +1,7 @@
 <template>
 <div>
   <div class="teams-status" v-if="teams">
-    <div class="" v-for="team in teams" v-key="team.PlayerName">
+    <div class="" v-for="team in teams">
       <h1>{{team.PlayerName}}</h1>
       <h2>{{team.Score}}</h2>
       <h2>{{team.Score}}</h2>

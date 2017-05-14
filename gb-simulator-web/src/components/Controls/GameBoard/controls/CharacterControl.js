@@ -13,7 +13,6 @@ function CharacterControl(character, image) {
   this.id = this.character.Name;
   this.update();
   this.shape.on("click", function(){
-    console.log(this.character);
   }, this);
 
 
@@ -44,7 +43,7 @@ p.showMoveIcon = function(){
     textBaseline: "middle",
     color: "white"
   });
-  this.addChild(text);
+  this.addChildAt(text, this.getChildIndex(this.shape) + 1);
 }
 
 p.onAuraAdded = function(aura){

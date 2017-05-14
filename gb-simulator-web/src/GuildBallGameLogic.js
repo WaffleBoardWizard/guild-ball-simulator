@@ -24,7 +24,7 @@ export default class GuildBallGameLogic {
     let me = this;
 
     this.bindEventHandlers();
-    this.loadCharacters();
+    //this.loadCharacters();
 
     //this.attackPlayer(this.teams[0].Characters[0], this.teams[0].Characters[1]);
     //me.rollDiceAndShow(6);
@@ -47,33 +47,34 @@ export default class GuildBallGameLogic {
     this.UI.onPieceClicked = this.PieceClicked.bind(this);
   }
 
-  getOpposingTeam(){
+  getOpposingTeam() {
     let me = this;
 
     return _.find(this.gameData.Teams, team => team.PlayerName != me.player);
   }
 
-  getOpposingTeamId(){
+  getOpposingTeamId() {
     return this.getOpposingTeam().PlayerName;
   }
 
-  incrementCurrentPlayersAction(){
+  incrementCurrentPlayersAction() {
+    this.playerTeam.CurrentAction += 1;
+    console.log(this.playerTeam.CurrentAction + " <<<<<<<< Current Action");
     this.UI.emit("updateCurrentAction", {
-      player : this.player,
-      currentAction : ++this.playerTeam.CurrentAction
+      player: this.player,
+      currentAction: this.playerTeam.CurrentAction
     });
   }
-  addAction(action) {
-    action.perform();
+  addAction(action, instant) {
+    action.perform(instant);
     this.incrementCurrentPlayersAction();
 
     let copyAction = Object.assign({}, action);
     delete copyAction.game;
-
     this.UI.emit("addAction", copyAction);
   }
 
-  addInfoLog(message){
+  addInfoLog(message) {
     this.addLog({
       Message: message
     }, 'info');
@@ -82,7 +83,7 @@ export default class GuildBallGameLogic {
   addLog(params, type) {
     let action = new Actions.Log({
       Params: params,
-      Type : type,
+      Type: type,
       CreatedOn: new Date()
     }, this);
 
@@ -90,12 +91,45 @@ export default class GuildBallGameLogic {
   }
 
   performAction(action) {
+    let me = this;
     if (action.id > this.playerTeam.CurrentAction) {
-      new Actions[action.action.name](action.action.params, this).perform();
+      if (!this.performingAction) {
+       this.performingAction = true;
+        console.log(action.id);
+        console.log(this.playerTeam.CurrentAction);
+        console.log(action.action.params);
+
+
+        console.log("=========================");
+        console.log("PERFORMING ACITON");
+        console.log(action.action.name);
+        console.log("=========================");
+
+        this.incrementCurrentPlayersAction();
+
+        new Actions[action.action.name](action.action.params, this).perform();
+
+        setTimeout(() => {
+          console.log("catching up")
+          if (me.backlogActions){
+            console.log(me.backlogActions);
+            me.catchUpOnActions( me.backlogActions, true);
+            me.backlogActions = [];
+          }
+          me.performingAction = false;
+        }, action.action.replaySpeed);
+
+      } else {
+        console.log("cannot perform action adding to back log")
+        console.log(action.action);
+        if (!me.backlogActions)
+          me.backlogActions = [];
+        me.backlogActions.push(action.action);
+      }
     }
   }
 
-  catchUpOnActions(actions) {
+  catchUpOnActions(actions, skipIndexCheck) {
     let me = this;
 
     return new Promise(function(resolve, reject) {
@@ -103,14 +137,18 @@ export default class GuildBallGameLogic {
       let totalTime = 0;
 
       actions.forEach((action, index) => {
-        if(index > me.playerTeam.CurrentAction){
-         setTimeout(() => {
+        let copyAction = Object.assign({}, action);
+
+        if (skipIndexCheck || index > me.playerTeam.CurrentAction) {
+          console.log(totalTime)
+          setTimeout(() => {
+            console.log("Firing ");
             me.incrementCurrentPlayersAction();
-            new Actions[action.name](action.params, me).perform();
+            new Actions[copyAction.name](copyAction.params, me).perform();
           }, totalTime);
-          totalTime += action.replaySpeed;
-        } else{
-          new Actions[action.name](action.params, me).perform(true);
+          totalTime += copyAction.replaySpeed;
+        } else {
+          new Actions[copyAction.name](copyAction.params, me).perform(true);
         }
       }, me);
 
@@ -119,9 +157,9 @@ export default class GuildBallGameLogic {
   }
 
   switchTeam() {
-    let team = this.teams.indexOf(this.currentTeam) == 0
-      ? this.teams[1]
-      : this.teams[0];
+    let team = this.teams.indexOf(this.currentTeam) == 0 ?
+      this.teams[1] :
+      this.teams[0];
     this.setCurrentTeam(team);
   }
 
@@ -133,16 +171,18 @@ export default class GuildBallGameLogic {
     this.UI.showCharacterActions(character, actions);
   }
 
-  loadCharacters() {
-    this.UI.removeCharacters();
-    let i = 2;
-    this.teams.forEach(team => {
-      team.Characters.forEach(c => {
-        let x = c.x || i;
-        let y = c.y || i;
-        this.UI.addCharacter(c, x, y);
-        i += 2;
-      }, this);
+  loadTeamsCharactersOnSide(team) {
+    let i = 0;
+    var y = 0;
+    if (team.Side == "North")
+      y = 3;
+    else
+      y = 34;
+
+    team.Characters.forEach(c => {
+      let x = (i++ * 3) + 11;
+      this.UI.addCharacter(c, x, y);
+
     }, this);
   }
 
@@ -170,14 +210,6 @@ export default class GuildBallGameLogic {
 
     if (this.futureStates.length > 0) {
       let me = this;
-      if (!validated && this._currentState.validateExit) {
-        this._currentState.validateExit().then(validated => {
-          if (validated)
-            me.next(true)
-        });
-        return;
-      }
-
       let nextState = this.futureStates.shift();
       this.switchState(nextState, null, true);
     } else {
@@ -188,15 +220,21 @@ export default class GuildBallGameLogic {
   }
 
   getTeam(playerName) {
-    return _.find(this.teams, {PlayerName: playerName});
+    return _.find(this.teams, {
+      PlayerName: playerName
+    });
   }
 
   getCharacter(characterName) {
-    return _.find(this.teams[0].Characters.concat(this.teams[1].Characters), {Name: characterName});
+    return _.find(this.teams[0].Characters.concat(this.teams[1].Characters), {
+      Name: characterName
+    });
   }
 
   getCharacterThatHasBall() {
-    return _.find(this.teams[0].Characters.concat(this.teams[1].Characters), {HasBall: true});
+    return _.find(this.teams[0].Characters.concat(this.teams[1].Characters), {
+      HasBall: true
+    });
   }
 
   highlightCharacters(characters, color) {
@@ -267,11 +305,15 @@ export default class GuildBallGameLogic {
   };
 
   getCondition(name) {
-    return _.find(Conditions, {Name: name});
+    return _.find(Conditions, {
+      Name: name
+    });
   }
 
   getPlay(name) {
-    return _.find(Plays, {Name: name});
+    return _.find(Plays, {
+      Name: name
+    });
   }
 
   getTeamCharacters(team) {
@@ -352,7 +394,9 @@ export default class GuildBallGameLogic {
   applyActions(attacker, defender, actions) {
     let me = this;
     //let states = [];
-    let damageActions = _.filter(actions, {Damage: true});
+    let damageActions = _.filter(actions, {
+      Damage: true
+    });
     let damage = _.reduce(damageActions, (sum, a) => sum += a.DamageValue, 0);
     if (damage) {
       defender.Health -= damage;
@@ -362,7 +406,9 @@ export default class GuildBallGameLogic {
       // }, null, me));
     }
 
-    let nonDamageActions = _.filter(actions, {Damage: false});
+    let nonDamageActions = _.filter(actions, {
+      Damage: false
+    });
     //
     // var kd = _.find(actions, {
     //   Name: "Knock Down"
@@ -528,19 +574,34 @@ export default class GuildBallGameLogic {
 
   checkDiceResult(diceResults, goal) {
     let result = 0;
-    diceResults.forEach(function(d) {
-      if (d >= goal)
+
+    if(Number.isInteger(diceResults))
+    {
+      if (diceResults >= goal)
         result++;
-      }
-    );
+    } else {
+      diceResults.forEach(function(d) {
+        if (d >= goal)
+          result++;
+      });
+    }
+
     return result;
   }
 
 
-  switchState(state, doNotEmit, validated) {
+  switchState(state, doNotEmit) {
     let me = this;
+    console.log(state.state);
+    console.log(state.id);
+
 
     if (!doNotEmit) {
+      console.log("============");
+      console.log("EMITING");
+      console.log(state.state);
+      console.log("============");
+
       this.UI.emit("switchState", {
         Name: state.state,
         Params: state.params,
@@ -550,15 +611,6 @@ export default class GuildBallGameLogic {
     }
 
     if (this._currentState) {
-      if (!validated && this._currentState && this._currentState.validateExit) {
-        this._currentState.validateExit().then(validated => {
-          if (validated)
-            me.switchState(state, null, true)
-        });
-
-        return;
-      }
-
       this._currentState.onExit();
 
       if (this.player == this._currentState.activeTeamId)
@@ -571,52 +623,30 @@ export default class GuildBallGameLogic {
 
     this._currentState.onStart();
 
-    if (this.player == this._currentState.activeTeamId)
+    if (this.player == this._currentState.activeTeamId) {
       this._currentState.onActiveTeamStart();
-    else
+
+
+    } else
       this._currentState.onNonActiveTeamStart();
 
-    }
+  }
 
   switchStateA(state) {
-    console.log(this._currentState);
-    console.log(state);
-    if(!this._currentState || state.id != this._currentState.id)
+    if (!this._currentState || state.id != this._currentState.id)
       this.switchState(new States[state.Name](state.Params || state.params, state.activeTeamId, this), true);
   }
 
-  replayState(actions) {
-    this.switchState(new States[actions.state](actions.params, null, this), true);
-  }
-
-  replayInput(actions) {
-    let input = null;
-    switch (actions.input) {
-      case Inputs.PIECE_DRAG:
-        input = this.pressMovePiece;
-        break;
-      case Inputs.PIECE_CLICK:
-        input = this.clickPiece;
-        break;
-      case Inputs.CLICK_MENU_BUTTON:
-        input = this.menuButtonClick;
-        break;
-      default:
-    }
-
-    input.bind(this)(actions.params, true);
-  }
-
   PieceClicked(params, skipAction) {
-    if (!skipAction) {
-      this.actions.push({
-        id: this.actions.length + 1,
-        type: "Input",
-        params: params,
-        input: Inputs.PIECE_CLICK,
-        replaySpeed: 1
-      });
-    }
+    // if (!skipAction) {
+    //   this.actions.push({
+    //     id: this.actions.length + 1,
+    //     type: "Input",
+    //     params: params,
+    //     input: Inputs.PIECE_CLICK,
+    //     replaySpeed: 1
+    //   });
+    // }
 
     //this._currentState.handleInput("PIECE_CLICKED", params.pieceId);
   }

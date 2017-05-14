@@ -8,7 +8,8 @@ export default class RollKickScatter extends State {
     super("RollKickScatter", params, activeTeamId, game);
   }
 
-  onStart(){
+  onActiveTeamStart(){
+    let me = this;
     let direction = this.game.rollDice(1);
     let distance = this.game.rollDice(1);
 
@@ -24,21 +25,48 @@ export default class RollKickScatter extends State {
       direction++;
 
     let coord = MathHelper.CalculateXYWithDistanceAndAngle(distance, (22.5 * direction) + angle - 90);
-
-
-    this.game.addAction(new Actions.MoveBall({
+    let currentBallX = this.game.gameData.Ball.x;
+    let currentBallY = this.game.gameData.Ball.y;
+    let kickAction = new Actions.MoveBall({
       to: {
-        x: coord.x + this.game.gameData.Ball.x,
-        y: coord.y + this.game.gameData.Ball.y
+        x: coord.x + currentBallX,
+        y: coord.y + currentBallY
       }
-    }, this.game));
+    }, this.game);
 
-    this.game.switchState(new States[this.params.afterKickState.name](this.params.afterKickState.params, this.params.afterKickState.activeTeamId, this.game));
+    kickAction.perform();
+    if(me.params.allowReroll){
+      me.game.UI.showConfirm("Reroll", "Would you like to reroll?")
+        .then( confirm =>{
+          if(confirm)
+          {
+            new Actions.MoveBall({
+              to: {
+                x: currentBallX,
+                y: currentBallY
+              }
+            }, this.game).perform();
+
+            setTimeout(()=>{
+              me.params.allowReroll = false
+              me.game.switchState(new States.RollKickScatter(this.params, this.activeTeamId, this.game), true);
+            }, 500);
+          }
+          else{
+            me.game.addAction(kickAction, true);
+            this.nextState();
+          }
+        })
+        .catch( e => console.log(e))
+    } else {
+      me.game.addAction(kickAction, true);
+      this.nextState();
+    }
 
   }
 
-  onActiveTeamStart() {
-
+  nextState(){
+    this.game.switchState(new States[this.params.afterKickState.name](this.params.afterKickState.params, this.params.afterKickState.activeTeamId, this.game));
   }
 
   onNonActiveTeamStart() {

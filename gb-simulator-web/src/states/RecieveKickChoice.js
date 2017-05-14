@@ -13,12 +13,15 @@ export default class RecieveKickChoice extends State {
 
     this.game.UI.showConfirm("Recieve", "Would you like to recieve?").then(confirm => {
       if (confirm) {
-        me.game.switchState(new States.SetupCharacters({ kicking : true}, me.activeTeamId, me.game));
         me.game.addInfoLog(me.activeTeamId + ' has chosen to Kick');
       } else {
-        me.game.switchState(new States.SetupCharacters({ kicking : true}, me.game.getOpposingTeamId(), me.game));
         me.game.addInfoLog(me.activeTeamId + ' has chosen to Recieve');
       }
+
+      me.game.switchState(new States.PickSideChoice({
+        kickingTeamId: confirm ? me.game.getOpposingTeamId() : me.activeTeamId
+      }, me.game.getOpposingTeamId(), me.game));
+
     }).catch(e => console.log(e))
   }
 

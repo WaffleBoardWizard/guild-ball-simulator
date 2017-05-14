@@ -4,3 +4,6 @@ export {default as AssignBall}  from './AssignBall';
 export {default as FinishSetup}  from './FinishSetup';
 export {default as MoveBall}  from './MoveBall';
 export {default as SetTeamMomentum}  from './SetTeamMomentum';
+export {default as SetTeamSide}  from './SetTeamSide';
+export {default as AddCharacterToField}  from './AddCharacterToField';
+export {default as SetTeamHasSetInfluence}  from './SetTeamHasSetInfluence';
