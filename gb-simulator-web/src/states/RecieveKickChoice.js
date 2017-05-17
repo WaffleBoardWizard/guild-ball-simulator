@@ -11,13 +11,22 @@ export default class RecieveKickChoice extends State {
 
     this.game.UI.showMessage("Coin Flip");
 
-    this.game.UI.showConfirm("Recieve", "Would you like to recieve?").then(confirm => {
-      if (confirm) {
-        me.game.switchState(new States.SetupCharacters({ kicking : true}, me.activeTeamId, me.game));
-        me.game.addInfoLog(me.activeTeamId + ' has chosen to Kick');
-      } else {
-        me.game.switchState(new States.SetupCharacters({ kicking : true}, me.game.getOpposingTeamId(), me.game));
-        me.game.addInfoLog(me.activeTeamId + ' has chosen to Recieve');
+    this.game.UI.showOptions("You have won the coin toss. What would you like to do?", ["Recieve", "Kick"]).then(option => {
+
+      switch (option) {
+        case "Recieve":
+          me.game.switchState(new States.SetupCharacters({
+            kicking: true
+          }, me.activeTeamId, me.game));
+          me.game.addInfoLog(me.activeTeamId + ' has chosen to Kick');
+          break;
+        case "Kick":
+          me.game.switchState(new States.SetupCharacters({
+            kicking: true
+          }, me.game.getOpposingTeamId(), me.game));
+          me.game.addInfoLog(me.activeTeamId + ' has chosen to Recieve');
+          break;
+        default:
       }
     }).catch(e => console.log(e))
   }

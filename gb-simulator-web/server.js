@@ -90,7 +90,6 @@ io.on('connection', function(socket) {
   });
 
   socket.on('addAction', action => {
-    console.log('adding action');
     gameData.Actions.push(action);
     io.emit("actionAdded", { id : gameData.Actions.length - 1, action : action});
   });

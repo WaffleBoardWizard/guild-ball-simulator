@@ -54,6 +54,7 @@
         </div>
       </div>
     </div>
+    <OptionsDialog v-show="showOptionsDialog" :options="optionsDialog.options" :message="optionsDialog.message" @onOptionClicked="optionsDialog.onOptionClicked" />
   </div>
 
   <Logs v-if="gameData" :logs="gameData.Logs" class="logs" />
@@ -92,7 +93,8 @@ export default {
     TeamsSideBar: Controls.TeamsSideBar,
     BigCharacter: Controls.BigCharacter,
     MiniCharacter: Controls.MiniCharacter,
-    Logs: Controls.Logs
+    Logs: Controls.Logs,
+    OptionsDialog: Controls.OptionsDialog
   },
   data() {
     return {
@@ -119,6 +121,17 @@ export default {
         playbookColumns: [],
         result: [5, 4, 3],
         goal: 4
+      },
+      showOptionsDialog: false,
+      optionsDialog : {
+        message : "Would you like to die",
+        options : [
+          "Yes",
+          "No"
+        ],
+        onOptionClicked : (option) =>{
+          console.log(option);
+        }
       },
       message: null
     }

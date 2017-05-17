@@ -25,11 +25,20 @@ export default class GuildBallUI {
     this.fieldControl.showMessage(message);
   }
 
-  showConfirm(message) {
-    return Q.Promise(function(resolve, reject, notify) {
-      var resposne = confirm(message);
-      if (resposne)
-        resolve;
+  showOptions(message, options){
+    let me = this;
+    return new Promise(function(resolve, reject) {
+      me.vueControl.optionsDialog = {
+        message : message,
+        options: options,
+        onOptionClicked : o => {
+          me.vueControl.showOptionsDialog = false;
+          resolve(o);
+        }
+      };
+
+      me.vueControl.showOptionsDialog = true;
+
     });
   }
 
@@ -173,24 +182,6 @@ export default class GuildBallUI {
 
   showInflunceMenu(value) {
     this.vueControl.showInflunceMenu = value;
-  }
-
-  showConfirm(title, message, okMessage, cancelMesseage) {
-    let me = this;
-    return new Promise(function(resolve, reject) {
-      let yes = okMessage || "Yes";
-      let no = cancelMesseage || "No";
-      me.vueControl.confirm = {
-        title: title,
-        contentHTML: message,
-        okText: yes,
-        cancelText: no,
-        onOpen: function() {},
-        onClose: answer => resolve(answer == "ok")
-      };
-
-      me.vueControl.showConfirm();
-    });
   }
 
   showDiceRollVs(firstPlayer, secondPlayer) {
