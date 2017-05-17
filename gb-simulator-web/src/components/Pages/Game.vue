@@ -67,8 +67,8 @@
       <BigCharacter :character="activatedCharacter" style="display:inline-block;" />
       <div class="actions" v-if="actions">
         <h1>Actions</h1>
-        <div class="action" v-for="action in actions">
-          <md-button @click.native="action.action" class="md-raised md-primary">{{action.Name}} ({{action.cost}})</md-button>
+        <div class="action" v-for="action in actions" @mouseover="onActionHover(activatedCharacter, action)"  @mouseleave="onActionBlur(action)" >
+          <md-button @click.native="action.action" :disabled="action.disabled" class="md-raised md-primary">{{action.Name}} ({{action.cost}})</md-button>
         </div>
       </div>
     </div>
@@ -98,6 +98,7 @@ import GameBoard from "../Controls/GameBoard/GameBoard";
 import GuildBallUI from "../../GuildBallUI";
 import GuildBallGameLogic from "../../GuildBallGameLogic";
 import TeamModel from '../../models/TeamModel';
+import * as Boundaries from '@/helpers/boundary';
 import _ from 'lodash';
 
 
@@ -179,7 +180,7 @@ export default {
     },
     switchState: function(state){
       console.log("switching state");
-      logic.switchStateA(state);
+      logic.switchStateFromServer(state);
     },
     logAdded: function(log){
       console.log("adding log");
@@ -275,6 +276,21 @@ export default {
           goal: goal
         };
       });
+    },
+    onActionHover(character, action){
+      console.log(action);
+
+      if(action.range){
+        let boundaries = [];
+
+        boundaries.push(new Boundaries.Radius(character.x, character.y, action.range, ((character.Size / 2 ) * 0.0393701)));
+
+        ui.fieldControl.drawOverlays(boundaries);
+      }
+
+    },
+    onActionBlur(action){
+      ui.fieldControl.removeOverlays();
     }
   },
   watch: {

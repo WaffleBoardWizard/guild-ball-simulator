@@ -15,7 +15,6 @@ export default class SetupCharacters extends State {
     console.log("loading characters");
     this.game.loadTeamsCharactersOnSide(team);
     this.game.UI.showMessage("Please Setup For Kick Off");
-    this.game.highlightCharacters(characters);
     let boundaries = [];
 
     if(team.Side == "North")
@@ -56,10 +55,6 @@ export default class SetupCharacters extends State {
   }
 
   onActiveTeamExit(){
-    let team = this.game.getTeam(this.activeTeamId);
-    let characters = team.Characters;
-
-    this.game.stopHilightingCharacters(characters);
   }
   onExit() {
     this.game.UI.clearMessage();

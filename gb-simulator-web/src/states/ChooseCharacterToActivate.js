@@ -4,17 +4,16 @@ import * as States from "./"
 export default class ChooseCharacterToActivate extends State {
   constructor(params,activeTeamId, game) {
     super("ChooseCharacterToActivate", params, activeTeamId, game, params.speed);
+    this.team = this.game.getTeam(this.activeTeamId);
 
   }
 
   onStart(){
-  
+
   }
 
   onActiveTeamStart(){
     let me = this;
-    debugger
-    this.team = this.game.getTeam(this.activeTeamId);
     this.unActivatedCharacters = _.filter(this.team.Characters, c => c.Turn.Activated == false);
     this.game.UI.showMessage("Please Activate a Character");
     this.game.UI.selectCharacter(this.unActivatedCharacters)
@@ -25,7 +24,7 @@ export default class ChooseCharacterToActivate extends State {
   }
 
   onNonActiveTeamStart(){
-    this.game.UI.showMessage(this.Team.PlayerName + " is choosing a character to Activate");
+    this.game.UI.showMessage(this.team.PlayerName + " is choosing a character to Activate");
   }
 
   onActiveTeamExit(){

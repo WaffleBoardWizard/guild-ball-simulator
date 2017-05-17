@@ -37,7 +37,15 @@ export default class SetInfluence extends State {
     })
   }
 
+  setCharactersInfluenceActions(){
+    this.team.Characters.forEach(character => {
+      this.game.addAction(new Actions.SetCharacterInfluence({characterName: character.Name, Influence : character.Influence}, this.game));
+    }, this);
+  }
+
   nextState(){
+    this.setCharactersInfluenceActions();
+
     let otherTeam = this.game.getOpposingTeam();
 
     this.game.addAction(new Actions.SetTeamHasSetInfluence({teamId: this.activeTeamId, HasSetInfluence : true}, this.game));

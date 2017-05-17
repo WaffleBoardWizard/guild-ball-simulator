@@ -2,6 +2,7 @@ import State from './State';
 import * as States from './'
 import * as Actions from "@/actions";
 import MathHelper from '@/Helpers/MathHelper';
+import DiceHelper from '@/Helpers/DiceHelper';
 
 export default class RollKickScatter extends State {
   constructor(params, activeTeamId, game) {
@@ -10,8 +11,8 @@ export default class RollKickScatter extends State {
 
   onActiveTeamStart(){
     let me = this;
-    let direction = this.game.rollDice(1);
-    let distance = this.game.rollDice(1);
+    let direction = DiceHelper.rollDice(1);
+    let distance = DiceHelper.rollDice(1);
 
     this.game.addLog({
       direction: direction,

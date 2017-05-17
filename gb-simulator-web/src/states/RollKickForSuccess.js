@@ -1,6 +1,7 @@
 import State from './State';
 import * as States from './'
 import * as Actions from "@/actions";
+import DiceHelper from '@/Helpers/DiceHelper';
 
 export default class RollKickForSuccess extends State {
   constructor(params, activeTeamId, game) {
@@ -19,7 +20,7 @@ export default class RollKickForSuccess extends State {
     if(this.params.bonusTime)
       kickDice++
 
-    let results = this.game.rollDice(kickDice);
+    let results = DiceHelper.rollDice(kickDice);
 
     this.game.addLog({
       results : results,
@@ -28,7 +29,7 @@ export default class RollKickForSuccess extends State {
     }, 'DiceRollLog');
 
     this.game.switchState(new States.RollKickScatter({
-      allowReroll : this.game.checkDiceResult(results, success),
+      allowReroll : DiceHelper.checkDiceResult(results, success),
       characterName: this.params.characterName,
       afterKickState: this.params.afterKickState
     }, this.activeTeamId, this.game), true);

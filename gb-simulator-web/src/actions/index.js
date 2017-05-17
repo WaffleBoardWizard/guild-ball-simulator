@@ -7,3 +7,5 @@ export {default as SetTeamMomentum}  from './SetTeamMomentum';
 export {default as SetTeamSide}  from './SetTeamSide';
 export {default as AddCharacterToField}  from './AddCharacterToField';
 export {default as SetTeamHasSetInfluence}  from './SetTeamHasSetInfluence';
+export {default as SetCharacterInfluence}  from './SetCharacterInfluence';
+export {default as CharacterHasAdvanced}  from './CharacterHasAdvanced';
