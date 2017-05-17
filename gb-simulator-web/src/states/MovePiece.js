@@ -1,5 +1,4 @@
 import State from "./State";
-import Inputs from "../Inputs"
 
 export default class MovePiece extends State {
   constructor(params, callback, game) {

@@ -2,9 +2,9 @@ import Conditions from './Conditions';
 import Plays from './Plays';
 import CharacterModel from './models/CharacterModel';
 import * as States from './States';
-import * as Inputs from './Inputs';
-import * as Actions from "./actions";
-import MathHelper from './helpers/MathHelper';
+import * as Actions from "@/actions";
+import MathHelper from '@/Helpers/MathHelper';
+import DiceHelper from '@/Helpers/DiceHelper';
 
 export default class GuildBallGameLogic {
   constructor(ui, gameData, player) {
@@ -24,57 +24,119 @@ export default class GuildBallGameLogic {
   initialize() {
     let me = this;
 
-    this.bindEventHandlers();
-    this.loadCharacters();
-
-    //this.attackPlayer(this.teams[0].Characters[0], this.teams[0].Characters[1]);
-    //me.rollDiceAndShow(6);
-    //this.UI.showPlayBook(this.teams[0].Characters[0].PlayBookColumns, this.rollDice(6));
-    //
-    // this.switchState(new States.SetInfluence({
-    //   teamId: this.teams[0].PlayerName
-    // }, this));
-    //
-    // this.futureStates.push(new States.SetInfluence({
-    //   teamId: this.teams[1].PlayerName
-    // }, this));
-
     this.catchUpOnActions(this.gameData.Actions).then(x => {
-      me.switchStateA(me.gameData.CurrentState);
+      me.switchStateFromServer(me.gameData.CurrentState);
     });
   }
 
-  bindEventHandlers() {
-    this.UI.onPieceClicked = this.PieceClicked.bind(this);
+  ///TEAM HELPERS
+  getCurrentTeamID(){
+      return this.playerTeam.PlayerName;
   }
 
-  getOpposingTeam(){
-    let me = this;
+  getCurrentTeam(){
+    return this.playerTeam;
+  }
 
+  getOpposingTeam() {
+    let me = this;
     return _.find(this.gameData.Teams, team => team.PlayerName != me.player);
   }
 
-  getOpposingTeamId(){
+  getOpposingTeamId() {
     return this.getOpposingTeam().PlayerName;
   }
+  //END OF TEAM helpers
 
-  incrementCurrentPlayersAction(){
+  //ACTION HELPERS
+  incrementCurrentPlayersAction() {
+    this.playerTeam.CurrentAction += 1;
+    console.log(this.playerTeam.CurrentAction + " <<<<<<<< Current Action");
     this.UI.emit("updateCurrentAction", {
-      player : this.player,
-      currentAction : ++this.playerTeam.CurrentAction
+      player: this.player,
+      currentAction: this.playerTeam.CurrentAction
     });
   }
-  addAction(action) {
-    action.perform();
+
+  addAction(action, instant) {
+    action.perform(instant);
     this.incrementCurrentPlayersAction();
 
     let copyAction = Object.assign({}, action);
     delete copyAction.game;
-
     this.UI.emit("addAction", copyAction);
   }
 
-  addInfoLog(message){
+
+    performAction(action) {
+      let me = this;
+      if (action.id > this.playerTeam.CurrentAction) {
+        if (!this.performingAction) {
+         this.performingAction = true;
+          console.log(action.id);
+          console.log(this.playerTeam.CurrentAction);
+          console.log(action.action.params);
+
+
+          console.log("=========================");
+          console.log("PERFORMING ACITON");
+          console.log(action.action.name);
+          console.log("=========================");
+
+          this.incrementCurrentPlayersAction();
+
+          new Actions[action.action.name](action.action.params, this).perform();
+
+          setTimeout(() => {
+            console.log("catching up")
+            if (me.backlogActions){
+              console.log(me.backlogActions);
+              me.catchUpOnActions( me.backlogActions, true);
+              me.backlogActions = [];
+            }
+            me.performingAction = false;
+          }, action.action.replaySpeed);
+
+        } else {
+          console.log("cannot perform action adding to back log")
+          console.log(action.action);
+          if (!me.backlogActions)
+            me.backlogActions = [];
+          me.backlogActions.push(action.action);
+        }
+      }
+    }
+
+    catchUpOnActions(actions, skipIndexCheck) {
+      let me = this;
+
+      return new Promise(function(resolve, reject) {
+        let missingActions = actions.slice(me.playerTeam.CurrentAction + 1);
+        let totalTime = 0;
+
+        actions.forEach((action, index) => {
+          let copyAction = Object.assign({}, action);
+
+          if (skipIndexCheck || index > me.playerTeam.CurrentAction) {
+            console.log(totalTime)
+            setTimeout(() => {
+              console.log("Firing ");
+              me.incrementCurrentPlayersAction();
+              new Actions[copyAction.name](copyAction.params, me).perform();
+            }, totalTime);
+            totalTime += copyAction.replaySpeed;
+          } else {
+            new Actions[copyAction.name](copyAction.params, me).perform(true);
+          }
+        }, me);
+
+        setTimeout(resolve, totalTime);
+      });
+    }
+    /// END OF ACTION helpers
+
+  // LOG HELPERS
+  addInfoLog(message) {
     this.addLog({
       Message: message
     }, 'info');
@@ -83,67 +145,27 @@ export default class GuildBallGameLogic {
   addLog(params, type) {
     let action = new Actions.Log({
       Params: params,
-      Type : type,
+      Type: type,
       CreatedOn: new Date()
     }, this);
 
     this.addAction(action);
   }
+  // END OF LOG HELPERS
 
-  performAction(action) {
-    if (action.id > this.playerTeam.CurrentAction) {
-      new Actions[action.action.name](action.action.params, this).perform();
-    }
-  }
 
-  catchUpOnActions(actions) {
-    let me = this;
+  loadTeamsCharactersOnSide(team) {
+    let i = 0;
+    var y = 0;
+    if (team.Side == "North")
+      y = 3;
+    else
+      y = 34;
 
-    return new Promise(function(resolve, reject) {
-      let missingActions = actions.slice(me.playerTeam.CurrentAction + 1);
-      let totalTime = 0;
+    team.Characters.forEach(c => {
+      let x = (i++ * 3) + 11;
+      this.UI.addCharacter(c, x, y);
 
-      actions.forEach((action, index) => {
-        if(index > me.playerTeam.CurrentAction){
-         setTimeout(() => {
-            me.incrementCurrentPlayersAction();
-            new Actions[action.name](action.params, me).perform();
-          }, totalTime);
-          totalTime += action.replaySpeed;
-        } else{
-          new Actions[action.name](action.params, me).perform(true);
-        }
-      }, me);
-
-      setTimeout(resolve, totalTime);
-    });
-  }
-
-  switchTeam() {
-    let team = this.teams.indexOf(this.currentTeam) == 0
-      ? this.teams[1]
-      : this.teams[0];
-    this.setCurrentTeam(team);
-  }
-
-  activateCurrentTeamsPlayers() {
-    this.switchState((new States.ChooseCharacterToActivate({}, this.currentTeam.PlayerName, this)));
-  }
-
-  showCharacterActions(character, actions) {
-    this.UI.showCharacterActions(character, actions);
-  }
-
-  loadCharacters() {
-    this.UI.removeCharacters();
-    let i = 2;
-    this.teams.forEach(team => {
-      team.Characters.forEach(c => {
-        let x = c.x || i;
-        let y = c.y || i;
-        this.UI.addCharacter(c, x, y);
-        i += 2;
-      }, this);
     }, this);
   }
 
@@ -162,70 +184,53 @@ export default class GuildBallGameLogic {
     }).then(x => console.log(x));
   }
 
-  rollDiceAndShow(numberOfDice) {
-    let results = this.rollDice(numberOfDice);
-    this.UI.showDiceRoll("Dice Roll", results).then(x => console.log(x));
+  getEnemyCharactersInRangeOfCharacter(character, range){
+      let characters = this.getOpposingTeam().Characters.filter( c =>{
+         return this.getDistanceBetweenTwoCharacters(character, c) <= range
+      });
+      return characters;
   }
 
-  next(validated) {
+  getDistanceBetweenTwoCharacters(character1, character2){
+    let character1BaseRadius = (character1.Size / 25.4) / 2;
+    let character2BaseRadius = (character2.Size / 25.4) / 2;
+    let distance = MathHelper.pythagorean(Math.abs(character1.x - character2.x), Math.abs(character1.y - character2.y));
 
-    if (this.futureStates.length > 0) {
-      let me = this;
-      if (!validated && this._currentState.validateExit) {
-        this._currentState.validateExit().then(validated => {
-          if (validated)
-            me.next(true)
-        });
-        return;
-      }
-
-      let nextState = this.futureStates.shift();
-      this.switchState(nextState, null, true);
-    } else {
-      this.switchTeam();
-      this.activateCurrentTeamsPlayers();
-    }
-
+    return  (distance - (character1BaseRadius + character2BaseRadius));
   }
 
+  //CHARACTER/TEAM/DATA HELPERS
   getTeam(playerName) {
-    return _.find(this.teams, {PlayerName: playerName});
+    return _.find(this.teams, {
+      PlayerName: playerName
+    });
   }
 
   getCharacter(characterName) {
-    return _.find(this.teams[0].Characters.concat(this.teams[1].Characters), {Name: characterName});
+    return _.find(this.teams[0].Characters.concat(this.teams[1].Characters), {
+      Name: characterName
+    });
   }
 
   getCharacterThatHasBall() {
-    return _.find(this.teams[0].Characters.concat(this.teams[1].Characters), {HasBall: true});
+    return _.find(this.teams[0].Characters.concat(this.teams[1].Characters), {
+      HasBall: true
+    });
   }
 
-  highlightCharacters(characters, color) {
-    characters.forEach(character => {
-      this.UI.highlightCharacter(character.Name, color);
-    }, this);
+  getCondition(name) {
+    return _.find(Conditions, {
+      Name: name
+    });
   }
 
-  stopHilightingCharacters(characters) {
-    characters.forEach(character => {
-      this.UI.stopHighlightingCharacter(character.Name);
-    }, this);
+  getPlay(name) {
+    return _.find(Plays, {
+      Name: name
+    });
   }
 
-  setCurrentTeam(team) {
-    this.currentTeam = team;
-    this.UI.setCurrentTeam(team);
-  }
-
-  allowTeamToSetInfluence(team) {
-    this.UI.showInfluenceControls(team);
-  }
-
-  hideInfluenceControls(team) {
-    this.UI.hideCurrentTeam();
-    this.UI.showInflunceMenu(false);
-    this.UI.hideInfluenceControls();
-  }
+  // END CHARACTER/TEAM/DATA HELPERS
 
   setCharacterAsActivated(character) {
     this.UI.setCharacterAsActivated(character);
@@ -247,123 +252,19 @@ export default class GuildBallGameLogic {
     }, this);
   }
 
-  rollDice(numberOfDice, goal) {
-    let results = [];
-
-    for (var i = 0; i < numberOfDice; i++) {
-      results.push(MathHelper.RandomNumber(1, 6));
-    }
-    //TODO MOVE THIS OUT
-    // me.switchState(new States.RollDice({
-    //   results,
-    //   goal
-    // }, function() {
-    //   resolve(results);
-    // }, me));
-
-    if (results.length == 1)
-      return results[0];
-
-    return results;
-  };
-
-  getCondition(name) {
-    return _.find(Conditions, {Name: name});
-  }
-
-  getPlay(name) {
-    return _.find(Plays, {Name: name});
-  }
-
-  getTeamCharacters(team) {
-    var pieces = this.getPieceByType("character");
-
-    return _.filter(pieces, x => x.character.Team == team);
-  }
-
-  saveCharacterData() {
-    var characters = this.getPieceByType("character").map(c => c.data());
-    this.actions.push({
-      id: this.actions.length + 1,
-      type: "SetCharacterData",
-      params: characters,
-      replaySpeed: 1
-    });
-  }
-
-  kickScatter(fromX, fromY, toX, toY) {
-    let me = this;
-    let angle = Math.atan2(toY - fromY, toX - fromX) * 180 / Math.PI;
-    me.ball.drawScatter(angle);
-
-    this.rollDice(2, 7).then(function(results) {
-      let direction = results[0];
-      let distance = results[1];
-
-      me.ball.highlighScatterLine(direction);
-
-      if (direction > 3)
-        direction++;
-
-      let coord = MathHelper.CalculateXYWithDistanceAndAngle(distance * Measurements.Inch, (22.5 * direction) + angle - 90);
-
-      setTimeout(function() {
-        me.movePiece(me.ball, coord.x + me.ball.x, coord.y + me.ball.y);
-        me.ball.removeScatter();
-      }, 2000, this);
-
-    }).catch(function(ex) {
-      console.log(ex);
-    });
-  }
-
-  activateCurrentCharacter() {
-    this.activateCharacterInGroup([this.activatedCharacter.id]);
-  }
-
-  activateCurrentTeamsNotActivatedPlayers() {
-    let characters = this.getTeamCharacters(this.currentTeam.PlayerName);
-    characters = _.filter(characters, c => !c.character.turn.activated);
-    this.activateCharacterInGroup(this.reducePiecesToId(characters));
-  }
-
-  activateCharacterInGroup(charactersIds) {
-    this.switchState(new States.SelectPiece(charactersIds, this.setCharacterAsActivated, this));
-  }
-
-  choosePlaybook(character, hits) {
-    let me = this;
-
-    return Q.Promise(function(resolve, reject) {
-      console.log(hits);
-      me.showPlayBook(character, hits).then(actions => {
-        if (character.PlayBookColumns.length < hits) {
-          hits -= character.PlayBookColumns.length
-          me.choosePlaybook(character, hits).then(nextActions => {
-            actions = actions.concat(nextActions);
-            resolve(actions);
-          });
-        } else {
-          resolve(actions);
-        }
-      });
-    });
-  }
-
   applyActions(attacker, defender, actions) {
     let me = this;
-    //let states = [];
-    let damageActions = _.filter(actions, {Damage: true});
+    let damageActions = _.filter(actions, {
+      Damage: true
+    });
     let damage = _.reduce(damageActions, (sum, a) => sum += a.DamageValue, 0);
     if (damage) {
       defender.Health -= damage;
-      // me.switchState(new States.ModifyCharacterHealth({
-      //   characterId: otherCharacter.id,
-      //   hits: damage
-      // }, null, me));
     }
 
-    let nonDamageActions = _.filter(actions, {Damage: false});
+    let nonDamageActions = _.filter(actions, {
+      Damage: false
+    });
     //
     // var kd = _.find(actions, {
     //   Name: "Knock Down"
@@ -501,47 +402,18 @@ export default class GuildBallGameLogic {
   //     }, this));
   // }
 
-  kickBall(character) {
-    let otherCharacterIds = this.reducePiecesToId(this.characters.filter(x => x != character));
-    let goalIds = this.reducePiecesToId(this.goals);
+  switchState(state, doNotEmit) {
     let me = this;
+    console.log(state.state);
+    console.log(state.id);
 
-    this.switchState(new States.KickBall({
-      charactersId: otherCharacterIds.concat(goalIds)
-    }, function(kickParams) {
-      if (kickParams.type == "piece") {
-        let otherCharacter = this.getPiece(kickParams.pieceId);
-        this.rollDice(character.character.KickDice, 4).then(function(results) {
-          me.snapBallToCharacter(otherCharacter);
-
-          if (!me.checkDiceResult(results, 4))
-            me.kickScatter(character.x, character.y, otherCharacter.x, otherCharacter.y);
-
-          me.activateCurrentCharacter();
-        }).catch(function(ex) {
-          console.log(ex);
-        });
-      } else if (kickParams.type == "field") {
-        me.kickScatter(character.x, character.y, me.ball.x, me.ball.y);
-      }
-    }, this));
-  }
-
-  checkDiceResult(diceResults, goal) {
-    let result = 0;
-    diceResults.forEach(function(d) {
-      if (d >= goal)
-        result++;
-      }
-    );
-    return result;
-  }
-
-
-  switchState(state, doNotEmit, validated) {
-    let me = this;
 
     if (!doNotEmit) {
+      console.log("============");
+      console.log("EMITING");
+      console.log(state.state);
+      console.log("============");
+
       this.UI.emit("switchState", {
         Name: state.state,
         Params: state.params,
@@ -551,15 +423,6 @@ export default class GuildBallGameLogic {
     }
 
     if (this._currentState) {
-      if (!validated && this._currentState && this._currentState.validateExit) {
-        this._currentState.validateExit().then(validated => {
-          if (validated)
-            me.switchState(state, null, true)
-        });
-
-        return;
-      }
-
       this._currentState.onExit();
 
       if (this.player == this._currentState.activeTeamId)
@@ -572,53 +435,18 @@ export default class GuildBallGameLogic {
 
     this._currentState.onStart();
 
-    if (this.player == this._currentState.activeTeamId)
+    if (this.player == this._currentState.activeTeamId) {
       this._currentState.onActiveTeamStart();
-    else
+
+
+    } else
       this._currentState.onNonActiveTeamStart();
 
-    }
+  }
 
-  switchStateA(state) {
-    console.log(this._currentState);
-    console.log(state);
-    if(!this._currentState || state.id != this._currentState.id)
+  switchStateFromServer(state) {
+    if (!this._currentState || state.id != this._currentState.id)
       this.switchState(new States[state.Name](state.Params || state.params, state.activeTeamId, this), true);
   }
 
-  replayState(actions) {
-    this.switchState(new States[actions.state](actions.params, null, this), true);
-  }
-
-  replayInput(actions) {
-    let input = null;
-    switch (actions.input) {
-      case Inputs.PIECE_DRAG:
-        input = this.pressMovePiece;
-        break;
-      case Inputs.PIECE_CLICK:
-        input = this.clickPiece;
-        break;
-      case Inputs.CLICK_MENU_BUTTON:
-        input = this.menuButtonClick;
-        break;
-      default:
-    }
-
-    input.bind(this)(actions.params, true);
-  }
-
-  PieceClicked(params, skipAction) {
-    if (!skipAction) {
-      this.actions.push({
-        id: this.actions.length + 1,
-        type: "Input",
-        params: params,
-        input: Inputs.PIECE_CLICK,
-        replaySpeed: 1
-      });
-    }
-
-    //this._currentState.handleInput("PIECE_CLICKED", params.pieceId);
-  }
 }

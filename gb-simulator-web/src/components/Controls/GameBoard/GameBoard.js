@@ -89,7 +89,9 @@ export default class GameBoard extends Game {
   }
 
   updateCharacter(characterName) {
-    this.getPiece(characterName).update();
+    let piece = this.getPiece(characterName)
+    if(piece)
+      piece.update();
   }
 
   stopIllumatingAllCharacters() {
@@ -128,7 +130,7 @@ export default class GameBoard extends Game {
     }
   }
 
-  allowBallToMove(characterName) {
+  allowBallToMove(characterName, boundaries) {
     let me = this;
     let character = this.getPiece(characterName);
     let pressMoveListener = this.ball.on("pressmove", onMove, this);
@@ -136,14 +138,18 @@ export default class GameBoard extends Game {
 
 
     function onMove(evt) {
-      this.ball.x = evt.rawX;
-      this.ball.y = evt.rawY;
+      if(!boundaries
+        || _.find(boundaries, x => x.InBoundary((evt.rawX) / Measurements.Inch, (evt.rawY) / Measurements.Inch))){
+          this.ball.x = evt.rawX;
+          this.ball.y = evt.rawY;
+
+          let angle = Math.atan2(this.ball.y - character.y, this.ball.x - character.x) * 180 / Math.PI;
+          this.ball.removeScatter();
+          this.ball.drawScatter(angle);
+        }
     };
 
     function onClick(evt) {
-      let angle = Math.atan2(this.ball.y - character.y, this.ball.x - character.x) * 180 / Math.PI;
-      this.ball.removeScatter();
-      this.ball.drawScatter(angle);
     };
 
     onClick.bind(this)();
@@ -179,7 +185,7 @@ export default class GameBoard extends Game {
       }).to({
         x: toX * Measurements.Inch,
         y: toY * Measurements.Inch
-      }, 1000, createjs.Ease.getPowInOut(4));
+      }, 500, createjs.Ease.getPowInOut(4));
     }
   }
 
@@ -191,9 +197,9 @@ export default class GameBoard extends Game {
         });
         this.field.removeChild(c)
       }, this);
-
-
   }
+
+
 
   //END UI Functions
 }

@@ -1,3 +1,6 @@
+import MathHelper from '@/Helpers/MathHelper';
+import * as Boundaries from '@/helpers/boundary';
+
 export default class GuildBallUI {
   constructor(fieldControl, vueControl) {
     this.fieldControl = fieldControl;
@@ -14,7 +17,10 @@ export default class GuildBallUI {
   }
 
   bindEventHandlers() {
-    this.fieldControl.onPieceClicked = (p) => this.onPieceClicked(p);
+    this.fieldControl.onPieceClicked = (p) => {
+      if(this.onPieceClicked)
+        this.onPieceClicked(p);
+    };
   }
 
   loadTeams(teams) {
@@ -54,46 +60,6 @@ export default class GuildBallUI {
     $("#menu").empty();
   }
 
-  showCharacterPlays(character) {
-    let me = this;
-    return Q.Promise(function(resolve, reject, notify) {
-      let html = '<div class="ui cards">';
-      let playid = 0;
-      let plays = [];
-
-      character.CharacterPlays.forEach((p, i) => {
-        let play = me.getPlay(p.Name);
-        plays.push({
-          metaData: p,
-          action: play
-        });
-
-        html += '<div class="character-play card" play="' + playid++ + '">';
-        html += '<div class="content">';
-        html += '<div class="character-play-name header">' + p.Name + "</div>";
-        html += '<div class="character-play-description description">' + p.Description + "</div>";
-        html += '</div>';
-        html += '</div>';
-
-      });
-
-      html += '</div>';
-      vex.dialog.open({
-        message: 'Select a Character Play',
-        input: html,
-        buttons: [],
-        callback: function(data) {},
-        afterOpen: function() {
-          $(".character-play").click((evt) => {
-            var pId = $(evt.currentTarget).attr("play");
-            var play = plays[Number(pId)];
-            this.close();
-            resolve(play);
-          })
-        }
-      });
-    });
-  }
 
   setCharacterAsActivated(character) {
     this.vueControl.activatedCharacter = character;
@@ -104,36 +70,60 @@ export default class GuildBallUI {
   }
 
   addCharacter(character, x, y) {
-    this.fieldControl.addCharacter(character, x, y, this.teams[0]);
+    this.fieldControl.addCharacter(character, x, y);
+  }
+
+  highlightCharacters(characters, color){
+    characters.forEach( c => this.highlightCharacter(c.Name, color));
   }
 
   highlightCharacter(character, color) {
     this.fieldControl.illuminateCharacter(character, color);
   }
 
+  stopHighlightingCharacters(characters){
+    characters.forEach( c => this.stopHighlightingCharacter(c.Name));
+  }
+
   stopHighlightingCharacter(character) {
     this.fieldControl.stopIlluminatingCharacter(character);
   }
 
-  showInfluenceControls(team) {
-    let maxInfluence = 0;
+  setInfluence(team) {
+    let me = this;
+    return new Promise(function(resolve, reject) {
+      let maxInfluence = 0;
+      me.vueControl.charactersToSetInfluence = team.Characters;
+      me.vueControl.showInflunceMenu = true;
+      me.vueControl.currentTeam = team;
+      me.highlightCharacters(team.Characters);
 
-    this.vueControl.charactersToSetInfluence = team.Characters;
-    this.vueControl.showInflunceMenu = true;
+      me.vueControl.next = x =>{
+        me.vueControl.showInflunceMenu = false;
+        me.vueControl.currentTeam = null;
 
-    team.Characters.forEach(character => {
-      maxInfluence += character.InfluenceStart;
-    }, this);
-
-    team.Characters.forEach(character => {
-      this.fieldControl.showInfluenceControls(character.Name, maxInfluence, () => {
-        let usedInfluence = 0;
+        me.stopHighlightingCharacters(team.Characters);
         team.Characters.forEach(character => {
-          usedInfluence += character.Influence;
-        }, this);
-        return maxInfluence - usedInfluence;
-      });
-    }, this);
+          me.fieldControl.hideInfluenceControls(character.Name);
+        });
+
+        resolve();
+      };
+
+      team.Characters.forEach(character => {
+        maxInfluence += character.InfluenceStart;
+      }, this);
+
+      team.Characters.forEach(character => {
+        me.fieldControl.showInfluenceControls(character.Name, maxInfluence, () => {
+          let usedInfluence = 0;
+          team.Characters.forEach(character => {
+            usedInfluence += character.Influence;
+          }, this);
+          return maxInfluence - usedInfluence;
+        });
+      }, me);
+    });
   }
 
   hideInfluenceControls() {
@@ -172,8 +162,92 @@ export default class GuildBallUI {
     this.fieldControl.moveBall(x, y, instant);
   }
 
-  moveCharacter(character) {
-    return this.fieldControl.movePiece(character.Name);
+  advanceCharacter(character, length) {
+
+    let me = this;
+    let movePromise = null;
+
+    length = Number(length);
+    
+    return new Promise(function(resolve, reject) {
+      let movements = [];
+      let remainingLength = length;
+
+
+      me.vueControl.showMovementControl = true;
+      me.vueControl.movementControl.movementLeft = length;
+      me.vueControl.movementControl.movementUsed = 0;
+      me.vueControl.movementControl.undo = () => {
+        let m = movements.pop();
+        let lastMovement = movements[movements.length - 1];
+        remainingLength += m.distance;
+
+        me.fieldControl.moveCharacterFromTo(character.Name, 0, 0, lastMovement.x, lastMovement.y, true);
+        me.vueControl.movementControl.movementLeft = remainingLength.toFixed(2);
+        me.vueControl.movementControl.movementUsed = (length - remainingLength).toFixed(2);
+
+        let boundaries = [];
+
+        boundaries.push(new Boundaries.Radius(lastMovement.x, lastMovement.y, remainingLength, ((character.Size / 2 ) * 0.0393701)));
+
+        me.fieldControl.removeOverlays();
+        me.fieldControl.drawOverlays(boundaries);
+      };
+
+
+      let onMove = r => {
+        let startX = 0;
+        let startY = 0;
+
+        let x = r ? r.x : character.x;
+        let y = r ? r.y : character.y;
+
+        if(movements.length == 0){
+          startX = character.x;
+          startY = character.y;
+        } else {
+          let lastMovement = movements[movements.length - 1];
+          startX = lastMovement.x;
+          startY = lastMovement.y;
+        }
+
+        if(r){
+          let distance = MathHelper.pythagorean(Math.abs(x - startX), Math.abs(y - startY));
+          remainingLength -= distance;
+          me.vueControl.movementControl.movementLeft = remainingLength.toFixed(2);
+          me.vueControl.movementControl.movementUsed = (length - remainingLength).toFixed(2);;
+          movements.push({x, y, distance});
+
+        } else {
+          movements.push({x, y, distance : 0});
+        }
+
+
+        let boundaries = [];
+        boundaries.push(new Boundaries.Radius(x, y, remainingLength, ((character.Size / 2 ) * 0.0393701)));
+
+        me.fieldControl.removeOverlays();
+        me.fieldControl.drawOverlays(boundaries);
+
+
+        movePromise = me.fieldControl.movePiece(character.Name, boundaries);
+        movePromise
+          .promise
+          .then(onMove)
+          .catch(e => console.log(e));
+      };
+
+      onMove();
+
+      me.vueControl.next = () => {
+        me.vueControl.showMovementControl = false;
+        me.vueControl.movementControl.movementLeft = 0;
+        me.vueControl.movementControl.movementUsed = 0;
+        me.fieldControl.removeOverlays();
+        movePromise.cancel();
+        resolve(movements);
+      }
+    });
   }
 
   hideCurrentTeam() {
@@ -231,18 +305,20 @@ export default class GuildBallUI {
       me.vueControl.confirmActivation = () => {
         characters.forEach(character => me.stopHighlightingCharacter(character.Name));
         resolve(me.vueControl.confirmActivationCharacter);
-
+        me.onPieceClicked = null;
         me.vueControl.confirmActivationCharacter = null;
         me.vueControl.confirmActivation = null;
       }
     });
   }
 
-  setupCharacters(characters, boundary) {
+  setupCharacters(characters, boundaries) {
     let me = this;
     let promises = [];
-
     return new Promise(function(resolve, reject) {
+
+      me.fieldControl.drawOverlays(boundaries);
+
       characters.forEach((character, index) => {
         let prom = null;
 
@@ -251,8 +327,7 @@ export default class GuildBallUI {
             character.x = r.x,
               character.y = r.y;
           }
-
-          promises[index] = me.moveCharacter(character);
+          promises[index] = me.fieldControl.movePiece(character.Name, boundaries);
 
           promises[index]
             .promise
@@ -264,6 +339,7 @@ export default class GuildBallUI {
       });
 
       me.vueControl.next = () => {
+        me.fieldControl.removeOverlays();
         promises.forEach(prom => prom.cancel());
         resolve();
       }
@@ -274,7 +350,13 @@ export default class GuildBallUI {
     let me = this;
 
     return new Promise(function(resolve, reject) {
-      var cancel = me.fieldControl.allowBallToMove(character.Name);
+      let boundaries = [];
+      boundaries.push(new Boundaries.Radius(character.x, character.y, character.KickLength, .5));
+
+      me.fieldControl.removeOverlays();
+      me.fieldControl.drawOverlays(boundaries);
+
+      var cancel = me.fieldControl.allowBallToMove(character.Name, boundaries);
 
       me.vueControl.next = () => {
         cancel();

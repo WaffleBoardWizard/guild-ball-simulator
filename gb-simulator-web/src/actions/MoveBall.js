@@ -1,4 +1,4 @@
-import Action from "./Action";
+import Action from "@/actions/Action";
 
 export default class MoveBall extends Action{
   constructor(params, game){
@@ -9,6 +9,5 @@ export default class MoveBall extends Action{
     this.game.UI.moveBall(this.params.to.x, this.params.to.y, instant);
     this.game.gameData.Ball.x = this.params.to.x;
     this.game.gameData.Ball.y = this.params.to.y;
-
   }
 }

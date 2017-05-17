@@ -12,4 +12,8 @@ export default  class  MathHelper{
   static RandomNumber(from, to){
     return Math.floor(Math.random() * ((to - from) + from) + from);
   }
+
+  static pythagorean(sideA, sideB){
+    return Math.sqrt(Math.pow(sideA, 2) + Math.pow(sideB, 2));
+  }
 }

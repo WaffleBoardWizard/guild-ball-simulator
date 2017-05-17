@@ -5,7 +5,7 @@
       <h1>{{team.PlayerName}}</h1>
       <h2>{{team.Score}}</h2>
       <h2>{{team.Score}}</h2>
-      <MiniCharacter :character="character" v-for="character in team.Characters" />
+      <MiniCharacter :character="character" v-for="character in team.Characters" v-bind:key="character.Name" />
     </div>
   </div>
 </div>

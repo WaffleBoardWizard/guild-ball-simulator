@@ -7,7 +7,7 @@ export default class Game {
     this.assets = null;
     this.pieces = [];
     this.canvasId = canvasId;
-
+    this.overlays = [];
     this.onPieceClicked = null;
   }
 
@@ -106,24 +106,77 @@ export default class Game {
   }
   //END INPUT HANDLERS
 
-  movePiece(pieceId) {
+  drawOverlays(boundaries){
+      boundaries.forEach( o => this.drawOverlay(o));
+  }
+
+  drawOverlay(boundary){
+    if(boundary.name == "Box")
+      this.drawBoxOverlay(boundary);
+    else if(boundary.name == "Radius")
+        this.drawRadiusOverlay(boundary);
+  }
+
+  drawBoxOverlay(boundary){
+   var g = new createjs.Graphics();
+   g.setStrokeStyle(1);
+   g.beginStroke(createjs.Graphics.getRGB(0,0,0));
+   g.beginFill(createjs.Graphics.getRGB(255,0,0));
+   let minX = boundary.minX * Measurements.Inch;
+   let maxX = boundary.maxX * Measurements.Inch;
+   let minY = boundary.minY * Measurements.Inch;
+   let maxY = boundary.maxY * Measurements.Inch;
+
+   g.drawRect(minX, minY, maxX - minX, maxY - minY);
+
+   var s = new createjs.Shape(g);
+   s.alpha = .5;
+   this.overlays.push(s);
+   this.field.addChild(s);
+  }
+
+  drawRadiusOverlay(boundary){
+   var g = new createjs.Graphics();
+   g.setStrokeStyle(1);
+   g.beginStroke(createjs.Graphics.getRGB(0,0,0));
+   g.beginFill(createjs.Graphics.getRGB(255,0,0));
+   let x = boundary.startX * Measurements.Inch;
+   let y = boundary.startY * Measurements.Inch;
+   let radius = boundary.radius * Measurements.Inch;
+
+   g.drawCircle(x, y, radius);
+
+   var s = new createjs.Shape(g);
+   s.alpha = .5;
+   this.overlays.push(s);
+   this.field.addChild(s);
+  }
+
+  removeOverlays(){
+    this.overlays.forEach(o => this.field.removeChild(o));
+    this.overlays = [];
+  }
+
+  movePiece(pieceId, boundaries) {
     let me = this;
     let cancel = null;
 
     let promise = new Promise((resolve, reject) => {
       let piece = me.getPiece(pieceId);
       let pressMoveListener = piece.on("pressmove", onMove, this);
-      let clickListener = piece.on("click", onClick, this);
-
+      let clickListener = piece.on("pressup", onClick, this);
 
       function onMove(evt) {
-        piece.x = evt.rawX;
-        piece.y = evt.rawY;
+        if(!boundaries
+          || _.find(boundaries, x => x.InBoundary((evt.rawX) / Measurements.Inch, (evt.rawY) / Measurements.Inch))){
+          piece.x = evt.rawX;
+          piece.y = evt.rawY;
+        }
       };
 
       function onClick(evt) {
         piece.off("pressmove", pressMoveListener);
-        piece.off("click", clickListener);
+        piece.off("pressup", clickListener);
         resolve({
           x: piece.x / Measurements.Inch,
           y: piece.y / Measurements.Inch

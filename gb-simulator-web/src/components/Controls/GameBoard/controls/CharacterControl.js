@@ -13,7 +13,6 @@ function CharacterControl(character, image) {
   this.id = this.character.Name;
   this.update();
   this.shape.on("click", function(){
-    console.log(this.character);
   }, this);
 
 
@@ -44,7 +43,7 @@ p.showMoveIcon = function(){
     textBaseline: "middle",
     color: "white"
   });
-  this.addChild(text);
+  this.addChildAt(text, this.getChildIndex(this.shape) + 1);
 }
 
 p.onAuraAdded = function(aura){
@@ -89,7 +88,7 @@ p.showInfluenceBar = function() {
       this.influenceBar.graphics.f("white");
 
     this.influenceBar.graphics.moveTo(0, 0)
-    this.influenceBar.graphics.arc(0, 0, this.baseSize * .65, startAngle, endAngle);
+    this.influenceBar.graphics.arc(0, 0, this.baseSize * .5, startAngle, endAngle);
   }
 };
 
@@ -127,7 +126,7 @@ p.showHealthBar = function() {
       this.healthBar.graphics.f("white");
 
     this.healthBar.graphics.moveTo(0, 0)
-    this.healthBar.graphics.arc(0, 0, this.baseSize * .5, startAngle, endAngle);
+    this.healthBar.graphics.arc(0, 0, this.baseSize * .4, startAngle, endAngle);
   }
 };
 
@@ -142,7 +141,7 @@ p.addImage = function() {
   this.shape.graphics.setStrokeStyle(2)
     .beginStroke("black")
     .beginBitmapFill(charaterImage, "no-repeat", m)
-    .drawCircle(0, 0, (this.baseSize * .4) - 1);
+    .drawCircle(0, 0, (this.baseSize * .3) - 1);
   this.addChild(this.shape);
 }
 

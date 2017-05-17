@@ -70,6 +70,7 @@ app.get('/game', function(req, res) {
 
         character.x = 0;
         character.y = 0;
+        character.HasBall = false;
 
         team.Characters.push(character);
       });
@@ -91,6 +92,8 @@ io.on('connection', function(socket) {
 
   socket.on('addAction', action => {
     gameData.Actions.push(action);
+    console.log('adding action' + (gameData.Actions.length - 1));
+
     io.emit("actionAdded", { id : gameData.Actions.length - 1, action : action});
   });
 

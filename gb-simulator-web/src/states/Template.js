@@ -1,6 +1,6 @@
 import State from './State';
 import * as States from './'
-import * as Actions from "../actions";
+import * as Actions from "@/actions";
 
 export default class Template extends State {
   constructor(params, activeTeamId, game) {

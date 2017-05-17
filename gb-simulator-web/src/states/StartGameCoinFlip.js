@@ -1,6 +1,7 @@
 import State from './State';
 import * as States from './'
-import * as Actions from '../Actions';
+import * as Actions from "@/actions";
+import DiceHelper from "@/Helpers/DiceHelper";
 
 export default class StartGameCoinFlip extends State {
   constructor(params, activeTeamId, game) {
@@ -14,8 +15,8 @@ export default class StartGameCoinFlip extends State {
   onActiveTeamStart() {
     let me = this;
 
-    let team1Result = this.game.rollDice(1);
-    let team2Result = this.game.rollDice(1);
+    let team1Result = DiceHelper.rollDice(1);
+    let team2Result = DiceHelper.rollDice(1);
 
     me.game.addInfoLog("Rolling For Initiative");
 

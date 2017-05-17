@@ -24,7 +24,7 @@ module.exports = [
   "traitIds": [1, 2, 3, 4, 5],
   "playIds": [1, 2, 3],
   "keywordIds": [1, 2, 3, 4, 5],
-  "Sprint": "8",
+  "Sprint": 8,
   "Team": {
     "Name": "Alchemists",
     "IconUrl": "assets\\Alchemists.png",

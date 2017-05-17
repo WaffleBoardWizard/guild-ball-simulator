@@ -1,6 +1,6 @@
 import GamePieceControl from "./GamePieceControl";
 import Measurements from '../common/Measurements';
-import MathHelper from '../helpers/MathHelper';
+import MathHelper from '@/Helpers/MathHelper';
 var BALL_IMAGE = require("../assets/ball.png");
 
 function BallControl(ballmage) {
@@ -25,8 +25,35 @@ p.addImage = function(size, ballmage) {
 
 p.scatterLines = [];
 
+p.distance = null;
+
 p.drawScatter = function(intialAngle) {
-  console.log(intialAngle);
+  if (this.distance)
+    this.removeChild(this.distance);
+
+
+  this.distance = new createjs.Shape().set({
+    x: 0,
+    y: 0
+  });
+
+  this.distance.alpha = .3;
+
+  this.addChildAt(this.distance, 0);
+
+  let colors = ['red', 'blue', 'orange', 'yellow', 'purple', 'green'];
+  for (var i = 6; i != 0; i--) {
+    var startAngle =  (intialAngle - 90  + 22.5) * 0.0174533;
+    var endAngle = (intialAngle - 90  + (22.5 * 7)) * 0.0174533;
+
+    this.distance.graphics.s("black").ss(3);
+
+    this.distance.graphics.f(colors[i - 1]);
+
+    this.distance.graphics.moveTo(0, 0)
+    this.distance.graphics.arc(0, 0, (Measurements.Inch * i) + (Measurements.Inch / 2), startAngle, endAngle);
+  }
+
 
   let angle = intialAngle - 90  + 22.5;
   for(let i = 1; i <= 6; i++){
@@ -34,7 +61,7 @@ p.drawScatter = function(intialAngle) {
       angle += 22.5;
 
     let line = new createjs.Shape();
-    let coord = MathHelper.CalculateXYWithDistanceAndAngle(6 * Measurements.Inch, angle);
+    let coord = MathHelper.CalculateXYWithDistanceAndAngle((6 * Measurements.Inch) + (Measurements.Inch / 2) , angle);
 
     line.graphics.setStrokeStyle(3);
     if(i == 1)
@@ -46,12 +73,14 @@ p.drawScatter = function(intialAngle) {
     line.graphics.moveTo(0, 0);
     line.graphics.lineTo(coord.x, coord.y);
 
-    this.addChildAt(line, this);
+    this.addChildAt(line, 1);
 
     this.scatterLines.push(line);
 
     angle += 22.5;
   }
+
+
 }
 
 p.removeScatter = function(){
