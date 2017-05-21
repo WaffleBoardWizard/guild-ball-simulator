@@ -35,7 +35,6 @@ export default {
 .character-status {
   margin: 0;
   border: 1px solid black;
-  width: 200px;
 }
 
 .character-status h4{

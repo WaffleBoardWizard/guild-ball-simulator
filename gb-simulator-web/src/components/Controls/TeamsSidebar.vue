@@ -28,34 +28,16 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-.character-status {
-  margin: 0;
-  border: 1px solid black;
-  width: 200px;
-}
-
-.character-status h4 {
-  margin: 0;
-}
-
-.character-image {
-  height: 50px;
-  display: inline-block;
-  vertical-align: super
-}
 
 .status {
   display: inline-block;
-  margin: 0px 20px;
+  margin: 0px;
   vertical-align: super
 }
 
 
 .teams-status {
   z-index: 1;
-  position: absolute;
   background: white;
-  right: 0;
-  margin-top: 120px;
 }
 </style>

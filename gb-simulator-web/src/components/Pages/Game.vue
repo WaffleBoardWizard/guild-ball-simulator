@@ -2,93 +2,95 @@
 <div>
   <p style="display: none;"><i class="fa fa-car"></i> Force Font to load.</p>
 
-  <div id="menu">
-    <div class="message" v-if="message">
-      <h1>{{message}}</h1>
-    </div>
-    <div class="">
-      <md-button @click.native="next" class="md-raised md-primary">Finished</md-button>
-    </div>
-
-    <div class="influnce-menu" v-if="showInflunceMenu">
-      <div class="influence-totals">
-        <div class="influence-total">
-          <h4>
-                Total Influence
-          </h4>
-          <h2 class="">
-              {{TotalInfluence(currentTeam)}}
-          </h2>
-        </div>
-        <div class="influence-total">
-          <h4>
-                Remaining Influence
-          </h4>
-          <h2 class="">
-              {{CurrentTeamsRemainingInfluence}}
-          </h2>
-        </div>
-      </div>
-
-      <!-- <div class="characters">
-          <div class="" v-for="character in charactersToSetInfluence">
-            <MiniCharacter :character="character"  style="display:inline-block;"/>
+<div id="message" v-if="message">
+  <h1>{{message}}</h1>
+</div>
+<div class="sidebar">
+  <md-tabs class="" md-centered :md-dynamic-height="false" :md-fixed="true">
+    <md-tab md-label="Action" md-icon="ondemand_video">
+      <div class="influnce-menu" v-if="showInflunceMenu">
+        <div class="influence-totals">
+          <div class="influence-total">
+            <h4>
+                  Total Influence
+            </h4>
+            <h2 class="">
+                {{TotalInfluence(currentTeam)}}
+            </h2>
           </div>
-        </div> -->
-      <div class="">
-        <md-button @click.native="next" class="md-raised md-primary">Submit</md-button>
-      </div>
+          <div class="influence-total">
+            <h4>
+                  Remaining Influence
+            </h4>
+            <h2 class="">
+                {{CurrentTeamsRemainingInfluence}}
+            </h2>
+          </div>
+        </div>
 
-    </div>
-    <div v-if="showMovementControl" class="influence-totals">
-      <div class="influence-total">
-        <h4>
-              Remaining Movement
-        </h4>
-        <h2 class="">
-            {{movementControl.movementLeft}}
-        </h2>
+        <!-- <div class="characters">
+            <div class="" v-for="character in charactersToSetInfluence">
+              <MiniCharacter :character="character"  style="display:inline-block;"/>
+            </div>
+          </div> -->
+        <div class="">
+          <md-button @click.native="next" class="md-raised md-primary">Submit</md-button>
+        </div>
+
       </div>
-      <div class="influence-total">
-        <h4>
-              Used Movement
-        </h4>
-        <h2 class="">
-            {{movementControl.movementUsed}}
-        </h2>
+      <div v-if="showMovementControl" class="influence-totals">
+        <div class="influence-total">
+          <h4>
+                Remaining Movement
+          </h4>
+          <h2 class="">
+              {{movementControl.movementLeft}}
+          </h2>
+        </div>
+        <div class="influence-total">
+          <h4>
+                Used Movement
+          </h4>
+          <h2 class="">
+              {{movementControl.movementUsed}}
+          </h2>
+        </div>
+        <md-button v-if="movementControl.movementUsed > 0" @click.native="movementControl.undo" class="md-raised md-primary">Undo</md-button>
       </div>
-      <md-button v-if="movementControl.movementUsed > 0" @click.native="movementControl.undo" class="md-raised md-primary">Undo</md-button>
-    </div>
-    <div v-if="confirmActivationCharacter" class="confirm-activate-character" style="display:inline-block">
-      <BigCharacter :character="confirmActivationCharacter" />
-      <md-button @click.native="confirmActivation" class="md-raised md-primary">Activate</md-button>
-    </div>
-    <div v-if="activatedCharacter" class="activate-character" style="text-align:left;">
-      <BigCharacter :character="activatedCharacter" style="display:inline-block;" />
-      <div class="actions" v-if="actions">
-        <h1>Actions</h1>
-        <div class="action" v-for="action in actions" @mouseover="onActionHover(activatedCharacter, action)"  @mouseleave="onActionBlur(action)" >
-          <md-button @click.native="action.action" :disabled="action.disabled" class="md-raised md-primary">{{action.Name}} ({{action.cost}})</md-button>
+      <div v-if="confirmActivationCharacter" class="confirm-activate-character" style="display:inline-block">
+        <BigCharacter :character="confirmActivationCharacter" />
+        <md-button @click.native="confirmActivation" class="md-raised md-primary">Activate</md-button>
+      </div>
+      <div v-if="activatedCharacter" class="activate-character" style="text-align:left;">
+        <BigCharacter :character="activatedCharacter" style="display:inline-block;" />
+        <div class="actions" v-if="actions">
+          <h1>Actions</h1>
+          <div class="action" v-for="action in actions" @mouseover="onActionHover(activatedCharacter, action)"  @mouseleave="onActionBlur(action)" >
+            <md-button @click.native="action.action" :disabled="action.disabled" class="md-raised md-primary">{{action.Name}} ({{action.cost}})</md-button>
+          </div>
         </div>
       </div>
-    </div>
-    <OptionsDialog v-show="showOptionsDialog" :options="optionsDialog.options" :message="optionsDialog.message" @onOptionClicked="optionsDialog.onOptionClicked" />
-  </div>
 
-  <Logs v-if="gameData" :logs="gameData.Logs" class="logs" />
+      <div class="">
+        <md-button @click.native="next" class="md-raised md-primary">Finished</md-button>
+      </div>
+      <OptionsDialog v-show="showOptionsDialog" :options="optionsDialog.options" :message="optionsDialog.message" @onOptionClicked="optionsDialog.onOptionClicked" />
+    </md-tab>
+    <md-tab md-label="Logs" md-icon="ondemand_video">
+      <Logs v-if="gameData" :logs="gameData.Logs" class="logs" />
+    </md-tab>
 
-  <TeamsSideBar :teams="gameData.Teams" v-if="gameData"/>
+    <md-tab md-label="Teams" md-icon="music_note">
+      <TeamsSideBar :teams="gameData.Teams" v-if="gameData"/>
+    </md-tab>
+  </md-tabs>
+</div>
 
   <canvas id="demoCanvas" width="1200" height="1200"></canvas>
 
   <!--PlaybookDialog  -->
   <PlaybookDialog :goal="playbookResult.goal" :playbook-columns="playbookResult.playbookColumns" :results="playbookResult.results" :open="playbookResult.open" :onClose="playbookResult.onClose" :playbookResult="playbookResult.onClose" />
   <!--END PlaybookDialog  -->
-
-  <!--CONFIRM -->
-  <md-dialog-confirm :md-title="confirm.title" md-content="''" :md-content-html="confirm.contentHTML" :md-ok-text="confirm.okText" :md-cancel-text="confirm.cancelText" @open="confirm.onOpen" @close="confirm.onClose" ref="confirmDialog">
-  </md-dialog-confirm>
-  <!--END CONFIRM  -->
 </div>
 </template>
 
@@ -329,8 +331,11 @@ h1 {
   margin: 0;
 }
 
-#menu {
-  height: 175px;
+#message{
+  position: fixed;
+  width: 80%;
+  height: 40px;
+  background: white;
 }
 
 .playbook-result {
@@ -368,14 +373,14 @@ h1 {
 
 #menu {
   position: fixed;
-  width: 100%;
+  width: 80%;
   background: white;
   border: 1px solid black;
   z-index: 2;
 }
 
 #demoCanvas {
-  margin-top: 120px;
+  margin-top: 45px;
   float: left;
   z-index: 0;
 }
@@ -419,14 +424,6 @@ h1 {
 
 .action button {
   width: 100%;
-}
-
-.logs{
-  position: fixed;
-  top: 200px;
-  z-index: 200px;
-  overflow: scroll;
-  height: 300px;
 }
 </style>
     confirmActivation() {},
@@ -632,20 +629,6 @@ h1 {
   background-color: #f7bfbf;
 }
 
-#menu {
-  position: fixed;
-  width: 100%;
-  background: white;
-  border: 1px solid black;
-  z-index: 2;
-}
-
-#demoCanvas {
-  margin-top: 120px;
-  float: left;
-  z-index: 0;
-}
-
 .current-team {
   background: red;
   color: white;
@@ -685,14 +668,6 @@ h1 {
 
 .action button {
   width: 100%;
-}
-
-.logs {
-  position: fixed;
-  top: 200px;
-  z-index: 200px;
-  overflow: scroll;
-  height: 300px;
 }
 </style>
     confirmActivation() {},
@@ -861,10 +836,6 @@ h1 {
   margin: 0;
 }
 
-#menu {
-  height: 175px;
-}
-
 .playbook-result {
   border: 1px solid black;
   padding: 6px;
@@ -896,20 +867,6 @@ h1 {
 
 .momentous {
   background-color: #f7bfbf;
-}
-
-#menu {
-  position: fixed;
-  width: 100%;
-  background: white;
-  border: 1px solid black;
-  z-index: 2;
-}
-
-#demoCanvas {
-  margin-top: 120px;
-  float: left;
-  z-index: 0;
 }
 
 .current-team {
@@ -953,11 +910,24 @@ h1 {
   width: 100%;
 }
 
-.logs {
+.sidebar{
+  right: 0px;
   position: fixed;
-  top: 200px;
-  z-index: 200px;
-  overflow: scroll;
-  height: 300px;
+  width: 20%;
+  height: 100%;
+  background-color: white;
+  z-index: 3;
+}
+
+.md-tab{
+  padding: 0px !important;
+}
+
+.footer{
+  position: fixed;
+    bottom: 0;
+    width: 80%;
+    background: white;
+    padding: 5px;
 }
 </style>
