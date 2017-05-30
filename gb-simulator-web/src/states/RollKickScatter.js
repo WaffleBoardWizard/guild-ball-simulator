@@ -36,29 +36,30 @@ export default class RollKickScatter extends State {
     }, this.game);
 
     kickAction.perform();
-    if(me.params.allowReroll){
-      me.game.UI.showConfirm("Reroll", "Would you like to reroll?")
-        .then( confirm =>{
-          if(confirm)
-          {
-            new Actions.MoveBall({
-              to: {
-                x: currentBallX,
-                y: currentBallY
-              }
-            }, this.game).perform();
 
-            setTimeout(()=>{
-              me.params.allowReroll = false
-              me.game.switchState(new States.RollKickScatter(this.params, this.activeTeamId, this.game), true);
-            }, 500);
-          }
-          else{
+    if(me.params.allowReroll){
+      this.game.UI.showOptions("Would you like to reroll??", ["Yes", "No"]).then(option => {
+        switch (option) {
+          case "Yes":
+          new Actions.MoveBall({
+            to: {
+              x: currentBallX,
+              y: currentBallY
+            }
+          }, this.game).perform();
+
+          setTimeout(()=>{
+            me.params.allowReroll = false
+            me.game.switchState(new States.RollKickScatter(this.params, this.activeTeamId, this.game), true);
+          }, 500);
+            break;
+          case "No":
             me.game.addAction(kickAction, true);
             this.nextState();
-          }
-        })
-        .catch( e => console.log(e))
+            break;
+          default:
+        }
+      });
     } else {
       me.game.addAction(kickAction, true);
       this.nextState();

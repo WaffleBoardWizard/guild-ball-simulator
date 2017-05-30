@@ -26,4 +26,18 @@ body{
   padding: 0;
   margin: 0;
 }
+
+.sidebar>.md-tabs{
+  height: 100% !important;
+}
+
+.sidebar>.md-tabs .md-tabs-content{
+  height: 100% !important;
+}
+
+.sidebar>.md-tabs .md-tab{
+  height: 100% !important;
+  overflow: auto !important;
+}
+
 </style>

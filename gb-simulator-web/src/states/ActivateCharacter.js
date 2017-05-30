@@ -140,7 +140,17 @@ export default class ActivateCharacter extends State {
         },
         disabled : false,
         cost : '?'
+      },
+      {
+        Name: "Finish Activation",
+        action: () =>{
+          me.game.addAction(new Actions.setCharacterAsActivated({characterName: me.character.Name, Activated : true}, me.game));
+
+        },
+        disabled : false,
+        cost : null
       }
+
     ]
 
     //this.game.setCharacterAsActivated(this.character);

@@ -28,7 +28,6 @@ export default class ChooseCharacterToActivate extends State {
   }
 
   onActiveTeamExit(){
-    this.game.stopHilightingCharacters(this.team.Characters);
   }
 
   onExit(){

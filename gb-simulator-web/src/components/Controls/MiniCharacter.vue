@@ -2,6 +2,7 @@
   <div class="character-status">
     <h4>{{character.Name}}</h4>
     <img class="character-image" :src="'./src/assets/' + character.Name + '.PNG'" />
+    <md-button @click.native="openDialog = true" class="md-raised md-primary">More</md-button>
     <div class="status">
       <div>
       Health : {{character.Health}}
@@ -15,15 +16,23 @@
       Has Ball
     </div>
   </div>
+  <CharacterDialog :character="character" :open="openDialog" @onClose="openDialog = false" />
+
 </div>
 </template>
 
 <script>
+import CharacterDialog from './CharacterDialog';
+
 export default {
   name: 'MiniCharacter',
   props: ["character"],
+  components :{
+    CharacterDialog
+  },
   data () {
     return {
+      openDialog : false
     }
   }
 }
