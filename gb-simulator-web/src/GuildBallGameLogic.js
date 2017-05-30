@@ -46,6 +46,38 @@ export default class GuildBallGameLogic {
   getOpposingTeamId() {
     return this.getOpposingTeam().PlayerName;
   }
+
+  addMomentumToTeam(team, momentumToAdd){
+    this.addAction(new Actions.SetTeamMomentum({
+      teamId: team.PlayerName,
+    }, this));
+    momentum: team.Momentum  + momentumToAdd
+  }
+
+  clearTeamsMomentum(team){
+      this.addAction(new Actions.SetTeamMomentum({
+        teamId: team.PlayerName,
+        momentum: 0
+      }, this))
+  }
+  clearTeamsCharacterTurnData(team){
+    let me = this;
+
+    team.Characters.forEach(character => {
+        me.addAction(new Actions.ClearCharacterTurnData({
+          characterName : character.Name
+        }, this));
+    });
+  }
+
+  clearTeamsTurnData(){
+    let me = this;
+
+    this.teams.forEach( team => {
+        me.clearTeamsMomentum(team);
+        me.clearTeamsCharacterTurnData(team);
+    });
+  }
   //END OF TEAM helpers
 
   //ACTION HELPERS

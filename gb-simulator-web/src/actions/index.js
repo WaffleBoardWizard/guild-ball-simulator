@@ -10,3 +10,4 @@ export {default as SetTeamHasSetInfluence}  from './SetTeamHasSetInfluence';
 export {default as SetCharacterInfluence}  from './SetCharacterInfluence';
 export {default as CharacterHasAdvanced}  from './CharacterHasAdvanced';
 export {default as SetCharacterActivated}  from './SetCharacterActivated';
+export {default as ClearCharacterTurnData}  from './ClearCharacterTurnData';

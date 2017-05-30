@@ -13,6 +13,7 @@ export default class KickOff extends State {
   onActiveTeamStart(){
     let me = this;
     let character = me.game.getCharacterThatHasBall();
+    
 
     me.game.switchState(new States.MoveCharacter({
       characterName : character.Name,
@@ -23,9 +24,6 @@ export default class KickOff extends State {
           characterName: character.Name,
           afterKickState :{
              name: "SetInfluence",
-             params: {
-               teamId: me.game.getOpposingTeamId()
-             },
              activeTeamId: me.game.getOpposingTeamId()
           }
         },

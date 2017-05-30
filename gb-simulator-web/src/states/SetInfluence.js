@@ -4,7 +4,7 @@ import * as Actions from "@/actions";
 
 export default class SetInfluence extends State {
   constructor(params, activeTeamId, game) {
-    super("SetInfluence", params, activeTeamId, game, params.speed);
+    super("SetInfluence", params, activeTeamId, game, 50);
     this.team = this.game.getTeam(this.activeTeamId);
   }
 

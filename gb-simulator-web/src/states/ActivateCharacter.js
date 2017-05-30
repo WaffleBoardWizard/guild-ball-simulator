@@ -11,8 +11,6 @@ export default class ActivateCharacter extends State {
 
   onActiveTeamStart(){
     let c = this.game.getEnemyCharactersInRangeOfCharacter(this.character, this.character.MeleeZone + this.character.Sprint);
-
-    console.log(c);
     let me = this;
     let actions = [
       {
@@ -144,8 +142,15 @@ export default class ActivateCharacter extends State {
       {
         Name: "Finish Activation",
         action: () =>{
-          me.game.addAction(new Actions.setCharacterAsActivated({characterName: me.character.Name, Activated : true}, me.game));
+          me.game.addAction(new Actions.SetCharacterActivated({characterName: me.character.Name, Activated : true}, me.game));
 
+          let otherTeamUnactivatedCharacters =  me.game.getOpposingTeam().Characters.filter( c => !c.Turn.Activated);
+
+          if(otherTeamUnactivatedCharacters.length > 0){
+            me.game.switchState(new States.ChooseCharacterToActivate({}, me.game.getOpposingTeamId(), me.game));
+          } else {
+            me.game.switchState(new States.RollForInitiative({}, me.activeTeamId, me.game));
+          }
         },
         disabled : false,
         cost : null
@@ -155,6 +160,10 @@ export default class ActivateCharacter extends State {
 
     //this.game.setCharacterAsActivated(this.character);
     this.game.UI.showCharacterActions(this.character, actions);
+  }
+
+  onActiveTeamExit(){
+    this.game.UI.hideCharacterActions();
   }
 
   onExit(){

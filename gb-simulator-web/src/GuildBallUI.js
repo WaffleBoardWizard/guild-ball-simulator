@@ -145,6 +145,10 @@ export default class GuildBallUI {
     this.vueControl.actions = actions;
   }
 
+  hideCharacterActions(){
+    this.vueControl.actions = null;
+  }
+
   confirmActivation(character) {
     let me = this;
     me.vueControl.confirmActivationCharacter = character;
@@ -168,7 +172,7 @@ export default class GuildBallUI {
     let movePromise = null;
 
     length = Number(length);
-    
+
     return new Promise(function(resolve, reject) {
       let movements = [];
       let remainingLength = length;
